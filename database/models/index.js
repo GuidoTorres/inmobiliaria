@@ -10,6 +10,8 @@ const registroInicioSesion = require("./registroInicioSesion");
 const rol = require("./rol");
 const rolPermiso = require("./rolPermiso");
 const usuario = require("./usuario");
+const venta = require("./venta");
+const trabajadorPropiedad = require("./trabajadorPropiedad");
 
 const sequelize = new Sequelize(config.development);
 
@@ -25,9 +27,11 @@ db.models.Cotizacion = cotizacion(sequelize, DataTypes)
 db.models.Propiedad = propiedad(sequelize, DataTypes)
 db.models.Propietario = propietario(sequelize, DataTypes)
 db.models.ImagenVideo = imagenVideo(sequelize, DataTypes)
+db.models.Venta = venta(sequelize, DataTypes)
+db.models.TrabajadorPropiedad = trabajadorPropiedad(sequelize, DataTypes)
 
 // Configuración de las asociaciones
-const { Usuario, RegistroInicioSesion, Rol, Permiso, Cliente, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
+const {TrabajadorPropiedad, Venta, Usuario, RegistroInicioSesion, Rol, Permiso, Cliente, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
 Usuario.hasMany(RegistroInicioSesion, { foreignKey: "cod_usuario" });
 RegistroInicioSesion.belongsTo(Usuario, {foreignKey: "cod_usuario"})
 
@@ -43,6 +47,21 @@ Cotizacion.belongsTo(Usuario, {foreignKey:"cod_agente"})
 
 Usuario.hasMany(Cotizacion, {foreignKey:"cod_cliente"})
 Cotizacion.belongsTo(Usuario, {foreignKey:"cod_cliente"})
+
+Usuario.hasMany(Venta, {foreignKey:"cod_cliente"});
+Venta.belongsTo(Usuario, {foreignKey:"cod_cliente"});
+
+Usuario.hasMany(Venta, {foreignKey:"cod_trabajador"});
+Venta.belongsTo(Usuario, {foreignKey:"cod_trabajador"});
+
+Propiedad.hasMany(Venta, {foreignKey: 'cod_propiedad'});
+Venta.belongsTo(Propiedad, {foreignKey: 'cod_propiedad'});
+
+Usuario.hasMany(TrabajadorPropiedad, { foreignKey: "cod_trabajador" });
+TrabajadorPropiedad.belongsTo(Usuario, { foreignKey: "cod_trabajador" });
+
+Propiedad.hasMany(TrabajadorPropiedad, { foreignKey: "cod_propiedad" });
+TrabajadorPropiedad.belongsTo(Propiedad, { foreignKey: "cod_propiedad" });
 
 Propietario.hasMany(Propiedad, { foreignKey: "cod_propietario" });
 Propiedad.belongsTo(Propietario, { foreignKey: "cod_propietario" });

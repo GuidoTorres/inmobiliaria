@@ -18,24 +18,45 @@ const post = async (req, res) => {
     delete newPropiedadData.video;
 
     let newPropiedad = await Propiedad.create(newPropiedadData);
-    if (req.files) {  // Si hay archivos subidos
-      let allFiles = [...req.files.imagen, ...req.files.video];  // Unimos los arrays de imágenes y vídeos en uno solo
+
+    // Procesar imágenes
+    if (req.files && req.files.imagen) {  // Si hay imágenes subidas
+      for (let i = 0; i < req.files.imagen.length; i++) {
+        let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
     
-      for (let i = 0; i < allFiles.length; i++) {
-        let rutaImagenVideo = process.env.LOCAL_IMAGE + allFiles[i].filename;
-        
-        // Distinguir entre imágenes y videos por su tipo de contenido MIME
-        let tipo = allFiles[i].mimetype.startsWith("image/") ? "imagen" : "video";
-    
-        let newImagenVideo = {
-          url: rutaImagenVideo,
-          tipo: tipo,
+        let newImagen = {
+          url: rutaImagen,
+          tipo: "imagen",
           cod_propiedad: newPropiedad.cod_propiedad
         };
-        console.log(newImagenVideo);
     
-        await ImagenVideo.create(newImagenVideo);
+        await ImagenVideo.create(newImagen);
       }
+    }
+
+    // Procesar video
+    if (req.files && req.files.video) {
+      let newVideo;
+      
+      // Si el video es una URL de YouTube
+      if (typeof req.files.video === 'string' && (req.files.video.startsWith('http') || req.files.video.startsWith('https'))) {
+        newVideo = {
+          url: req.files.video,
+          tipo: 'video',
+          cod_propiedad: newPropiedad.cod_propiedad
+        };
+      }
+      // Si el video es un archivo
+      else {
+        let rutaVideo = process.env.LOCAL_IMAGE + req.files.video.filename;
+        newVideo = {
+          url: rutaVideo,
+          tipo: "video",
+          cod_propiedad: newPropiedad.cod_propiedad
+        };
+      }
+
+      await ImagenVideo.create(newVideo);
     }
 
     return res.status(200).json({ msg: "Propiedad registrada con éxito!" });
@@ -44,6 +65,8 @@ const post = async (req, res) => {
     res.status(500).json({ msg: "No se pudo registrar la propiedad." });
   }
 };
+
+
 
 
 const update = async (req, res) => {

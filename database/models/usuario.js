@@ -28,13 +28,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       oficina: {
         type: DataTypes.STRING,
       },
       estado: {
-        type: DataTypes.STRING,
+        type: DataTypes.BOOLEAN,
       },
       cod_recuperacion: {
         type: DataTypes.INTEGER,

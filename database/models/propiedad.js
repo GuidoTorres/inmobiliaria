@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) =>{
         allowNull:false
     },
     metraje: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull:false
     },
     propiedadHabilitada: {
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) =>{
         allowNull:false
     },
     areaLibre: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull:false
     },
     cocheraAdicional: {
@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) =>{
         allowNull:false
     },
     comision: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull:false
     },
     observaciones: {

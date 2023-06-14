@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const { checkAuth, checkRoleAuth } = require("../controllers/auth");
 const cliente = require("../controllers/cliente");
-const { crearCliente, actualizarCliente } = require("../middlewares/schemes/cliente.scheme");
-const validate = require("../middlewares/validate");
+// const { crearCliente, actualizarCliente } = require("../middlewares/schemes/cliente.scheme");
+// const validate = require("../middlewares/validate");
 
 // router.get("/", checkAuth, checkRoleAuth([1,2]), cliente.get);
 // router.post("/",checkAuth, checkRoleAuth([1,2]), validate(crearCliente), cliente.post);

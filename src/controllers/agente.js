@@ -6,8 +6,8 @@ const { encrypt } = require("./auth");
 const get = async (req, res) => {
   try {
     const agente = await Usuario.findAll({
-      where: { cod_rol: 2 },
-      include: [{ model: Rol }],
+      
+      include: [{ model: Rol,where: { rol: "Trabajador" }, }],
     });
     return res.status(200).json({ data: agente });
   } catch (error) {
@@ -27,7 +27,7 @@ const post = async (req, res) => {
       dni: dni,
       celular: celular,
       correo: correo,
-      password: await encrypt(password),
+      password: password ? await encrypt(password) : null,
       oficina: oficina,
       cod_rol: cod_rol,
     };
@@ -43,7 +43,23 @@ const post = async (req, res) => {
 const update = async (req, res) => {
   let id = req.params.id;
   try {
-    await Usuario.update(req.body, { where: { cod_usuario: id } });
+    const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+
+    let nuevoUsuario = {
+      nombre: nombre,
+      dni: dni,
+      celular: celular,
+      correo: correo,
+      estado: false,
+      cod_rol: cod_rol,
+    };
+
+    // Verifica si se proporciona una nueva contraseña
+    if (password) {
+      nuevoUsuario.password = await encrypt(password);
+    }
+
+    await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
     return res.status(200).json({ msg: "Trabajador actualizado con éxito!" });
   } catch (error) {
     console.log(error);

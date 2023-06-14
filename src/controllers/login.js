@@ -15,7 +15,7 @@ const authLogin = async (req, res) => {
     let user = await db.models.Usuario.findOne({
       where: { correo: email }, include:[{model:db.models.Rol}]
     });
-    console.log(user.password);
+    console.log(user);
     // Si el usuario no se encuentra en ninguna de las tablas, devuelve un error
     if (!user) {
       return res.status(404).json({ msg: "No se encontro el usuario." });

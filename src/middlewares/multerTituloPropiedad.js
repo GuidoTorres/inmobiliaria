@@ -10,7 +10,7 @@ const uploadFile = () => {
       },
   });
 
-  const upload = multer({ storage: storage }).single("tituloPropiedad");
+  const upload = multer({ storage: storage }).single("titulo_propiedad");
   return upload;
 };
 module.exports = uploadFile;

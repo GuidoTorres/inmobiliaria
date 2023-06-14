@@ -5,37 +5,26 @@ const { encrypt } = require("./auth");
 const get = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({
-      where: { rol: "Cliente" },
-      include: [{ model: Rol }],
+      where:{estado:false},
+      include: [{ model: Rol, where: { rol: "Cliente"} }],
     });
     return res.status(200).json({ data: cliente });
   } catch (error) {
-    res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
-  }
-};
-const getClienteTrabajado = async (req, res) => {
-  try {
-    const cliente = await Usuario.findAll({
-      where: { rol: "Cliente", estado: true },
-      include: [{ model: Rol }],
-    });
-    return res.status(200).json({ data: cliente });
-  } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
   }
 };
 
 const post = async (req, res) => {
   try {
-    const { cod_rol, password, nombre, dni, celular, correo } =
-      req.body;
+    const { cod_rol, password, nombre, dni, celular, correo } = req.body;
 
     let nuevoUsuario = {
       nombre: nombre,
       dni: dni,
       celular: celular,
       correo: correo,
-      password: await encrypt(password),
+      password: password ? await encrypt(password) : null,
       estado: false,
       cod_rol: cod_rol,
     };
@@ -51,7 +40,23 @@ const post = async (req, res) => {
 const update = async (req, res) => {
   let id = req.params.id;
   try {
-    await Usuario.update(req.body, { where: { cod_usuario: id } });
+    const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+
+    let nuevoUsuario = {
+      nombre: nombre,
+      dni: dni,
+      celular: celular,
+      correo: correo,
+      estado: false,
+      cod_rol: cod_rol,
+    };
+
+    // Verifica si se proporciona una nueva contraseña
+    if (password) {
+      nuevoUsuario.password = await encrypt(password);
+    }
+
+    await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
     return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
   } catch (error) {
     console.log(error);
@@ -70,6 +75,39 @@ const delte = async (req, res) => {
     return res.status(200).json({ msg: "Cliente eliminado con éxito!" });
   } catch (error) {
     res.status(500).json({ msg: "No se pudo eliminar el cliente." });
+  }
+};
+
+const getClienteTrabajado = async (req, res) => {
+  try {
+    const cliente = await Usuario.findAll({
+      where:{estado:true},
+      include: [{ model: Rol, where: { rol: "Cliente" } }],
+    });
+    return res.status(200).json({ data: cliente });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
+  }
+};
+const postClienteTrabajado = async (req, res) => {
+  try {
+    const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+
+    let nuevoUsuario = {
+      nombre: nombre,
+      dni: dni,
+      celular: celular,
+      correo: correo,
+      cod_rol: cod_rol,
+      estado: true,
+    };
+
+    await Usuario.create(nuevoUsuario);
+    return res.status(200).json({ msg: "Cliente registrado con éxito!" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo registrar el Cliente." });
   }
 };
 
