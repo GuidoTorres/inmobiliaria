@@ -1,5 +1,6 @@
+const dayjs = require("dayjs");
 const db = require("../../database/models");
-const { Usuario, Rol, Venta } = db.models;
+const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
 
 // REGISTRO DE CLIENTE COMO USUARIO
@@ -83,7 +84,21 @@ const getPosibleCliente = async (req, res) => {
     const cliente = await Usuario.findAll({
       include: [{ model: Rol, where: { cod_rol: 4 } }],
     });
-    return res.status(200).json({ data: cliente });
+
+    const formatData = cliente.map(item => {
+      return{
+
+        cod_cliente: item?.cod_usuario,
+        nombre: item?.nombre,
+        dni: item?.dni,
+        correo: item?.correo,
+        celular: item?.celular,
+        cod_rol: item?.rol?.cod_rol,
+        rol: item?.rol?.rol,
+        estado: item?.estado
+      }
+    })
+    return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
@@ -135,9 +150,56 @@ const updatePosibleCliente = async (req, res) => {
 const getClienteTrabajado = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({
-      include: [{ model: Rol, where: { cod_rol: 5 } }],
+      where: { cod_rol: 5 },
+      include: [
+        {
+          model: Venta,
+          as: "VentasComoCliente",
+          include: [{ model: Propiedad }, { model: Usuario, as: "Trabajador" }],
+        },
+      ],
     });
-    return res.status(200).json({ data: cliente });
+
+    const formatData = cliente.map((item) => {
+      const propiedad = item.VentasComoCliente.map((ele) => ele.propiedad);
+      const trabajador = item.VentasComoCliente.map((ele) => ele.Trabajador);
+
+      return {
+        cod_usuario: item?.cod_usuario,
+        nombre: item?.nombre,
+        dni: item?.dni,
+        corre: item?.correo,
+        celular: item?.celular,
+        estado: true,
+        cod_rol: item?.cod_rol,
+        rol: item?.rol?.rol,
+        createdAt: dayjs(item?.createdAt)?.format("DD-MM-YYYY"),
+        updatedAt: dayjs(item?.createdAt)?.format("DD-MM-YYYY"),
+        propiedad: {
+          cod_propiedad: propiedad.cod_propiedad,
+          nombre: propiedad.nombre,
+        },
+        propiedad: propiedad
+          .map((data) => {
+            return {
+              cod_trabajador: data.cod_propiedad,
+              nombre: data.nombre,
+            };
+          })
+          .at(0),
+
+        trabajador: trabajador
+          .map((data) => {
+            return {
+              cod_trabajador: data.cod_usuario,
+              nombre: data.nombre,
+            };
+          })
+          .at(0),
+        // cod_trabajador:item?.venta?.usuario?.nombre
+      };
+    });
+    return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
@@ -164,8 +226,9 @@ const postClienteTrabajado = async (req, res) => {
       cod_propiedad: cod_propiedad,
       cod_trabajador: cod_trabajador,
     };
-
-    await Venta.create(info);
+    console.log(info);
+    const prueba = await Venta.create(info);
+    console.log(prueba);
     return res
       .status(200)
       .json({ msg: "Cliente trabajado registrado con éxito!" });
@@ -175,34 +238,48 @@ const postClienteTrabajado = async (req, res) => {
   }
 };
 const updateClienteTrabajado = async (req, res) => {
-  let id = req.params.id;
-
   try {
-    const { nombre, dni, celular, correo } = req.body;
+    const { id } = req.params; // ID del cliente trabajado que se va a actualizar.
+    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } = req.body;
 
-    // Obtén el registro del cliente trabajado desde la base de datos
-    const clienteTrabajado = await Usuario.findOne({cod_usuario: id});
+    // Busca el cliente trabajado.
+    const usuario = await Usuario.findOne({ where: { cod_usuario: id } });
 
-    // Verifica si el cliente trabajado existe y si tiene permiso para ser modificado
-    if (!clienteTrabajado) {
-      return res.status(404).json({ msg: "Cliente no encontrado." });
+    // Si el cliente trabajado no se encuentra, devuelve un error.
+    if (!usuario) {
+      return res.status(404).json({ msg: "No se encontró el cliente." });
     }
 
-    // Realiza las actualizaciones necesarias en los campos del cliente trabajado
-    clienteTrabajado.nombre = nombre || clienteTrabajado.nombre;
-    clienteTrabajado.dni = dni || clienteTrabajado.dni;
-    clienteTrabajado.celular = celular || clienteTrabajado.celular;
-    clienteTrabajado.correo = correo || clienteTrabajado.correo;
+    // Actualiza el cliente trabajado.
+    await usuario.update({
+      nombre: nombre,
+      dni: dni,
+      celular: celular,
+      correo: correo,
+    });
 
-    // Guarda los cambios actualizados en la base de datos
-    await clienteTrabajado.save();
+    // Busca la venta asociada a este cliente trabajado y la actualiza.
+    const venta = await Venta.findOne({ where: { cod_cliente: id } });
+
+    // Si no se encuentra la venta, devuelve un error.
+    if (!venta) {
+      return res.status(404).json({ msg: "No se encontró la venta asociada al cliente." });
+    }
+
+    // Actualiza la venta.
+    await venta.update({
+      cod_propiedad: cod_propiedad,
+      cod_trabajador: cod_trabajador,
+    });
 
     return res.status(200).json({ msg: "Cliente trabajado actualizado con éxito!" });
+
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "No se pudo actualizar el cliente." });
+    res.status(500).json({ msg: "No se pudo actualizar el cliente trabajado." });
   }
 };
+
 const delteClienteTrabajado = async (req, res) => {
   let id = req.params.id;
 
@@ -231,5 +308,5 @@ module.exports = {
   getClienteTrabajado,
   postClienteTrabajado,
   updateClienteTrabajado,
-  delteClienteTrabajado
+  delteClienteTrabajado,
 };

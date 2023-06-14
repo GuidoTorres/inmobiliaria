@@ -13,6 +13,7 @@ const post = async (req, res) => {
   try {
     let newPropietarioData = {...req.body};
 
+    console.log(req.file);
    // Verificar si se subió una imagen
    if (req.file) {
     // Concatenar la ruta de la imagen al nombre del archivo

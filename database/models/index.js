@@ -48,11 +48,11 @@ Cotizacion.belongsTo(Usuario, {foreignKey:"cod_agente"})
 Usuario.hasMany(Cotizacion, {foreignKey:"cod_cliente"})
 Cotizacion.belongsTo(Usuario, {foreignKey:"cod_cliente"})
 
-Usuario.hasMany(Venta, {foreignKey:"cod_cliente"});
-Venta.belongsTo(Usuario, {foreignKey:"cod_cliente"});
+Usuario.hasMany(Venta, { as: 'VentasComoTrabajador', foreignKey: 'cod_trabajador' });
+Venta.belongsTo(Usuario, { as: 'Trabajador', foreignKey: 'cod_trabajador' });
 
-Usuario.hasMany(Venta, {foreignKey:"cod_trabajador"});
-Venta.belongsTo(Usuario, {foreignKey:"cod_trabajador"});
+Usuario.hasMany(Venta, { as: 'VentasComoCliente', foreignKey: 'cod_cliente' });
+Venta.belongsTo(Usuario, { as: 'Cliente', foreignKey: 'cod_cliente' });
 
 Propiedad.hasMany(Venta, {foreignKey: 'cod_propiedad'});
 Venta.belongsTo(Propiedad, {foreignKey: 'cod_propiedad'});

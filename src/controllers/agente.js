@@ -29,7 +29,7 @@ const post = async (req, res) => {
       correo: correo,
       password: password ? await encrypt(password) : null,
       oficina: oficina,
-      cod_rol: cod_rol,
+      cod_rol: 2,
     };
 
     await Usuario.create(nuevoUsuario);
