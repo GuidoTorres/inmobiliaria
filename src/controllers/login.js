@@ -41,7 +41,7 @@ const authLogin = async (req, res) => {
 
     if (!checkPassword) {
       res.status(409).send({
-        error: "Contraseña invalida",
+        msg: "Contraseña invalida",
       });
     }
   } catch (error) {
