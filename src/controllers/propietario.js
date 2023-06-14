@@ -17,6 +17,9 @@ const post = async (req, res) => {
    if (req.file) {
     // Concatenar la ruta de la imagen al nombre del archivo
     newPropietarioData.titulo_propiedad = process.env.LOCAL_TITLE + req.file.filename;
+  }else{
+    newPropietarioData.titulo_propiedad = ""
+
   }
 
     await db.models.Propietario.create(newPropietarioData);
