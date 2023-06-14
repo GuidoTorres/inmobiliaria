@@ -11,7 +11,13 @@ const cliente = require("../controllers/cliente");
 router.get("/", cliente.get);
 router.get("/trabajado", cliente.getClienteTrabajado);
 router.post("/", cliente.post);
+router.post("/trabajado", cliente.postClienteTrabajado);
+router.post("/posible", cliente.postPosibleCliente);
 router.put("/:id", cliente.update);
+router.put("/trabajado/:id", cliente.updateClienteTrabajado);
+router.put("/posible/:id", cliente.updatePosibleCliente);
 router.delete("/:id", cliente.delte);
+router.delete("/trabajado/:id", cliente.delteClienteTrabajado);
+
 
 module.exports = router;
