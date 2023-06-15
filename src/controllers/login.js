@@ -41,12 +41,12 @@ const authLogin = async (req, res) => {
         celular: user?.celular,
         cod_rol: user?.rol?.cod_rol,
         rol: user?.rol?.rol,
+        token: tokenSession,
+        refreshToken,
       };
 
       res.status(200).send({
         data: data,
-        token: tokenSession,
-        refreshToken,
       });
     }
 

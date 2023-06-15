@@ -85,9 +85,8 @@ const getPosibleCliente = async (req, res) => {
       include: [{ model: Rol, where: { cod_rol: 4 } }],
     });
 
-    const formatData = cliente.map(item => {
-      return{
-
+    const formatData = cliente.map((item) => {
+      return {
         cod_cliente: item?.cod_usuario,
         nombre: item?.nombre,
         dni: item?.dni,
@@ -95,9 +94,9 @@ const getPosibleCliente = async (req, res) => {
         celular: item?.celular,
         cod_rol: item?.rol?.cod_rol,
         rol: item?.rol?.rol,
-        estado: item?.estado
-      }
-    })
+        estado: item?.estado,
+      };
+    });
     return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
@@ -107,6 +106,22 @@ const getPosibleCliente = async (req, res) => {
 const postPosibleCliente = async (req, res) => {
   try {
     const { nombre, dni, celular, correo } = req.body;
+
+    // Verificar si el correo electrónico ya está en uso
+    const emailInUse = await Usuario.findOne({
+      where: { correo: correo },
+    });
+    if (emailInUse) {
+      return res.status(400).json({ msg: "El correo ya está en uso." });
+    }
+
+    // Verificar si el DNI ya está en uso
+    const dniInUse = await Usuario.findOne({
+      where: { dni: dni },
+    });
+    if (dniInUse) {
+      return res.status(400).json({ msg: "El DNI ya está en uso." });
+    }
 
     let nuevoUsuario = {
       nombre: nombre,
@@ -240,7 +255,8 @@ const postClienteTrabajado = async (req, res) => {
 const updateClienteTrabajado = async (req, res) => {
   try {
     const { id } = req.params; // ID del cliente trabajado que se va a actualizar.
-    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } = req.body;
+    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
+      req.body;
 
     // Busca el cliente trabajado.
     const usuario = await Usuario.findOne({ where: { cod_usuario: id } });
@@ -263,7 +279,9 @@ const updateClienteTrabajado = async (req, res) => {
 
     // Si no se encuentra la venta, devuelve un error.
     if (!venta) {
-      return res.status(404).json({ msg: "No se encontró la venta asociada al cliente." });
+      return res
+        .status(404)
+        .json({ msg: "No se encontró la venta asociada al cliente." });
     }
 
     // Actualiza la venta.
@@ -272,11 +290,14 @@ const updateClienteTrabajado = async (req, res) => {
       cod_trabajador: cod_trabajador,
     });
 
-    return res.status(200).json({ msg: "Cliente trabajado actualizado con éxito!" });
-
+    return res
+      .status(200)
+      .json({ msg: "Cliente trabajado actualizado con éxito!" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "No se pudo actualizar el cliente trabajado." });
+    res
+      .status(500)
+      .json({ msg: "No se pudo actualizar el cliente trabajado." });
   }
 };
 const delteClienteTrabajado = async (req, res) => {

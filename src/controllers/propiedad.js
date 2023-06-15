@@ -1,9 +1,20 @@
+const { internal } = require("@hapi/boom");
 const db = require("../../database/models");
-const { Propiedad, ImagenVideo } = db.models;
+const { Propiedad, ImagenVideo, Propietario } = db.models;
 const get = async (req, res) => {
   try {
     let whereClause = {};
-    const {busqueda, precioMin, precioMax, tipo, zona, fechaMin, fechaMax, orden, estado} = req.query
+    const {
+      busqueda,
+      precioMin,
+      precioMax,
+      tipo,
+      zona,
+      fechaMin,
+      fechaMax,
+      orden,
+      estado,
+    } = req.query;
     // Filtro de búsqueda por texto
     if (busqueda) {
       whereClause.nombre = { [Op.like]: `%${busqueda}%` }; // Asume que 'nombre' es el campo a buscar
@@ -60,9 +71,39 @@ const get = async (req, res) => {
     const propiedad = await Propiedad.findAll({
       where: whereClause,
       order: orderClause,
-      include: [{ model: ImagenVideo }],
+      include: [{ model: Propietario }, { model: ImagenVideo }],
     });
-    return res.status(200).json({ data: propiedad });
+
+    const formatData = propiedad.map((item) => {
+      return {
+        cod_propiedad: item?.cod_propiedad,
+        nombre: item?.nombre,
+        tipo: item?.tipo,
+        zona: item?.zona,
+        direccion: item?.direccion,
+        precio: item?.precio,
+        estado: item?.estado,
+        descripcion: item?.descripcion,
+        caracteristicas: item?.caracteristicas,
+        metraje: item?.metraje,
+        propiedadHabilitada: item?.propiedadHabilitada,
+        areaLibre: item?.areaLibre,
+        cocheraAdicional: item?.cocheraAdicional,
+        comision: item?.comision,
+        observaciones: item?.observaciones,
+        propietario: {
+          cod_propietario: item?.propietario?.cod_propietario,
+          nombre: item?.propietario?.nombre,
+          dni: item?.propietario?.dni,
+          celular: item?.propietario?.celular,
+          direccion: item?.propietario?.direccion,
+          titulo_propiedad: item?.propietario?.titulo_propiedad,
+        },
+        imagenVideos: item.imagenVideos,
+      };
+    });
+
+    return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
