@@ -117,7 +117,7 @@ const delte = async (req, res) => {
 
   try {
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
-    let imagenesVideos = await ImagenVideo.findAll({ where: { propiedadId: id } });
+    let imagenesVideos = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
     for (let i = 0; i < imagenesVideos.length; i++) {
         // Aquí también podrías eliminar los archivos del servidor si es necesario
         await imagenesVideos[i].destroy();

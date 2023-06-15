@@ -42,11 +42,11 @@ RolPermiso.belongsTo(Permiso, { foreignKey: "cod_permiso" });
 Rol.hasMany(Usuario, {foreignKey: "cod_rol"})
 Usuario.belongsTo(Rol, { foreignKey: "cod_rol" });
 
-Usuario.hasMany(Cotizacion, {foreignKey:"cod_agente"})
-Cotizacion.belongsTo(Usuario, {foreignKey:"cod_agente"})
+Usuario.hasMany(Cotizacion, { as: 'CotizacionCliente', foreignKey: 'cod_cliente' });
+Cotizacion.belongsTo(Usuario, { as: 'Cliente', foreignKey: 'cod_cliente' });
 
-Usuario.hasMany(Cotizacion, {foreignKey:"cod_cliente"})
-Cotizacion.belongsTo(Usuario, {foreignKey:"cod_cliente"})
+Usuario.hasMany(Cotizacion, { as: 'CotizacionTrabajador', foreignKey: 'cod_trabajador' });
+Cotizacion.belongsTo(Usuario, { as: 'Trabajador', foreignKey: 'cod_trabajador' });
 
 Usuario.hasMany(Venta, { as: 'VentasComoTrabajador', foreignKey: 'cod_trabajador' });
 Venta.belongsTo(Usuario, { as: 'Trabajador', foreignKey: 'cod_trabajador' });

@@ -279,7 +279,6 @@ const updateClienteTrabajado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar el cliente trabajado." });
   }
 };
-
 const delteClienteTrabajado = async (req, res) => {
   let id = req.params.id;
 

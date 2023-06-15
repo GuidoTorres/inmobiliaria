@@ -19,11 +19,15 @@ module.exports = (sequelize, DataTypes) =>{
         type: DataTypes.STRING,
         allowNull: false
     },
+    cod_cliente: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     cod_propiedad:{
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    cod_usuario:{
+    cod_trabajador:{
         type: DataTypes.INTEGER,
         allowNull: false
     },
