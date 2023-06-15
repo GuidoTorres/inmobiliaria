@@ -78,6 +78,13 @@ const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
+    const propietario = await db.models.Propietario.findOne({
+      where: { cod_propietario: id },
+    });
+
+    if (!propietario) {
+      return res.status(404).json({ msg: "No se encontró el propietario." });
+    }
     await db.models.Propietario.destroy({ where: { cod_propietario: id } });
     return res.status(200).json({ msg: "Propietario eliminado con éxito!" });
   } catch (error) {
