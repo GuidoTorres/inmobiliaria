@@ -6,14 +6,15 @@ const {
 } = require("../helpers/generateToken");
 const { compare, regenerateTokens } = require("./auth");
 const dayjs = require("dayjs");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
 const authLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     // Primero busca en la tabla de Agentes
     let user = await db.models.Usuario.findOne({
-      where: { correo: email }, include:[{model:db.models.Rol}]
+      where: { correo: email },
+      include: [{ model: db.models.Rol }],
     });
     console.log(user);
     // Si el usuario no se encuentra en ninguna de las tablas, devuelve un error
@@ -32,8 +33,18 @@ const authLogin = async (req, res) => {
         cod_usuario: user.cod_usuario,
       });
 
+      const data = {
+        cod_usuario: user?.cod_usuario,
+        nombre: user?.nombre,
+        dni: user?.dni,
+        correo: user?.correo,
+        celular: user?.celular,
+        cod_rol: user?.rol?.cod_rol,
+        rol: user?.rol?.rol,
+      };
+
       res.status(200).send({
-        data: user,
+        data: data,
         token: tokenSession,
         refreshToken,
       });
@@ -63,7 +74,7 @@ const refreshToken = async (req, res, next) => {
     res.status(200).json(newTokens);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ms: "Hubo un error"});
+    res.status(500).json({ ms: "Hubo un error" });
   }
 };
 

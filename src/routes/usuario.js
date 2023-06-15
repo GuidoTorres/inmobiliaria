@@ -9,6 +9,7 @@ const usuario = require("../controllers/usuario");
 
 router.get("/", usuario.get);
 router.post("/", usuario.post);
+router.post("/recuperar", usuario.codigoRecuperacion);
 router.put("/:id", usuario.update);
 router.delete("/:id", usuario.delte);
 

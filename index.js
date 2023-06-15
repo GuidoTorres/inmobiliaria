@@ -13,6 +13,7 @@ const propietarioRouter = require("./src/routes/propietario");
 const propiedadRouter = require("./src/routes/propiedad");
 const reporteInicioSesionRouter = require("./src/routes/registroInicioSesion");
 const usuarioRouter = require("./src/routes/usuario");
+const cotizacionRouter = require("./src/routes/cotizacion");
 
 
 
@@ -48,6 +49,7 @@ app.use("/api/v1/propietario", propietarioRouter);
 app.use("/api/v1/propiedad", propiedadRouter);
 app.use("/api/v1/reporte", reporteInicioSesionRouter);
 app.use("/api/v1/usuario", usuarioRouter);
+app.use("/api/v1/cotizacion", cotizacionRouter);
 
 
 

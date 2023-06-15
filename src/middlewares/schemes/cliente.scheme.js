@@ -2,7 +2,7 @@ const joi = require("joi");
 
 let crearCliente = joi.object({
     nombre: joi.string().required().messages({
-        'string.empty': 'El campo nombre"no puede estar vacío',
+        'string.empty': 'El campo nombre no puede estar vacío',
         'any.required': 'El campo nombre es obligatorio'
       }),
       dni: joi.string().required().messages({

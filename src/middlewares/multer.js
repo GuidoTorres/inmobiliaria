@@ -13,9 +13,7 @@ const uploadFile = (req, res, next) => {
   const upload = multer({
     storage: storage
   }).fields([
-    { name: 'imagen', maxCount: 10 },
-    { name: 'video', maxCount: 2 }
-  ]);
+    { name: 'imagen', maxCount: 10 }  ]);
   return upload;
 };
 
