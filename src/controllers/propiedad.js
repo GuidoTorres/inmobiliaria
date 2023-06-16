@@ -165,44 +165,31 @@ const update = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
     let propiedadData = { ...req.body };
+    let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
+    delete propiedadData.imagenes;
     delete propiedadData.imagen;
     delete propiedadData.video;
 
     // Actualizar las propiedades básicas de la propiedad
     await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
 
-    // Si hay imágenes, manejarlas
-    if (req.body.imagen || (req.files && req.files.imagen)) {
-      // Obtén las rutas de las imágenes a conservar
-      let imagenesParaConservar = req.body.imagen
-        ? [req.body.imagen]
-        : [];
+    // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
+    let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id, tipo: "imagen" } });
 
-      // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
-      let allImagenes = await ImagenVideo.findAll({
-        where: { cod_propiedad: id, tipo: "imagen" },
-      });
-
-      // Aquí podrías eliminar las imágenes que no están en la lista de imágenes a conservar
-      for (let i = 0; i < allImagenes.length; i++) {
-        if (!imagenesParaConservar.includes(allImagenes[i].ruta)) {
-          // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
-          await allImagenes[i].destroy();
-        }
+    // Eliminar las imágenes que no están en la lista de imágenes a conservar
+    for (let i = 0; i < allImagenes.length; i++) {
+      if (!idsImagenesParaConservar.includes(allImagenes[i].id)) {
+        // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
+        await allImagenes[i].destroy();
       }
+    }
 
-      // Subir y crear entradas para las nuevas imágenes
-      if (req.files && req.files.imagen) {
-        for (let i = 0; i < req.files.imagen.length; i++) {
-          let rutaImagen =
-            process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
-          let newImagen = {
-            cod_propiedad: id,
-            ruta: rutaImagen,
-            tipo: "imagen",
-          };
-          await ImagenVideo.create(newImagen);
-        }
+    // Subir y crear entradas para las nuevas imágenes
+    if (req.files && req.files.imagen) {
+      for (let i = 0; i < req.files.imagen.length; i++) {
+        let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
+        let newImagen = { cod_propiedad: id, ruta: rutaImagen, tipo: "imagen" };
+        await ImagenVideo.create(newImagen);
       }
     }
 
