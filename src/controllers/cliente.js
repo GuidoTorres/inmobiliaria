@@ -176,11 +176,12 @@ const getClienteTrabajado = async (req, res) => {
     });
 
     const formatData = cliente.map((item) => {
-      const propiedad = item.VentasComoCliente.map((ele) => ele.propiedad);
-      const trabajador = item.VentasComoCliente.map((ele) => ele.Trabajador);
+      const cod_venta = item?.VentasComoCliente?.map((ele) => ele?.id);
+      const propiedad = item?.VentasComoCliente?.map((ele) => ele?.propiedad);
+      const trabajador = item?.VentasComoCliente?.map((ele) => ele?.Trabajador);
 
       return {
-        cod_usuario: item?.cod_usuario,
+        cod_cliente: item?.cod_usuario,
         nombre: item?.nombre,
         dni: item?.dni,
         corre: item?.correo,
@@ -188,17 +189,12 @@ const getClienteTrabajado = async (req, res) => {
         estado: true,
         cod_rol: item?.cod_rol,
         rol: item?.rol?.rol,
-        createdAt: dayjs(item?.createdAt)?.format("DD-MM-YYYY"),
-        updatedAt: dayjs(item?.createdAt)?.format("DD-MM-YYYY"),
-        propiedad: {
-          cod_propiedad: propiedad.cod_propiedad,
-          nombre: propiedad.nombre,
-        },
+        cod_venta: Number(cod_venta),
         propiedad: propiedad
-          .map((data) => {
+          ?.map((data) => {
             return {
-              cod_trabajador: data.cod_propiedad,
-              nombre: data.nombre,
+              cod_propiedad: data?.cod_propiedad,
+              nombre: data?.nombre,
             };
           })
           .at(0),
@@ -225,6 +221,20 @@ const postClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
+          // Verificar si el correo electrónico ya está en uso
+    const emailInUse = await Usuario.findOne({ where: { correo: correo } });
+    if (emailInUse) {
+      return res
+        .status(400)
+        .json({ msg: "El correo electrónico ya está en uso." });
+    }
+
+    // Verificar si el DNI ya está en uso
+    const dniInUse = await Usuario.findOne({ where: { dni: dni } });
+    if (dniInUse) {
+      return res.status(400).json({ msg: "El DNI ya está en uso." });
+    }
+
     let nuevoUsuario = {
       nombre: nombre,
       dni: dni,
@@ -241,7 +251,6 @@ const postClienteTrabajado = async (req, res) => {
       cod_propiedad: cod_propiedad,
       cod_trabajador: cod_trabajador,
     };
-    console.log(info);
     const prueba = await Venta.create(info);
     console.log(prueba);
     return res
@@ -254,45 +263,51 @@ const postClienteTrabajado = async (req, res) => {
 };
 const updateClienteTrabajado = async (req, res) => {
   try {
-    const { id } = req.params; // ID del cliente trabajado que se va a actualizar.
+    const cod_cliente = parseInt(req.params.cod_cliente)
+    const cod_venta = parseInt(req.params.cod_venta)
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-    // Busca el cliente trabajado.
-    const usuario = await Usuario.findOne({ where: { cod_usuario: id } });
+    // Start the transaction.
+    const t = await db.sequelize.transaction();
 
-    // Si el cliente trabajado no se encuentra, devuelve un error.
-    if (!usuario) {
-      return res.status(404).json({ msg: "No se encontró el cliente." });
+    try {
+      const usuario = await Usuario.findOne({ where: { cod_usuario: cod_cliente } }, { transaction: t });
+
+      if (!usuario) {
+        await t.rollback();
+        return res.status(404).json({ msg: "No se encontró el cliente." });
+      }
+      const venta = await Venta.findOne({ where: { id: cod_venta } }, { transaction: t });
+
+      if (!venta) {
+        await t.rollback();
+        return res.status(404).json({ msg: "No se encontró la venta asociada al cliente." });
+      }
+
+      await usuario.update({
+        nombre: nombre,
+        dni: dni,
+        celular: celular,
+        correo: correo,
+        estado: true
+      }, { transaction: t });
+
+
+
+      await venta.update({
+        cod_propiedad: cod_propiedad,
+        cod_trabajador: cod_trabajador,
+        cod_cliente: cod_cliente
+      }, { transaction: t });
+
+      await t.commit();
+
+      return res.status(200).json({ msg: "Cliente trabajado actualizado con éxito!" });
+    } catch (error) {
+      await t.rollback();
+      throw error;
     }
-
-    // Actualiza el cliente trabajado.
-    await usuario.update({
-      nombre: nombre,
-      dni: dni,
-      celular: celular,
-      correo: correo,
-    });
-
-    // Busca la venta asociada a este cliente trabajado y la actualiza.
-    const venta = await Venta.findOne({ where: { cod_cliente: id } });
-
-    // Si no se encuentra la venta, devuelve un error.
-    if (!venta) {
-      return res
-        .status(404)
-        .json({ msg: "No se encontró la venta asociada al cliente." });
-    }
-
-    // Actualiza la venta.
-    await venta.update({
-      cod_propiedad: cod_propiedad,
-      cod_trabajador: cod_trabajador,
-    });
-
-    return res
-      .status(200)
-      .json({ msg: "Cliente trabajado actualizado con éxito!" });
   } catch (error) {
     console.log(error);
     res
@@ -301,14 +316,22 @@ const updateClienteTrabajado = async (req, res) => {
   }
 };
 const delteClienteTrabajado = async (req, res) => {
-  let id = req.params.id;
+  const cod_cliente = parseInt(req.params.cod_cliente)
+  const cod_venta = parseInt(req.params.cod_venta)
 
   try {
+    const user = await Usuario.findOne({
+      where: { cod_usuario: cod_cliente },
+    });
+
+    if (!user) {
+      return res.status(404).json({ msg: "No se encontró el usuario." });
+    }
     await Venta.destroy({
-      where: { cod_cliente: id },
+      where: { cod_cliente: cod_venta },
     });
     await Usuario.destroy({
-      where: { cod_usuario: id },
+      where: { cod_usuario: cod_cliente },
     });
 
     return res.status(200).json({ msg: "Cliente eliminado con éxito!" });

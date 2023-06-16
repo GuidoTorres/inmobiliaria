@@ -25,8 +25,8 @@ let crearCliente = joi.object({
         'string.empty': 'El campo celular no puede estar vacío',
         'any.required': 'El campo celular es obligatorio'
       }),
-      password: joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).messages({
-        'string.pattern.base': 'El campo password debe contener entre 3 y 30 caracteres alfanuméricos',
+      password: joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,8}$")).messages({
+        'string.pattern.base': 'El campo password debe contener entre 3 y 8 caracteres alfanuméricos',
         'string.empty': 'El campo password no puede estar vacío',
       }),
 });

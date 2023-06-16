@@ -15,10 +15,10 @@ router.post("/", cliente.post);
 router.post("/trabajado", cliente.postClienteTrabajado);
 router.post("/posible", cliente.postPosibleCliente);
 router.put("/:id", cliente.update);
-router.put("/trabajado/:id", cliente.updateClienteTrabajado);
+router.put("/trabajado/:cod_cliente/:cod_venta", cliente.updateClienteTrabajado);
 router.put("/posible/:id", cliente.updatePosibleCliente);
 router.delete("/:id", cliente.delte);
-router.delete("/trabajado/:id", cliente.delteClienteTrabajado);
+router.delete("/trabajado/:cod_cliente/:cod_venta", cliente.delteClienteTrabajado);
 
 
 module.exports = router;

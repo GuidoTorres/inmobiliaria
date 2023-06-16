@@ -1,8 +1,9 @@
 const db = require("../../database/models");
+const {Permiso} = db.models
 
 const get = async (req, res) => {
   try {
-    const permiso = await db.models.Permiso.findAll();
+    const permiso = await Permiso.findAll();
     return res.status(200).json({ data: permiso });
   } catch (error) {
     res.status(500).json({ msg: "No se pudo obtener la lista de permisos" });
@@ -11,7 +12,7 @@ const get = async (req, res) => {
 
 const post = async (req, res) => {
   try {
-    await db.models.Permiso.create(req.body);
+    await Permiso.create(req.body);
     return res
       .status(200)
       .json({ msg: "Permiso registrado con éxito!" });
@@ -23,7 +24,14 @@ const post = async (req, res) => {
 const update = async (req, res) => {
   let id = req.params.id;
   try {
-    await db.models.Permiso.update(req.body, { where: { cod_permiso: id } });
+    const permiso = await Permiso.findOne({
+      where: { cod_permiso: id },
+    });
+
+    if (!permiso) {
+      return res.status(404).json({ msg: "No se encontró el permiso." });
+    }
+    await Permiso.update(req.body, { where: { cod_permiso: id } });
     return res
       .status(200)
       .json({ msg: "Permiso actualizado con éxito!" });
@@ -37,7 +45,14 @@ const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
-    await db.models.Permiso.destroy({ where: { cod_permiso: id } });
+    const permiso = await Permiso.findOne({
+      where: { cod_permiso: id },
+    });
+
+    if (!permiso) {
+      return res.status(404).json({ msg: "No se encontró el permiso." });
+    }
+    await Permiso.destroy({ where: { cod_permiso: id } });
     return res
       .status(200)
       .json({ msg: "Permiso eliminado con éxito!" });

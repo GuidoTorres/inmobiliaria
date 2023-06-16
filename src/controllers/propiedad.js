@@ -137,30 +137,15 @@ const post = async (req, res) => {
     }
 
     // Procesar video
-    if (req.files && req.files.video) {
+    if (req.body.video) {
       let newVideo;
 
-      // Si el video es una URL de YouTube
-      if (
-        typeof req.files.video === "string" &&
-        (req.files.video.startsWith("http") ||
-          req.files.video.startsWith("https"))
-      ) {
-        newVideo = {
-          url: req.files.video,
-          tipo: "video",
-          cod_propiedad: newPropiedad.cod_propiedad,
-        };
-      }
-      // Si el video es un archivo
-      else {
-        let rutaVideo = process.env.LOCAL_IMAGE + req.files.video.filename;
-        newVideo = {
-          url: rutaVideo,
-          tipo: "video",
-          cod_propiedad: newPropiedad.cod_propiedad,
-        };
-      }
+      // Asumimos que el video siempre será una URL de YouTube
+      newVideo = {
+        url: req.body.video,
+        tipo: "video",
+        cod_propiedad: newPropiedad.cod_propiedad,
+      };
 
       await ImagenVideo.create(newVideo);
     }
@@ -172,9 +157,14 @@ const post = async (req, res) => {
   }
 };
 
+
 const update = async (req, res) => {
   let id = req.params.id;
   try {
+    let propiedad = await Propiedad.findOne({ where: { cod_propiedad: id } });
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontró la propiedad." });
+    }
     let propiedadData = { ...req.body };
 
     // Eliminar los campos 'imagen' y 'video' del objeto propiedadData
@@ -184,31 +174,46 @@ const update = async (req, res) => {
     // Actualizar las propiedades básicas de la propiedad
     await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
 
-    // Si hay archivos subidos, manejarlos
-    if (req.files) {
-      // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
-      let oldImagenesVideos = await ImagenVideo.findAll({
-        where: { propiedadId: id },
+    // Si hay imágenes subidas, manejarlas
+    if (req.files && req.files.imagen) {
+      // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
+      let oldImagenes = await ImagenVideo.findAll({
+        where: { propiedadId: id, tipo: "imagen" },
       });
-      for (let i = 0; i < oldImagenesVideos.length; i++) {
+      for (let i = 0; i < oldImagenes.length; i++) {
         // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
-        await oldImagenesVideos[i].destroy();
+        await oldImagenes[i].destroy();
       }
 
-      // Subir y crear entradas para los nuevos archivos
-      for (let i = 0; i < req.files.length; i++) {
-        let rutaImagenVideo = process.env.LOCAL_MEDIA + req.files[i].filename;
-        let tipo = req.files[i].mimetype.startsWith("image/")
-          ? "imagen"
-          : "video";
-
-        let newImagenVideo = {
+      // Subir y crear entradas para las nuevas imágenes
+      for (let i = 0; i < req.files.imagen.length; i++) {
+        let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
+        let newImagen = {
           propiedadId: id,
-          ruta: rutaImagenVideo,
-          tipo: tipo,
+          ruta: rutaImagen,
+          tipo: "imagen",
         };
-        await ImagenVideo.create(newImagenVideo);
+        await ImagenVideo.create(newImagen);
       }
+    }
+
+    // Si hay un video subido, manejarlo
+    if (req.body.video) {
+      // Buscar y eliminar la entrada de ImagenVideo para este video
+      let oldVideo = await ImagenVideo.findOne({
+        where: { propiedadId: id, tipo: "video" },
+      });
+      if (oldVideo) {
+        await oldVideo.destroy();
+      }
+
+      // Crear una entrada para el nuevo video
+      let newVideo = {
+        propiedadId: id,
+        ruta: req.body.video,
+        tipo: "video",
+      };
+      await ImagenVideo.create(newVideo);
     }
 
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
@@ -218,10 +223,15 @@ const update = async (req, res) => {
   }
 };
 
+
 const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
+    let propiedad = await Propiedad.findOne({ where: { cod_propiedad: id } });
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontró la propiedad." });
+    }
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
     let imagenesVideos = await ImagenVideo.findAll({
       where: { cod_propiedad: id },

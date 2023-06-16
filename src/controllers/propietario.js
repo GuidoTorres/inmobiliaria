@@ -1,8 +1,8 @@
 const db = require("../../database/models");
-
+const {Propietario} = db.models
 const get = async (req, res) => {
   try {
-    const propietario = await db.models.Propietario.findAll();
+    const propietario = await Propietario.findAll();
     const formatData = propietario.map(item =>{
       return{
 
@@ -27,7 +27,13 @@ const post = async (req, res) => {
     let newPropietarioData = { ...req.body };
 
     delete newPropietarioData.titulo_propiedad;
+    const propietario = await Propietario.findOne({
+      where: { dni: newPropietarioData.dni },
+    });
 
+    if (propietario) {
+      return res.status(404).json({ msg: "El DNI ya esta registrado." });
+    }
     // Verificar si se subió una imagen
     if (req.file) {
       // Concatenar la ruta de la imagen al nombre del archivo
@@ -35,7 +41,7 @@ const post = async (req, res) => {
         process.env.LOCAL_TITLE + req.file.filename;
     }
 
-    await db.models.Propietario.create(newPropietarioData);
+    await Propietario.create(newPropietarioData);
     return res.status(200).json({ msg: "Propietario registrado con éxito!" });
   } catch (error) {
     console.log(error);
@@ -48,7 +54,7 @@ const update = async (req, res) => {
   try {
     let updateData = { ...req.body };
 
-    const propietario = await db.models.Propietario.findOne({
+    const propietario = await Propietario.findOne({
       where: { cod_propietario: id },
     });
 
@@ -64,7 +70,7 @@ const update = async (req, res) => {
       delete updateData.titulo_propiedad;
     }
 
-    await db.models.Propietario.update(updateData, {
+    await Propietario.update(updateData, {
       where: { cod_propietario: id },
     });
     return res.status(200).json({ msg: "Propietario actualizado con éxito!" });
@@ -78,14 +84,14 @@ const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
-    const propietario = await db.models.Propietario.findOne({
+    const propietario = await Propietario.findOne({
       where: { cod_propietario: id },
     });
 
     if (!propietario) {
       return res.status(404).json({ msg: "No se encontró el propietario." });
     }
-    await db.models.Propietario.destroy({ where: { cod_propietario: id } });
+    await Propietario.destroy({ where: { cod_propietario: id } });
     return res.status(200).json({ msg: "Propietario eliminado con éxito!" });
   } catch (error) {
     res.status(500).json({ msg: "No se pudo eliminar." });

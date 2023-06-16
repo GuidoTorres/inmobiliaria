@@ -33,12 +33,21 @@ const get = async (req, res) => {
 
 const post = async (req, res) => {
   try {
-    const id_rol = await db.models.Rol.create({ rol: req.body.rol });
+    const { rol } = req.body;
 
-    if (id_rol && req.body.cod_permiso) {
+    // Check if the role already exists.
+    const existingRole = await db.models.Rol.findOne({ where: { rol } });
+
+    if (existingRole) {
+      return res.status(400).json({ msg: "El rol ya existe." });
+    }
+
+    const createdRole = await db.models.Rol.create({ rol });
+
+    if (createdRole && req.body.cod_permiso) {
       const rol_permiso = req.body.cod_permiso.map((item) => {
         return {
-          cod_rol: id_rol.cod_rol,
+          cod_rol: createdRole.cod_rol,
           cod_permiso: item,
         };
       });
@@ -51,6 +60,7 @@ const post = async (req, res) => {
     res.status(500).json({ msg: "No se pudo registrar el rol." });
   }
 };
+
 
 const update = async (req, res) => {
   let id = req.params.id;

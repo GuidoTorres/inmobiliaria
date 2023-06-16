@@ -21,15 +21,12 @@ module.exports = (sequelize, DataTypes) =>{
     },
     celular: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     direccion: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     titulo_propiedad: {
         type: DataTypes.STRING,
-        allowNull:false
     },
 
     createdAt:{
