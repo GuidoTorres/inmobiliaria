@@ -116,7 +116,6 @@ const post = async (req, res) => {
 
     // Eliminar los campos 'imagen' y 'video' del objeto newPropiedadData
     delete newPropiedadData.imagen;
-    delete newPropiedadData.video;
 
     let newPropiedad = await Propiedad.create(newPropiedadData);
 
@@ -134,20 +133,6 @@ const post = async (req, res) => {
 
         await ImagenVideo.create(newImagen);
       }
-    }
-
-    // Procesar video
-    if (req.body.video) {
-      let newVideo;
-
-      // Asumimos que el video siempre será una URL de YouTube
-      newVideo = {
-        url: req.body.video,
-        tipo: "video",
-        cod_propiedad: newPropiedad.cod_propiedad,
-      };
-
-      await ImagenVideo.create(newVideo);
     }
 
     return res.status(200).json({ msg: "Propiedad registrada con éxito!" });
@@ -189,7 +174,8 @@ const update = async (req, res) => {
     if (req.files && req.files.imagen) {
       for (let i = 0; i < req.files.imagen.length; i++) {
         let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
-        let newImagen = { cod_propiedad: id, ruta: rutaImagen, tipo: "imagen" };
+        let newImagen = { cod_propiedad: id, url: rutaImagen, tipo: "imagen" };
+        console.log(newImagen);
         await ImagenVideo.create(newImagen);
       }
     }
