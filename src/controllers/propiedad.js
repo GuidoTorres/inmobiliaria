@@ -166,24 +166,25 @@ const update = async (req, res) => {
     }
     let propiedadData = { ...req.body };
     let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
-    delete propiedadData.imagenes;
     delete propiedadData.imagen;
-    delete propiedadData.video;
-
-    // Actualizar las propiedades básicas de la propiedad
-    await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
-
-    // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
-    let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id, tipo: "imagen" } });
-
-    // Eliminar las imágenes que no están en la lista de imágenes a conservar
-    for (let i = 0; i < allImagenes.length; i++) {
-      if (!idsImagenesParaConservar.includes(allImagenes[i].id)) {
-        // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
-        await allImagenes[i].destroy();
+    // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar
+    if (Array.isArray(idsImagenesParaConservar) && idsImagenesParaConservar.length > 0) {
+      // Actualizar las propiedades básicas de la propiedad
+      delete propiedadData.imagenes;
+      await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
+    
+      // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
+      let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id, tipo: "imagen" } });
+    
+      // Eliminar las imágenes que no están en la lista de imágenes a conservar
+      for (let i = 0; i < allImagenes.length; i++) {
+        if (!idsImagenesParaConservar.includes(allImagenes[i].id)) {
+          // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
+          await allImagenes[i].destroy();
+        }
       }
     }
-
+    
     // Subir y crear entradas para las nuevas imágenes
     if (req.files && req.files.imagen) {
       for (let i = 0; i < req.files.imagen.length; i++) {
@@ -192,25 +193,8 @@ const update = async (req, res) => {
         await ImagenVideo.create(newImagen);
       }
     }
+    
 
-    // Si hay un video subido, manejarlo
-    if (req.body.video) {
-      // Buscar y eliminar la entrada de ImagenVideo para este video
-      let oldVideo = await ImagenVideo.findOne({
-        where: { cod_propiedad: id, tipo: "video" },
-      });
-      if (oldVideo) {
-        await oldVideo.destroy();
-      }
-
-      // Crear una entrada para el nuevo video
-      let newVideo = {
-        cod_propiedad: id,
-        ruta: req.body.video,
-        tipo: "video",
-      };
-      await ImagenVideo.create(newVideo);
-    }
 
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
   } catch (error) {
