@@ -175,7 +175,7 @@ const update = async (req, res) => {
     if (req.body.imagen || (req.files && req.files.imagen)) {
       // Obtén las rutas de las imágenes a conservar
       let imagenesParaConservar = req.body.imagen
-        ? JSON.parse(req.body.imagen)
+        ? [req.body.imagen]
         : [];
 
       // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
