@@ -90,6 +90,7 @@ const get = async (req, res) => {
         cocheraAdicional: item?.cocheraAdicional,
         comision: item?.comision,
         observaciones: item?.observaciones,
+        creado_por: item?.creado_por,
         propietario: {
           cod_propietario: item?.propietario?.cod_propietario,
           nombre: item?.propietario?.nombre,
@@ -164,7 +165,7 @@ const update = async (req, res) => {
     }
     let propiedadData = { ...req.body };
 
-    let { cod_propietario } = newPropiedadData;
+    let { cod_propietario } = propiedadData;
 
     // Validar el cod_propietario solo si existe
     if (cod_propietario) {
@@ -176,7 +177,7 @@ const update = async (req, res) => {
     let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
     delete propiedadData.imagen;
     if (req.fileValidationError) {
-      return res.status(400).json({ error: req.fileValidationError });
+      return res.status(400).json({ msg: "Una de las imagenes sobrepasa los 5mb." });
     }
   
     // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar

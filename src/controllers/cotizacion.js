@@ -25,6 +25,7 @@ const get = async (req, res) => {
         cod_cotizacion: item.cod_cotizacion,
         fecha_emision: item.fecha_emision,
         fecha_vencimiento: item.fecha_vencimiento,
+        creado_por: item?.creado_por,
         cliente: {
           cod_cliente: item.Cliente.cod_usuario,
           nombre: item.Cliente.nombre,
