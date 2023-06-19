@@ -174,6 +174,7 @@ let update = async (req, res) => {
         return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido." });
       }
     }
+
     let idsImagenesParaConservar = [];
     if (propiedadData.imagenes) {
       if (typeof propiedadData.imagenes === 'string') {
@@ -184,25 +185,21 @@ let update = async (req, res) => {
     }
     delete propiedadData.imagen;
     if (req.fileValidationError) {
-      return res.status(400).json({ msg: "Una de las imagenes sobrepasa los 5mb." });
+      return res.status(400).json({ msg: "Una o varias de las imagenes sobrepasan los 5mb." });
     }
 
     // Actualizar las propiedades básicas de la propiedad
     delete propiedadData.imagenes;
     await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
 
-    // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar
-    if (Array.isArray(idsImagenesParaConservar) && idsImagenesParaConservar.length > 0) {
-    
-      // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
-      let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
-    
-      // Eliminar las imágenes que no están en la lista de imágenes a conservar
-      for (let i = 0; i < allImagenes.length; i++) {
-        if (!idsImagenesParaConservar.includes(allImagenes[i].id)) {
-          // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
-          await allImagenes[i].destroy();
-        }
+    // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
+    let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
+
+    // Eliminar las imágenes que no están en la lista de imágenes a conservar
+    for (let i = 0; i < allImagenes.length; i++) {
+      if (!idsImagenesParaConservar.includes(allImagenes[i].id)) {
+        // Aquí también podrías eliminar los archivos viejos del servidor si es necesario
+        await allImagenes[i].destroy();
       }
     }
     
@@ -211,7 +208,6 @@ let update = async (req, res) => {
       for (let i = 0; i < req.files.imagen.length; i++) {
         let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
         let newImagen = { cod_propiedad: id, url: rutaImagen };
-        console.log(newImagen);
         await ImagenVideo.create(newImagen);
       }
     }
@@ -222,6 +218,7 @@ let update = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
+
 
 
 const delte = async (req, res) => {
@@ -250,4 +247,53 @@ const delte = async (req, res) => {
   }
 };
 
-module.exports = { get, post, update, delte };
+
+let updateHabilitado = async (req, res) => {
+  let id = req.params.id;
+  try {
+    let propiedad = await Propiedad.findOne({ where: { cod_propiedad: id } });
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontró la propiedad." });
+    }
+
+    // Leer el valor actual del campo 'propiedadHabilitada'
+    let estadoActual = propiedad.propiedadHabilitada;
+    
+    // Invertir el valor de 'propiedadHabilitada'
+    let nuevoEstado = !estadoActual;
+
+    // Actualizar el campo 'propiedadHabilitada' en la base de datos
+    propiedad.propiedadHabilitada = nuevoEstado;
+    await propiedad.save();
+  
+    return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo actualizar." });
+  }
+};
+
+let updateEstado = async (req, res) => {
+  let id = req.params.id;
+  try {
+    let propiedad = await Propiedad.findOne({ where: { cod_propiedad: id } });
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontró la propiedad." });
+    }
+
+    // Leer el valor actual del campo 'propiedadHabilitada'
+    let {estado} = req.body
+
+    // Actualizar el campo 'propiedadHabilitada' en la base de datos
+    propiedad.estado = estado;
+    await propiedad.save();
+  
+    return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo actualizar." });
+  }
+};
+
+
+module.exports = { get, post, update, delte, updateHabilitado, updateEstado };
