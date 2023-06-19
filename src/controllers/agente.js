@@ -56,7 +56,7 @@ const post = async (req, res) => {
 const update = async (req, res) => {
   let id = req.params.id;
   try {
-    const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+    const { password, nombre, dni, celular, correo } = req.body;
     const usuario = await Usuario.findOne({
       where: { cod_usuario: id },
     });
@@ -72,7 +72,7 @@ const update = async (req, res) => {
       celular: celular,
       correo: correo,
       estado: false,
-      cod_rol: cod_rol,
+      cod_rol: 2,
     };
 
     // Verifica si se proporciona una nueva contraseña
