@@ -1,92 +1,102 @@
-"use strict"
+"use strict";
 
-
-module.exports = (sequelize, DataTypes) =>{
-
-    let Propiedad = sequelize.define("propiedad",{
-
-    cod_propiedad:{
+module.exports = (sequelize, DataTypes) => {
+  let Propiedad = sequelize.define(
+    "propiedad",
+    {
+      cod_propiedad: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        allowNull: false
-    },
-    nombre:{
+        allowNull: false,
+      },
+      nombre: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
-    tipo:{
+        allowNull: false,
+      },
+      tipo: {
         type: DataTypes.STRING,
-    },
-    zona:{
+      },
+      zona: {
         type: DataTypes.STRING,
-    },
-    direccion: {
+      },
+      direccion: {
         type: DataTypes.STRING,
-    },
-    precio: {
+      },
+      precio: {
         type: DataTypes.STRING,
-    },
-    estado: {
+      },
+      estado: {
         type: DataTypes.STRING,
-    },
-    descripcion: {
+      },
+      descripcion: {
         type: DataTypes.STRING,
-    },
-    caracteristicas: {
+      },
+      caracteristicas: {
         type: DataTypes.STRING,
-    },
-    metraje: {
+      },
+      metraje: {
         type: DataTypes.FLOAT,
-    },
-    propiedadHabilitada: {
+      },
+      propiedadHabilitada: {
         type: DataTypes.BOOLEAN,
-    },
-    areaLibre: {
+      },
+      areaLibre: {
         type: DataTypes.FLOAT,
-    },
-    cocheraAdicional: {
+      },
+      cocheraAdicional: {
         type: DataTypes.BOOLEAN,
-    },
-    comision: {
+      },
+      comision: {
         type: DataTypes.FLOAT,
-    },
-    observaciones: {
+      },
+      observaciones: {
         type: DataTypes.STRING,
-    },
-    video: {
+      },
+      video: {
         type: DataTypes.STRING,
-    },
-    creado_por:{
+      },
+      creado_por: {
         type: DataTypes.INTEGER,
         allowNull: false,
-
-    },
-    cod_propietario: {
+      },
+      cod_propietario: {
         type: DataTypes.INTEGER,
-        allowNull:false
-    },
-    createdAt:{
+        allowNull: false,
+      },
+      exportar: {
+        type: DataTypes.BOOLEAN,
+      },
+      cotizar: {
+        type: DataTypes.BOOLEAN,
+      },
+      tasacion: {
+        type: DataTypes.BOOLEAN,
+      },
+      valorizacion: {
+        type: DataTypes.BOOLEAN,
+      },
+      vender: {
+        type: DataTypes.BOOLEAN,
+      },
+      createdAt: {
         type: DataTypes.DATE,
         field: "created_at",
         defaultValue: DataTypes.NOW,
-        allowNull:false
-
-    },
-    updatedAt:{
+        allowNull: false,
+      },
+      updatedAt: {
         type: DataTypes.DATE,
         field: "updated_at",
         defaultValue: DataTypes.NOW,
-        allowNull:false
-
+        allowNull: false,
+      },
     },
+    {
+      tableName: "propiedad",
+      freezeTableName: true,
+    }
+  );
 
-    },{
-        tableName: "propiedad",
-        freezeTableName: true
-    })
-
-
-    return Propiedad
-
-}
+  return Propiedad;
+};
