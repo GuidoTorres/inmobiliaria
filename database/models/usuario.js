@@ -42,11 +42,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      creado_por:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-
-      },
       createdAt: {
         type: DataTypes.DATE,
         field: "created_at",

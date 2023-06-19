@@ -99,6 +99,7 @@ const get = async (req, res) => {
           direccion: item?.propietario?.direccion,
           titulo_propiedad: item?.propietario?.titulo_propiedad,
         },
+        
         imagenVideos: item.imagenVideos,
       };
     });
@@ -128,7 +129,10 @@ const post = async (req, res) => {
     delete newPropiedadData.imagen;
 
     let newPropiedad = await Propiedad.create(newPropiedadData);
-
+    if (req.fileValidationError) {
+      return res.status(400).json({ error: req.fileValidationError });
+    }
+  
     // Procesar imágenes
     if (req.files && req.files.imagen) {
       // Si hay imágenes subidas
@@ -172,6 +176,10 @@ const update = async (req, res) => {
     }
     let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
     delete propiedadData.imagen;
+    if (req.fileValidationError) {
+      return res.status(400).json({ error: req.fileValidationError });
+    }
+  
     // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar
     if (Array.isArray(idsImagenesParaConservar) && idsImagenesParaConservar.length > 0) {
       // Actualizar las propiedades básicas de la propiedad

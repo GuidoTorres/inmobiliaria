@@ -20,6 +20,17 @@ const post = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
 
+    const existeCorreo = await Usuario.findOne({ where: { correo } });
+    const existeDNI = await Usuario.findOne({ where: { dni } });
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
+
     let nuevoUsuario = {
       nombre: nombre,
       dni: dni,
@@ -41,6 +52,16 @@ const update = async (req, res) => {
   let id = req.params.id;
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+    const existeCorreo = await Usuario.findOne({ where: { correo } });
+    const existeDNI = await Usuario.findOne({ where: { dni } });
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
 
     let nuevoUsuario = {
       nombre: nombre,
@@ -151,6 +172,16 @@ const updatePosibleCliente = async (req, res) => {
       celular: celular,
       correo: correo,
     };
+    const existeCorreo = await Usuario.findOne({ where: { correo } });
+    const existeDNI = await Usuario.findOne({ where: { dni } });
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
 
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
     return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
@@ -159,6 +190,39 @@ const updatePosibleCliente = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar el cliente." });
   }
 };
+
+const updatePosibleClienteaTrabajado = async(req,res)=>{
+  let id = req.params.id;
+  try {
+    const { nombre, dni, celular, correo } = req.body;
+
+    let nuevoUsuario = {
+      nombre: nombre,
+      dni: dni,
+      celular: celular,
+      correo: correo,
+      estado: true,
+      cod_rol: 5
+    };
+    const existeCorreo = await Usuario.findOne({ where: { correo } });
+    const existeDNI = await Usuario.findOne({ where: { dni } });
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
+
+    await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
+    return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo actualizar el cliente." });
+  }
+
+}
 
 // REGISTRO DE CLIENTE TRABAJADO NO ACCEDE AL SISTEMA
 
@@ -268,6 +332,17 @@ const updateClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
+
+      const existeCorreo = await Usuario.findOne({ where: { correo } });
+      const existeDNI = await Usuario.findOne({ where: { dni } });
+  
+      if (existeCorreo) {
+        return res.status(400).json({ msg: "El correo ya está registrado." });
+      }
+  
+      if (existeDNI) {
+        return res.status(400).json({ msg: "El DNI ya está registrado." });
+      }
     // Start the transaction.
     const t = await db.sequelize.transaction();
 
@@ -320,9 +395,6 @@ const delteClienteTrabajado = async (req, res) => {
   const cod_venta = parseInt(req.params.cod_venta)
 
   try {
-    const user = await Usuario.findOne({
-      where: { cod_usuario: cod_cliente },
-    });
 
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
