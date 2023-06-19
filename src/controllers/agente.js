@@ -58,7 +58,7 @@ const update = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
     const usuario = await Usuario.findOne({
-      where: { cod_permiso: id },
+      where: { cod_usuario: id },
     });
 
     if (!usuario) {

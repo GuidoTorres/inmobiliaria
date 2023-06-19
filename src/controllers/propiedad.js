@@ -1,4 +1,3 @@
-const { internal } = require("@hapi/boom");
 const db = require("../../database/models");
 const { Propiedad, ImagenVideo, Propietario } = db.models;
 const get = async (req, res) => {

@@ -153,13 +153,13 @@ const codigoRecuperacion = async (req, res, next) => {
       { where: { correo: correo } }
     );
 
-    // Crear un objeto de transporte reutilizable usando la configuración por defecto de SMTP
-    let transporter = nodemailer.createTransport({
-      service: 'gmail',
+    var transporter = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "hectortorresdurand@gmail.com", // your email
-        pass: "Tupapi00", // your email password
-      },
+        user: "c09d962a6bf982",
+        pass: "08b1aeec0bccec"
+      }
     });
 
     // Enviar correo con el objeto de transporte
