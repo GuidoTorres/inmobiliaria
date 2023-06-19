@@ -141,7 +141,6 @@ const post = async (req, res) => {
 
         let newImagen = {
           url: rutaImagen,
-          tipo: "imagen",
           cod_propiedad: newPropiedad.cod_propiedad,
         };
 
@@ -187,7 +186,7 @@ const update = async (req, res) => {
       await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
     
       // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
-      let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id, tipo: "imagen" } });
+      let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
     
       // Eliminar las imágenes que no están en la lista de imágenes a conservar
       for (let i = 0; i < allImagenes.length; i++) {
@@ -202,7 +201,7 @@ const update = async (req, res) => {
     if (req.files && req.files.imagen) {
       for (let i = 0; i < req.files.imagen.length; i++) {
         let rutaImagen = process.env.LOCAL_IMAGE + req.files.imagen[i].filename;
-        let newImagen = { cod_propiedad: id, url: rutaImagen, tipo: "imagen" };
+        let newImagen = { cod_propiedad: id, url: rutaImagen };
         console.log(newImagen);
         await ImagenVideo.create(newImagen);
       }
