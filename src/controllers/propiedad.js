@@ -156,7 +156,7 @@ const post = async (req, res) => {
   }
 };
 
-const update = async (req, res) => {
+let update = async (req, res) => {
   let id = req.params.id;
   try {
     let propiedad = await Propiedad.findOne({ where: { cod_propiedad: id } });
@@ -179,12 +179,13 @@ const update = async (req, res) => {
     if (req.fileValidationError) {
       return res.status(400).json({ msg: "Una de las imagenes sobrepasa los 5mb." });
     }
-  
+
+    // Actualizar las propiedades básicas de la propiedad
+    delete propiedadData.imagenes;
+    await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
+
     // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar
     if (Array.isArray(idsImagenesParaConservar) && idsImagenesParaConservar.length > 0) {
-      // Actualizar las propiedades básicas de la propiedad
-      delete propiedadData.imagenes;
-      await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
     
       // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
       let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
@@ -214,6 +215,7 @@ const update = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
+
 
 const delte = async (req, res) => {
   let id = req.params.id;
