@@ -100,7 +100,7 @@ const get = async (req, res) => {
           titulo_propiedad: item?.propietario?.titulo_propiedad,
         },
         
-        imagenVideos: item.imagenVideos,
+        imagenes: item.imagenVideos,
       };
     });
 
