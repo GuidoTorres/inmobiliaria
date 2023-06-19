@@ -114,6 +114,16 @@ const post = async (req, res) => {
   try {
     let newPropiedadData = { ...req.body };
 
+    let { cod_propietario } = newPropiedadData;
+
+    // Validar el cod_propietario solo si existe
+    if (cod_propietario) {
+      let propietario = await Propietario.findOne({ where: { cod_propietario } });
+      if (!propietario) {
+        return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido.." });
+      }
+    }
+
     // Eliminar los campos 'imagen' y 'video' del objeto newPropiedadData
     delete newPropiedadData.imagen;
 
@@ -150,6 +160,16 @@ const update = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
     let propiedadData = { ...req.body };
+
+    let { cod_propietario } = newPropiedadData;
+
+    // Validar el cod_propietario solo si existe
+    if (cod_propietario) {
+      let propietario = await Propietario.findOne({ where: { cod_propietario } });
+      if (!propietario) {
+        return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido." });
+      }
+    }
     let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
     delete propiedadData.imagen;
     // Eliminar solo si se proporcionó una lista de IDs de imágenes para conservar
@@ -179,9 +199,7 @@ const update = async (req, res) => {
         await ImagenVideo.create(newImagen);
       }
     }
-    
-
-
+  
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
   } catch (error) {
     console.log(error);

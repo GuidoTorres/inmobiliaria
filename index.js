@@ -33,7 +33,7 @@ app.use("/titulo", express.static(path.join(__dirname, "upload/titulosPropiedad"
   try {
     await db.sequelize.authenticate();
     console.log("Conexión con bd exitosa!!");
-    // await db.sequelize.sync() // Sincronizar modelos con la base de datos
+    await db.sequelize.sync() // Sincronizar modelos con la base de datos
     console.log("Sincronización de modelos exitosa!!");
   } catch (error) {
     console.log(error);

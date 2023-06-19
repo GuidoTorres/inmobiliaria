@@ -17,57 +17,51 @@ module.exports = (sequelize, DataTypes) =>{
     },
     tipo:{
         type: DataTypes.STRING,
-        allowNull: false
     },
     zona:{
         type: DataTypes.STRING,
-        allowNull: false
     },
     direccion: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     precio: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     estado: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     descripcion: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     caracteristicas: {
         type: DataTypes.STRING,
-        allowNull:false
     },
     metraje: {
         type: DataTypes.FLOAT,
-        allowNull:false
     },
     propiedadHabilitada: {
         type: DataTypes.BOOLEAN,
-        allowNull:false
     },
     areaLibre: {
         type: DataTypes.FLOAT,
-        allowNull:false
     },
     cocheraAdicional: {
         type: DataTypes.BOOLEAN,
-        allowNull:false
     },
     comision: {
         type: DataTypes.FLOAT,
-        allowNull:false
     },
     observaciones: {
         type: DataTypes.STRING,
-        allowNull:false
     },
+    video: {
+        type: DataTypes.STRING,
+    },
+    creado_por:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
 
+    },
     cod_propietario: {
         type: DataTypes.INTEGER,
         allowNull:false
@@ -92,12 +86,6 @@ module.exports = (sequelize, DataTypes) =>{
         freezeTableName: true
     })
 
-    // Propiedad.associate = models =>{
-
-    //     Propiedad.hasOne(models.cotizacion)
-    //     Propiedad.belongsTo(models.propietario)
-
-    // }
 
     return Propiedad
 
