@@ -174,7 +174,14 @@ let update = async (req, res) => {
         return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido." });
       }
     }
-    let idsImagenesParaConservar = propiedadData.imagenes ? JSON.parse(propiedadData.imagenes) : [];
+    let idsImagenesParaConservar = [];
+    if (propiedadData.imagenes) {
+      if (typeof propiedadData.imagenes === 'string') {
+        idsImagenesParaConservar = propiedadData.imagenes.split(',').map(Number);
+      } else {
+        idsImagenesParaConservar = JSON.parse(propiedadData.imagenes);
+      }
+    }
     delete propiedadData.imagen;
     if (req.fileValidationError) {
       return res.status(400).json({ msg: "Una de las imagenes sobrepasa los 5mb." });
