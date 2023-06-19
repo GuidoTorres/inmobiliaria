@@ -66,14 +66,14 @@ const update = async (req, res) => {
     }
     const existingEmail = await db.models.Usuario.findOne({ where: { correo } });
 
-    if (existingEmail && existingEmail.cod_usuario !== cod_usuario) {
+    if (existingEmail && existingEmail.cod_usuario !== id) {
       return res.status(400).json({ msg: "El correo ya está en uso." });
     }
 
     // Check if the new DNI is already in use.
     const existingDni = await db.models.Usuario.findOne({ where: { dni } });
 
-    if (existingDni && existingDni.cod_usuario !== cod_usuario) {
+    if (existingDni && existingDni.cod_usuario !== id) {
       return res.status(400).json({ msg: "El DNI ya está en uso." });
     }
 
