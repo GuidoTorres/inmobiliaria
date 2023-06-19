@@ -194,28 +194,28 @@ const updatePosibleCliente = async (req, res) => {
 const updatePosibleClienteaTrabajado = async(req,res)=>{
   let id = req.params.id;
   try {
-    const { nombre, dni, celular, correo } = req.body;
+    const {cod_propiedad, cod_trabajador, nombre, dni, celular, correo } = req.body;
 
     let nuevoUsuario = {
-      nombre: nombre,
-      dni: dni,
-      celular: celular,
       correo: correo,
+      cod_rol: 5,
       estado: true,
-      cod_rol: 5
     };
-    const existeCorreo = await Usuario.findOne({ where: { correo } });
-    const existeDNI = await Usuario.findOne({ where: { dni } });
-
-    if (existeCorreo) {
-      return res.status(400).json({ msg: "El correo ya está registrado." });
-    }
-
-    if (existeDNI) {
-      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    const user = await Usuario.findOne({ where: { cod_usuario: id } });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ msg: "El cliente no existe." });
     }
 
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
+
+    const info = {
+      cod_cliente: id,
+      cod_propiedad: cod_propiedad,
+      cod_trabajador: cod_trabajador,
+    };
+    await Venta.create(info);
     return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
   } catch (error) {
     console.log(error);
@@ -424,4 +424,5 @@ module.exports = {
   postClienteTrabajado,
   updateClienteTrabajado,
   delteClienteTrabajado,
+  updatePosibleClienteaTrabajado
 };
