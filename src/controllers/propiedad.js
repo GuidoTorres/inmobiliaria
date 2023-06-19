@@ -91,6 +91,7 @@ const get = async (req, res) => {
         comision: item?.comision,
         observaciones: item?.observaciones,
         creado_por: item?.creado_por,
+        video: item?.video,
         propietario: {
           cod_propietario: item?.propietario?.cod_propietario,
           nombre: item?.propietario?.nombre,
