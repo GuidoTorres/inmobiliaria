@@ -100,7 +100,7 @@ const get = async (req, res) => {
           direccion: item?.propietario?.direccion,
           titulo_propiedad: item?.propietario?.titulo_propiedad,
         },
-        
+
         imagenes: item.imagenVideos,
       };
     });
@@ -120,9 +120,13 @@ const post = async (req, res) => {
 
     // Validar el cod_propietario solo si existe
     if (cod_propietario) {
-      let propietario = await Propietario.findOne({ where: { cod_propietario } });
+      let propietario = await Propietario.findOne({
+        where: { cod_propietario },
+      });
       if (!propietario) {
-        return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido.." });
+        return res
+          .status(400)
+          .json({ msg: "El cod_propietario proporcionado no es válido.." });
       }
     }
 
@@ -133,7 +137,7 @@ const post = async (req, res) => {
     if (req.fileValidationError) {
       return res.status(400).json({ error: req.fileValidationError });
     }
-  
+
     // Procesar imágenes
     if (req.files && req.files.imagen) {
       // Si hay imágenes subidas
@@ -169,23 +173,31 @@ let update = async (req, res) => {
 
     // Validar el cod_propietario solo si existe
     if (cod_propietario) {
-      let propietario = await Propietario.findOne({ where: { cod_propietario } });
+      let propietario = await Propietario.findOne({
+        where: { cod_propietario },
+      });
       if (!propietario) {
-        return res.status(400).json({ msg: "El cod_propietario proporcionado no es válido." });
+        return res
+          .status(400)
+          .json({ msg: "El cod_propietario proporcionado no es válido." });
       }
     }
 
     let idsImagenesParaConservar = [];
     if (propiedadData.imagenes) {
-      if (typeof propiedadData.imagenes === 'string') {
-        idsImagenesParaConservar = propiedadData.imagenes.split(',').map(Number);
+      if (typeof propiedadData.imagenes === "string") {
+        idsImagenesParaConservar = propiedadData.imagenes
+          .split(",")
+          .map(Number);
       } else {
         idsImagenesParaConservar = JSON.parse(propiedadData.imagenes);
       }
     }
     delete propiedadData.imagen;
     if (req.fileValidationError) {
-      return res.status(400).json({ msg: "Una o varias de las imagenes sobrepasan los 5mb." });
+      return res
+        .status(400)
+        .json({ msg: "Una o varias de las imagenes sobrepasan los 5mb." });
     }
 
     // Actualizar las propiedades básicas de la propiedad
@@ -193,7 +205,9 @@ let update = async (req, res) => {
     await Propiedad.update(propiedadData, { where: { cod_propiedad: id } });
 
     // Buscar todas las entradas de ImagenVideo para esta propiedad que sean de tipo imagen
-    let allImagenes = await ImagenVideo.findAll({ where: { cod_propiedad: id } });
+    let allImagenes = await ImagenVideo.findAll({
+      where: { cod_propiedad: id },
+    });
 
     // Eliminar las imágenes que no están en la lista de imágenes a conservar
     for (let i = 0; i < allImagenes.length; i++) {
@@ -202,7 +216,7 @@ let update = async (req, res) => {
         await allImagenes[i].destroy();
       }
     }
-    
+
     // Subir y crear entradas para las nuevas imágenes
     if (req.files && req.files.imagen) {
       for (let i = 0; i < req.files.imagen.length; i++) {
@@ -211,15 +225,13 @@ let update = async (req, res) => {
         await ImagenVideo.create(newImagen);
       }
     }
-  
+
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
-
-
 
 const delte = async (req, res) => {
   let id = req.params.id;
@@ -247,7 +259,6 @@ const delte = async (req, res) => {
   }
 };
 
-
 let updateHabilitado = async (req, res) => {
   let id = req.params.id;
   try {
@@ -258,14 +269,14 @@ let updateHabilitado = async (req, res) => {
 
     // Leer el valor actual del campo 'propiedadHabilitada'
     let estadoActual = propiedad.propiedadHabilitada;
-    
+
     // Invertir el valor de 'propiedadHabilitada'
     let nuevoEstado = !estadoActual;
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.propiedadHabilitada = nuevoEstado;
     await propiedad.save();
-  
+
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
   } catch (error) {
     console.log(error);
@@ -282,18 +293,22 @@ let updateEstado = async (req, res) => {
     }
 
     // Leer el valor actual del campo 'propiedadHabilitada'
-    let {estado} = req.body
+    let { estado } = req.body;
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.estado = estado;
+
+    if (propiedad.estado === "Vendido") {
+      propiedad.vender = true;
+    }
+
     await propiedad.save();
-  
+
     return res.status(200).json({ msg: "Propiedad actualizada con éxito!" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
-
 
 module.exports = { get, post, update, delte, updateHabilitado, updateEstado };

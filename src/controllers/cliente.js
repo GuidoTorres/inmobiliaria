@@ -1,4 +1,5 @@
 const dayjs = require("dayjs");
+const { Op } = require("sequelize");
 const db = require("../../database/models");
 const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
@@ -172,8 +173,8 @@ const updatePosibleCliente = async (req, res) => {
       celular: celular,
       correo: correo,
     };
-    const existeCorreo = await Usuario.findOne({ where: { correo } });
-    const existeDNI = await Usuario.findOne({ where: { dni } });
+    const existeCorreo = await Usuario.findOne({ where: { correo, cod_usuario: { [Op.ne]: id } } });
+    const existeDNI = await Usuario.findOne({ where: { dni, cod_usuario: { [Op.ne]: id } } });
 
     if (existeCorreo) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
@@ -205,7 +206,7 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
     if (!user) {
       return res
         .status(400)
-        .json({ msg: "El cliente no existe." });
+        .json({ msg: "El cliente no esta registrado." });
     }
 
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
@@ -333,8 +334,9 @@ const updateClienteTrabajado = async (req, res) => {
       req.body;
 
 
-      const existeCorreo = await Usuario.findOne({ where: { correo } });
-      const existeDNI = await Usuario.findOne({ where: { dni } });
+      const existeCorreo = await Usuario.findOne({ where: { correo, cod_usuario: { [Op.ne]: cod_cliente } } });
+      const existeDNI = await Usuario.findOne({ where: { dni, cod_usuario: { [Op.ne]: cod_cliente } } });
+  
   
       if (existeCorreo) {
         return res.status(400).json({ msg: "El correo ya está registrado." });
