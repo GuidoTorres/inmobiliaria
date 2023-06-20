@@ -253,7 +253,7 @@ const getClienteTrabajado = async (req, res) => {
         cod_cliente: item?.cod_usuario,
         nombre: item?.nombre,
         dni: item?.dni,
-        corre: item?.correo,
+        correo: item?.correo,
         celular: item?.celular,
         estado: true,
         cod_rol: item?.cod_rol,
