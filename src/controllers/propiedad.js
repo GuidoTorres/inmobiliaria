@@ -1,3 +1,4 @@
+const dayjs = require("dayjs");
 const db = require("../../database/models");
 const { Propiedad, ImagenVideo, Propietario } = db.models;
 const get = async (req, res) => {
@@ -92,6 +93,7 @@ const get = async (req, res) => {
         observaciones: item?.observaciones,
         creado_por: item?.creado_por,
         video: item?.video,
+        createdAt: dayjs(item?.createdAt).format("DD/MM/YYYY"),
         propietario: {
           cod_propietario: item?.propietario?.cod_propietario,
           nombre: item?.propietario?.nombre,
@@ -129,9 +131,10 @@ const post = async (req, res) => {
           .json({ msg: "El cod_propietario proporcionado no es válido.." });
       }
     }
-
-    // Eliminar los campos 'imagen' y 'video' del objeto newPropiedadData
     delete newPropiedadData.imagen;
+
+    newPropiedadData.valorizacion = true; 
+    newPropiedadData.tasacion = true;
 
     let newPropiedad = await Propiedad.create(newPropiedadData);
     if (req.fileValidationError) {

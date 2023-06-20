@@ -73,6 +73,8 @@ const post = async (req, res) => {
     };
 
     await Cotizacion.create(nuevoUsuario);
+    await Propiedad.update({cotizar:true}, { where: { cod_propiedad: cod_propiedad } });
+
     return res.status(200).json({ msg: "Cotización registrada con éxito!" });
   } catch (error) {
     console.log(error);

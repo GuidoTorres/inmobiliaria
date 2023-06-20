@@ -173,6 +173,12 @@ const updatePosibleCliente = async (req, res) => {
       celular: celular,
       correo: correo,
     };
+
+    const existeusuario = await Usuario.findOne({ where: { cod_usuario: id} } );
+
+    if (!existeusuario) {
+      return res.status(400).json({ msg: "El cliente no está registrado." });
+    }
     const existeCorreo = await Usuario.findOne({ where: { correo, cod_usuario: { [Op.ne]: id } } });
     const existeDNI = await Usuario.findOne({ where: { dni, cod_usuario: { [Op.ne]: id } } });
 
