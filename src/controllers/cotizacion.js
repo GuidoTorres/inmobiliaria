@@ -78,7 +78,7 @@ const post = async (req, res) => {
     return res.status(200).json({ msg: "Cotización registrada con éxito!" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "No se pudo registrar la contizacion." });
+    res.status(500).json({ msg: "No se pudo registrar la cotizacion." });
   }
 };
 
