@@ -197,7 +197,6 @@ const updatePosibleCliente = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar el cliente." });
   }
 };
-
 const updatePosibleClienteaTrabajado = async(req,res)=>{
   let id = req.params.id;
   try {
@@ -232,7 +231,6 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
 }
 
 // REGISTRO DE CLIENTE TRABAJADO NO ACCEDE AL SISTEMA
-
 const getClienteTrabajado = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({

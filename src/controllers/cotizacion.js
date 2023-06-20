@@ -69,7 +69,7 @@ const post = async (req, res) => {
       fecha_vencimiento: fecha_vencimiento,
       cod_propiedad: cod_propiedad,
       cod_trabajador: cod_trabajador,
-      creado_por: creado_por
+      creado_por: cod_trabajador
     };
 
     await Cotizacion.create(nuevoUsuario);
