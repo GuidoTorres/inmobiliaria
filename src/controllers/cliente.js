@@ -401,9 +401,10 @@ const delteClienteTrabajado = async (req, res) => {
   const cod_venta = parseInt(req.params.cod_venta)
 
   try {
-
+    const user = await Usuario.findByPk(cod_cliente);
+    console.log(user);
     if (!user) {
-      return res.status(404).json({ msg: "No se encontró el usuario." });
+      return res.status(404).json({ msg: "No se encontró el cliente." });
     }
     await Venta.destroy({
       where: { cod_cliente: cod_venta },
@@ -414,6 +415,7 @@ const delteClienteTrabajado = async (req, res) => {
 
     return res.status(200).json({ msg: "Cliente eliminado con éxito!" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "No se pudo eliminar el cliente." });
   }
 };

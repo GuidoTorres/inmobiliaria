@@ -3,8 +3,8 @@ const db = require("../../database/models");
 const { Usuario, TrabajadorPropiedad,Propiedad } = db.models;
 const get = async (req, res) => {
   try {
-    const usuarios = await Usuario.findAll({
-      include: [{ model: TrabajadorPropiedad, include:[{model:Propiedad}] }],
+    const usuarios = await Propiedad.findAll({
+      // include: [{ model: TrabajadorPropiedad, include:[{model:Propiedad}] }],
     });
 
     // const formatData = usuarios.flatMap(usuario => 
