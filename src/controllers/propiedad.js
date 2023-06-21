@@ -1,6 +1,6 @@
 const dayjs = require("dayjs");
 const db = require("../../database/models");
-const { Propiedad, ImagenVideo, Propietario } = db.models;
+const { Propiedad, ImagenVideo, Propietario, TrabajadorPropiedad } = db.models;
 const get = async (req, res) => {
   try {
     let whereClause = {};
@@ -119,6 +119,7 @@ const post = async (req, res) => {
     let newPropiedadData = { ...req.body };
 
     let { cod_propietario } = newPropiedadData;
+    let {creado_por} = newPropiedadData
 
     // Validar el cod_propietario solo si existe
     if (cod_propietario) {
@@ -133,10 +134,17 @@ const post = async (req, res) => {
     }
     delete newPropiedadData.imagen;
 
-    newPropiedadData.valorizacion = true; 
-    newPropiedadData.tasacion = true;
-
     let newPropiedad = await Propiedad.create(newPropiedadData);
+
+    const trabajador_prop={
+      cod_propiedad: newPropiedad.cod_propiedad,
+      cod_trabajador: creado_por,
+      tasacion: true,
+      valorizacion: true
+    }
+
+    await TrabajadorPropiedad.create(trabajador_prop)
+
     if (req.fileValidationError) {
       return res.status(400).json({ error: req.fileValidationError });
     }

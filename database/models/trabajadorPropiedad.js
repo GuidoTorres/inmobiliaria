@@ -16,10 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       cod_propiedad: {
         type: DataTypes.INTEGER,
       },
-      estadoActivo: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
-      },
       valorizacion: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,

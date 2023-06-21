@@ -154,18 +154,18 @@ const codigoRecuperacion = async (req, res, next) => {
     );
 
     var transporter = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
+      host: "smtp-relay.sendinblue.com",
+      port: 587,
       auth: {
-        user: "c09d962a6bf982",
-        pass: "08b1aeec0bccec"
+        user: "hectortorresdurand@gmail.com",
+        pass: "8jp6N0HwILXRJnVx"
       }
     });
 
     // Enviar correo con el objeto de transporte
-    let info = await transporter.sendMail({
+    await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: "gt12930@gmail.com", // receiver
+      to: "gt12930@gmail.com", // correo variable
       subject: "Código de recuperación de cuenta", // Subject line
       text: `Tu codigo de recuperacion es: ${recoveryCode}`, // plain text body
     });

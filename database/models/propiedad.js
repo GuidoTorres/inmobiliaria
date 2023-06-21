@@ -64,21 +64,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      exportar: {
-        type: DataTypes.BOOLEAN,
-      },
-      cotizar: {
-        type: DataTypes.BOOLEAN,
-      },
-      tasacion: {
-        type: DataTypes.BOOLEAN,
-      },
-      valorizacion: {
-        type: DataTypes.BOOLEAN,
-      },
-      vender: {
-        type: DataTypes.BOOLEAN,
-      },
+
       createdAt: {
         type: DataTypes.DATE,
         field: "created_at",
