@@ -1,5 +1,5 @@
 const db = require("../../database/models");
-const { Cotizacion, Usuario, Propiedad, ImagenVideo } = db.models;
+const { Cotizacion, Usuario, Propiedad, ImagenVideo, Propietario } = db.models;
 
 const get = async (req, res) => {
   try {
@@ -17,10 +17,17 @@ const get = async (req, res) => {
       include: [
         { model: Usuario, as: "Cliente" },
         { model: Usuario, as: "Trabajador" },
-        { model: Propiedad, include: [{ model: ImagenVideo }] },
+        
+        { model: Propiedad, include: [{ model: Propietario },{ model: ImagenVideo }] },
       ],
     });
     const formatData = cotizacion.map((item) => {
+      let propiedad = {
+        ...item.propiedad.toJSON(),
+        imagenes: item.propiedad.imagenVideos,
+      };
+
+      delete propiedad.imagenVideos;
       return {
         cod_cotizacion: item.cod_cotizacion,
         fecha_emision: item.fecha_emision,
@@ -40,7 +47,7 @@ const get = async (req, res) => {
           correo: item.Trabajador.correo,
           celular: item.Trabajador.celular,
         },
-        propiedad: item.propiedad,
+        propiedad: propiedad,
       };
     });
     return res.status(200).json({ data: formatData });
@@ -60,7 +67,7 @@ const post = async (req, res) => {
       fecha_vencimiento,
       cod_propiedad,
       cod_trabajador,
-      creado_por
+      creado_por,
     } = req.body;
 
     let nuevoUsuario = {
@@ -69,11 +76,14 @@ const post = async (req, res) => {
       fecha_vencimiento: fecha_vencimiento,
       cod_propiedad: cod_propiedad,
       cod_trabajador: cod_trabajador,
-      creado_por: cod_trabajador
+      creado_por: cod_trabajador,
     };
 
     await Cotizacion.create(nuevoUsuario);
-    await Propiedad.update({cotizar:true}, { where: { cod_propiedad: cod_propiedad } });
+    await Propiedad.update(
+      { cotizar: true },
+      { where: { cod_propiedad: cod_propiedad } }
+    );
 
     return res.status(200).json({ msg: "Cotización registrada con éxito!" });
   } catch (error) {
@@ -129,4 +139,4 @@ const delte = async (req, res) => {
   }
 };
 
-module.exports = { get, post, update,delte };
+module.exports = { get, post, update, delte };

@@ -1,8 +1,9 @@
 const db = require("../../database/models");
-require('dotenv').config();
+require("dotenv").config();
 const { encrypt } = require("./auth");
 const nodemailer = require("nodemailer");
 const { Usuario, Rol } = db.models;
+const { Op } = require("sequelize");
 
 const get = async (req, res) => {
   try {
@@ -16,6 +17,7 @@ const get = async (req, res) => {
         correo: item?.correo,
         celular: item?.celular,
         contrasenia: item?.password,
+        oficina: item?.oficina,
         rol: item?.rol,
       };
     });
@@ -51,6 +53,7 @@ const post = async (req, res) => {
       celular: celular,
       correo: correo,
       password: await encrypt(password),
+      oficina: oficina,
       cod_rol: cod_rol,
     };
 
@@ -80,22 +83,23 @@ const update = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
     }
-    // Verificar si el correo electrónico ya está en uso
-    const emailInUse = await Usuario.findOne({
-      where: { correo: correo, cod_usuario: { [Op.ne]: id } },
-    });
-    if (emailInUse) {
-      return res
-        .status(400)
-        .json({ msg: "El correo electrónico ya está en uso." });
-    }
+    console.log(dni);
+    console.log(user.dni);
+    if (user.dni !== dni) {
+      const dniInUse = await Usuario.findOne({
+        where: { dni, cod_usuario: { [Op.ne]: id } },
+      });
 
-    // Verificar si el DNI ya está en uso
-    const dniInUse = await Usuario.findOne({
-      where: { dni: dni, cod_usuario: { [Op.ne]: id } },
-    });
-    if (dniInUse) {
-      return res.status(400).json({ msg: "El DNI ya está en uso." });
+      if (dniInUse) {
+        return res.status(400).json({ msg: "El DNI ya está en uso." });
+      }
+    }
+    if (user.correo !== correo) {
+      const emailInUse = await Usuario.findOne({
+        where: { correo, cod_usuario: { [Op.ne]: id } },      });
+      if (emailInUse) {
+        return res.status(400).json({ msg: "El correo ya está en uso." });
+      }
     }
 
     let nuevoUsuario = {
@@ -103,9 +107,11 @@ const update = async (req, res) => {
       dni: dni,
       celular: celular,
       correo: correo,
-      // password: await encrypt(password),
       cod_rol: cod_rol,
     };
+    if (password) { // Si se envía una contraseña, encriptarla y actualizarla.
+      nuevoUsuario.password = await encrypt(password);
+    }
 
     if ((cod_rol == 1 || cod_rol == 2) && oficina !== null) {
       nuevoUsuario.oficina = oficina;
@@ -144,7 +150,9 @@ const codigoRecuperacion = async (req, res, next) => {
 
     const usuario = await Usuario.findOne({ where: { correo: correo } });
     if (!usuario) {
-      return res.status(404).json({ msg: "El usuario no existe." });
+      return res
+        .status(404)
+        .json({ msg: "El correo no se encuentra registrado en el sistema." });
     }
 
     const recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -159,27 +167,36 @@ const codigoRecuperacion = async (req, res, next) => {
       port: 587,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
+        pass: process.env.SMTP_PASS,
+      },
     });
 
-
     // Enviar correo con el objeto de transporte
-    await transporter.sendMail({
+    let info = await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
       to: "gt12930@gmail.com", // correo variable
       subject: "Código de recuperación de cuenta", // Subject line
       text: `Tu codigo de recuperacion es: ${recoveryCode}`, // plain text body
     });
 
-    return res
-      .status(200)
-      .json({ msg: "El código de recuperación ha sido enviado." });
+    if (info.messageId) {
+      return res
+        .status(200)
+        .json({ msg: "El código de recuperación ha sido enviado." });
+    } else {
+      throw new Error("Failed to send email");
+    }
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({ msg: "No se pudo enviar el código de recuperación." });
+    if (error.message === "Failed to send email") {
+      res
+        .status(500)
+        .json({ msg: "No se pudo enviar el correo de recuperación." });
+    } else {
+      res
+        .status(500)
+        .json({ msg: "No se pudo enviar el código de recuperación." });
+    }
   }
 };
 

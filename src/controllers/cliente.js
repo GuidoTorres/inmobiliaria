@@ -1,8 +1,8 @@
 const dayjs = require("dayjs");
-const { Op } = require("sequelize");
 const db = require("../../database/models");
 const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
+const { Op } = require("sequelize");
 
 // REGISTRO DE CLIENTE COMO USUARIO
 const get = async (req, res) => {
