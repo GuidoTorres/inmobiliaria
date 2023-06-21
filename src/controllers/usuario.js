@@ -1,4 +1,5 @@
 const db = require("../../database/models");
+require('dotenv').config();
 const { encrypt } = require("./auth");
 const nodemailer = require("nodemailer");
 const { Usuario, Rol } = db.models;
@@ -154,13 +155,14 @@ const codigoRecuperacion = async (req, res, next) => {
     );
 
     var transporter = nodemailer.createTransport({
-      host: "smtp-relay.sendinblue.com",
+      host: process.env.SMTP_HOST,
       port: 587,
       auth: {
-        user: "hectortorresdurand@gmail.com",
-        pass: "8jp6N0HwILXRJnVx"
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
       }
     });
+
 
     // Enviar correo con el objeto de transporte
     await transporter.sendMail({
