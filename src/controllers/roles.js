@@ -133,6 +133,9 @@ const update = async (req, res) => {
 const delte = async (req, res) => {
   let id = req.params.id;
 
+  if(id === "1" || id === "2" || id === "3") {
+    return res.status(403).json({ msg: "Este rol no puede ser eliminado." });
+  }
   try {
     await db.models.Rol.destroy({ where: { cod_rol: id } });
     return res.status(200).json({ msg: "Rol eliminado con éxito!" });
@@ -161,9 +164,10 @@ const updateRolPermisos = async (req, res) => {
   try {
     const { id } = req.params;
     const { cod_permiso } = req.body;
-    console.log(id);
     // Eliminar todos los permisos asociados con el rol
     await db.models.RolPermiso.destroy({ where: { cod_rol: id } });
+
+
 
     // Agregar los nuevos permisos
     if (cod_permiso) {
