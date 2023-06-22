@@ -4,6 +4,7 @@ const { checkAuth, checkRoleAuth } = require("../controllers/auth");
 const multer = require("../middlewares/multer")
 
 router.get("/",  propiedad.get);
+router.get("/cliente",  propiedad.getPropiedadCliente);
 router.get("/habilitado/:id", propiedad.updateHabilitado);
 router.post("/", multer.uploadFile(), propiedad.post);
 router.put("/:id", multer.uploadFile(), propiedad.update);

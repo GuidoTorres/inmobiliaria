@@ -1,12 +1,12 @@
 const db = require("../../database/models");
-
+const {Rol, RolPermiso, Permiso, Modulo} = db.models
 const get = async (req, res) => {
   try {
-    const roles = await db.models.Rol.findAll({
+    const roles = await Rol.findAll({
       include: [
         {
-          model: db.models.RolPermiso,
-          include: [{ model: db.models.Permiso }],
+          model: RolPermiso,
+          include: [{ model: Permiso, include:[{model:Modulo}] }],
         },
       ],
     });
@@ -18,8 +18,10 @@ const get = async (req, res) => {
         permisos: item.rol_permisos.map((ele) => {
           return {
             cod_permiso: ele.cod_permiso,
+            categoria: ele.permiso.modulo.nombre,
             permiso: ele.permiso.permiso,
             descripcion: ele.permiso.descripcion,
+            key: ele.permiso.key,
           };
         }),
       };
@@ -42,7 +44,7 @@ const post = async (req, res) => {
       return res.status(400).json({ msg: "El rol ya existe." });
     }
 
-    const createdRole = await db.models.Rol.create({ rol });
+    const createdRole = await db.models.Rol.create({ rol});
 
     if (createdRole && req.body.cod_permiso) {
       const rol_permiso = req.body.cod_permiso.map((item) => {
@@ -63,15 +65,54 @@ const post = async (req, res) => {
 
 
 const update = async (req, res) => {
-  let id = req.params.id;
+  const transaction = await db.sequelize.transaction();
   try {
-    await db.models.Rol.update(req.body, { where: { cod_rol: id } });
+    const { id } = req.params;
+    const { rol, cod_permiso } = req.body;
+
+    // Check if the role exists.
+    const existingRole = await db.models.Rol.findByPk(id);
+    if (!existingRole) {
+      await transaction.rollback();
+      return res.status(404).json({ msg: "El rol no existe." });
+    }
+
+    // Check if the new role already exists.
+    if (existingRole.rol !== rol) {
+      const duplicateRole = await db.models.Rol.findOne({ where: { rol } });
+      if (duplicateRole) {
+        await transaction.rollback();
+        return res.status(400).json({ msg: "El rol ya existe." });
+      }
+    }
+
+    await existingRole.update({ rol }, { transaction });
+
+    // If there are permissions, update them.
+    if (cod_permiso && Array.isArray(cod_permiso)) {
+      // Delete old associations.
+      await db.models.RolPermiso.destroy({
+        where: { cod_rol: id },
+        transaction,
+      });
+
+      // Create new associations.
+      const newPermissions = cod_permiso.map((item) => ({
+        cod_rol: id,
+        cod_permiso: item,
+      }));
+      await db.models.RolPermiso.bulkCreate(newPermissions, { transaction });
+    }
+
+    await transaction.commit();
     return res.status(200).json({ msg: "Rol actualizado con éxito!" });
   } catch (error) {
+    await transaction.rollback();
     console.log(error);
     res.status(500).json({ msg: "No se pudo actualizar el rol." });
   }
 };
+
 
 const delte = async (req, res) => {
   let id = req.params.id;

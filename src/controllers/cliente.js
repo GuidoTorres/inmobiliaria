@@ -3,6 +3,8 @@ const db = require("../../database/models");
 const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
 const { Op } = require("sequelize");
+const { countUsers, checkEmailInUse, checkDniInUse } = require("../../helpers/validacionUsuario");
+const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 
 // REGISTRO DE CLIENTE COMO USUARIO
 const get = async (req, res) => {
@@ -20,15 +22,17 @@ const get = async (req, res) => {
 const post = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
+    const userCount = await countUsers()
+    const emailInUse = await checkEmailInUse(correo)
+    const dniInUse = await checkDniInUse(dni)
 
-    const existeCorreo = await Usuario.findOne({ where: { correo } });
-    const existeDNI = await Usuario.findOne({ where: { dni } });
-
-    if (existeCorreo) {
+    if(userCount >= 10){
+      return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
+    }
+    if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
-
-    if (existeDNI) {
+    if (dniInUse) {
       return res.status(400).json({ msg: "El DNI ya está registrado." });
     }
 
@@ -39,7 +43,7 @@ const post = async (req, res) => {
       correo: correo,
       password: password ? await encrypt(password) : null,
       estado: false,
-      cod_rol: cod_rol,
+      cod_rol: 3,
     };
 
     await Usuario.create(nuevoUsuario);
@@ -53,14 +57,13 @@ const update = async (req, res) => {
   let id = req.params.id;
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
-    const existeCorreo = await Usuario.findOne({ where: { correo } });
-    const existeDNI = await Usuario.findOne({ where: { dni } });
-
-    if (existeCorreo) {
+    const emailInUse = await checkEmailInUseUpdate(id, correo);
+    const dniInUse = await checkDniInUseUpdate(id, dni);
+    if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
 
-    if (existeDNI) {
+    if (dniInUse) {
       return res.status(400).json({ msg: "El DNI ya está registrado." });
     }
 
@@ -70,7 +73,7 @@ const update = async (req, res) => {
       celular: celular,
       correo: correo,
       estado: false,
-      cod_rol: cod_rol,
+      cod_rol: 3,
     };
 
     // Verifica si se proporciona una nueva contraseña
@@ -89,6 +92,10 @@ const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
+    const user = await Usuario.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ msg: "No se encontró el cliente." });
+    }
     await Usuario.destroy({
       where: { cod_usuario: id },
     });
@@ -103,8 +110,8 @@ const delte = async (req, res) => {
 
 const getPosibleCliente = async (req, res) => {
   try {
-    const cliente = await Usuario.findAll({
-      include: [{ model: Rol, where: { cod_rol: 4 } }],
+    const cliente = await Usuario.findAll({ where:{tipo: "Posible cliente"},
+      include: [{ model: Rol,}],
     });
 
     const formatData = cliente.map((item) => {
@@ -129,18 +136,16 @@ const postPosibleCliente = async (req, res) => {
   try {
     const { nombre, dni, celular, correo } = req.body;
 
-    // Verificar si el correo electrónico ya está en uso
-    const emailInUse = await Usuario.findOne({
-      where: { correo: correo },
-    });
+    const userCount = await countUsers()
+    const emailInUse = await checkEmailInUse(correo)
+    const dniInUse = await checkDniInUse(dni)
+
+    if(userCount >= 10){
+      return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
+    }
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está en uso." });
     }
-
-    // Verificar si el DNI ya está en uso
-    const dniInUse = await Usuario.findOne({
-      where: { dni: dni },
-    });
     if (dniInUse) {
       return res.status(400).json({ msg: "El DNI ya está en uso." });
     }
@@ -151,7 +156,8 @@ const postPosibleCliente = async (req, res) => {
       celular: celular,
       correo: correo,
       estado: false,
-      cod_rol: 4,
+      cod_rol: 3,
+      tipo: "Posible cliente"
     };
 
     await Usuario.create(nuevoUsuario);
@@ -174,18 +180,16 @@ const updatePosibleCliente = async (req, res) => {
       correo: correo,
     };
 
-    const existeusuario = await Usuario.findOne({ where: { cod_usuario: id} } );
+    const existeusuario = await checkUserExists(id)
+    const existeCorreo = await checkEmailInUse(id, correo)
+    const existeDNI = await checkDniInUse(id, dni)
 
     if (!existeusuario) {
       return res.status(400).json({ msg: "El cliente no está registrado." });
     }
-    const existeCorreo = await Usuario.findOne({ where: { correo, cod_usuario: { [Op.ne]: id } } });
-    const existeDNI = await Usuario.findOne({ where: { dni, cod_usuario: { [Op.ne]: id } } });
-
     if (existeCorreo) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
-
     if (existeDNI) {
       return res.status(400).json({ msg: "El DNI ya está registrado." });
     }
@@ -202,18 +206,31 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
   try {
     const {cod_propiedad, cod_trabajador, nombre, dni, celular, correo } = req.body;
 
+    const user = await checkUserExists(id);
+    const propiedad = await Propiedad.findByPk(cod_propiedad)
+    const trabajador = await Usuario.findByPk(cod_trabajador)
+
+    if (!user) {
+      return res
+      .status(400)
+      .json({ msg: "El cliente no esta registrado." });
+    }
+    if (!propiedad) {
+      return res
+      .status(400)
+      .json({ msg: "No se encontro la propiedad." });
+    }
+    if (!trabajador) {
+      return res
+      .status(400)
+      .json({ msg: "No se encontro el cod_trabajador." });
+    }
+    
     let nuevoUsuario = {
       correo: correo,
       cod_rol: 5,
       estado: true,
     };
-    const user = await Usuario.findOne({ where: { cod_usuario: id } });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ msg: "El cliente no esta registrado." });
-    }
-
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
 
     const info = {
@@ -234,8 +251,8 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
 const getClienteTrabajado = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({
-      where: { cod_rol: 5 },
-      include: [
+      where:{tipo: "Cliente trabajado"},
+      include: [{model: Rol},
         {
           model: Venta,
           as: "VentasComoCliente",
@@ -290,16 +307,18 @@ const postClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-          // Verificar si el correo electrónico ya está en uso
-    const emailInUse = await Usuario.findOne({ where: { correo: correo } });
+      const userCount = await countUsers()
+      const emailInUse = await checkEmailInUse(correo)
+      const dniInUse = await checkDniInUse(dni)
+  
+      if(userCount >= 10){
+        return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
+      }
+
     if (emailInUse) {
-      return res
-        .status(400)
-        .json({ msg: "El correo electrónico ya está en uso." });
+      return res.status(400).json({ msg: "El correo ya está en uso." });
     }
 
-    // Verificar si el DNI ya está en uso
-    const dniInUse = await Usuario.findOne({ where: { dni: dni } });
     if (dniInUse) {
       return res.status(400).json({ msg: "El DNI ya está en uso." });
     }
@@ -309,8 +328,9 @@ const postClienteTrabajado = async (req, res) => {
       dni: dni,
       celular: celular,
       correo: correo,
-      cod_rol: 5,
+      cod_rol: 3,
       estado: true,
+      tipo: "Cliente trabajado"
     };
 
     const usuario = await Usuario.create(nuevoUsuario);
@@ -337,10 +357,12 @@ const updateClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-
-      const existeCorreo = await Usuario.findOne({ where: { correo, cod_usuario: { [Op.ne]: cod_cliente } } });
-      const existeDNI = await Usuario.findOne({ where: { dni, cod_usuario: { [Op.ne]: cod_cliente } } });
-  
+      const userCount = await countUsers()
+      const existeCorreo = await checkEmailInUse(correo)
+      const existeDNI = await checkDniInUse(dni)
+      if (userCount >= 10) {
+        return res.status(400).json({ msg: "El correo ya está registrado." });
+      }
   
       if (existeCorreo) {
         return res.status(400).json({ msg: "El correo ya está registrado." });
@@ -401,8 +423,7 @@ const delteClienteTrabajado = async (req, res) => {
   const cod_venta = parseInt(req.params.cod_venta)
 
   try {
-    const user = await Usuario.findByPk(cod_cliente);
-    console.log(user);
+    const user = await checkUserExists(cod_cliente)
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el cliente." });
     }

@@ -4,11 +4,20 @@ const { encrypt } = require("./auth");
 const nodemailer = require("nodemailer");
 const { Usuario, Rol } = db.models;
 const { Op } = require("sequelize");
+const {
+  checkEmailInUse,
+  checkDniInUse,
+  countUsers,
+} = require("../../helpers/validacionUsuario");
+const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 
 const get = async (req, res) => {
   try {
-    const usuario = await Usuario.findAll({ include: { model: Rol } });
-
+    const usuario = await Usuario.findAll({ 
+      where: { tipo: null }, 
+      include: { model: Rol } 
+    });
+    
     const formatUsuario = usuario.map((item) => {
       return {
         cod_usuario: item?.cod_usuario,
@@ -32,17 +41,18 @@ const post = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo, oficina, estado } =
       req.body;
-
-    // Verificar si el correo electrónico ya está en uso
-    const emailInUse = await Usuario.findOne({ where: { correo: correo } });
-    if (emailInUse) {
+    const count= await countUsers();
+    const emailInUse = await checkEmailInUse(correo);
+    const dniInUse = await checkDniInUse(dni);
+    console.log(count);
+    if (count >= 10) {
       return res
         .status(400)
-        .json({ msg: "El correo electrónico ya está en uso." });
+        .json({ msg: "No se pueden crear mas de 10 usuarios." });
     }
-
-    // Verificar si el DNI ya está en uso
-    const dniInUse = await Usuario.findOne({ where: { dni: dni } });
+    if (emailInUse) {
+      return res.status(400).json({ msg: "El correo ya está en uso." });
+    }
     if (dniInUse) {
       return res.status(400).json({ msg: "El DNI ya está en uso." });
     }
@@ -76,30 +86,19 @@ const update = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo, oficina, estado } =
       req.body;
-    const user = await Usuario.findOne({
-      where: { cod_usuario: id },
-    });
 
-    if (!user) {
-      return res.status(404).json({ msg: "No se encontró el usuario." });
-    }
-    console.log(dni);
-    console.log(user.dni);
-    if (user.dni !== dni) {
-      const dniInUse = await Usuario.findOne({
-        where: { dni, cod_usuario: { [Op.ne]: id } },
-      });
+    const existeusuario = await checkUserExists(id);
+    const existeCorreo = await checkEmailInUse(id, correo);
+    const existeDNI = await checkDniInUse(id, dni);
 
-      if (dniInUse) {
-        return res.status(400).json({ msg: "El DNI ya está en uso." });
-      }
+    if (!existeusuario) {
+      return res.status(400).json({ msg: "El usuario no está registrado." });
     }
-    if (user.correo !== correo) {
-      const emailInUse = await Usuario.findOne({
-        where: { correo, cod_usuario: { [Op.ne]: id } },      });
-      if (emailInUse) {
-        return res.status(400).json({ msg: "El correo ya está en uso." });
-      }
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
     }
 
     let nuevoUsuario = {
@@ -109,7 +108,7 @@ const update = async (req, res) => {
       correo: correo,
       cod_rol: cod_rol,
     };
-    if (password) { // Si se envía una contraseña, encriptarla y actualizarla.
+    if (password) {
       nuevoUsuario.password = await encrypt(password);
     }
 
@@ -130,9 +129,7 @@ const delte = async (req, res) => {
   let id = req.params.id;
 
   try {
-    const user = await Usuario.findOne({
-      where: { cod_usuario: id },
-    });
+    const user = await checkUserExists(id);
 
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el usuario." });

@@ -12,6 +12,7 @@ const rolPermiso = require("./rolPermiso");
 const usuario = require("./usuario");
 const venta = require("./venta");
 const trabajadorPropiedad = require("./trabajadorPropiedad");
+const modulos = require("./modulo");
 
 const sequelize = new Sequelize(config.development);
 
@@ -29,9 +30,10 @@ db.models.Propietario = propietario(sequelize, DataTypes)
 db.models.ImagenVideo = imagenVideo(sequelize, DataTypes)
 db.models.Venta = venta(sequelize, DataTypes)
 db.models.TrabajadorPropiedad = trabajadorPropiedad(sequelize, DataTypes)
+db.models.Modulo = modulos(sequelize, DataTypes)
 
 // Configuración de las asociaciones
-const {TrabajadorPropiedad, Venta, Usuario, RegistroInicioSesion, Rol, Permiso, Cliente, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
+const {Modulo,TrabajadorPropiedad, Venta, Usuario, RegistroInicioSesion, Rol, Permiso, Cliente, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
 Usuario.hasMany(RegistroInicioSesion, { foreignKey: "cod_usuario" });
 RegistroInicioSesion.belongsTo(Usuario, {foreignKey: "cod_usuario"})
 
@@ -41,6 +43,9 @@ RolPermiso.belongsTo(Rol, { foreignKey: "cod_rol" });
 RolPermiso.belongsTo(Permiso, { foreignKey: "cod_permiso" });
 Rol.hasMany(Usuario, {foreignKey: "cod_rol"})
 Usuario.belongsTo(Rol, { foreignKey: "cod_rol" });
+
+Modulo.hasMany(Permiso, {foreignKey: 'cod_modulo' });
+Permiso.belongsTo(Modulo, {foreignKey: 'cod_modulo' });
 
 Usuario.hasMany(Cotizacion, { as: 'CotizacionCliente', foreignKey: 'cod_cliente' });
 Cotizacion.belongsTo(Usuario, { as: 'Cliente', foreignKey: 'cod_cliente' });

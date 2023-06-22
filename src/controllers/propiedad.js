@@ -1,4 +1,5 @@
 const dayjs = require("dayjs");
+const { Op } = require("sequelize");
 const db = require("../../database/models");
 const { Propiedad, ImagenVideo, Propietario, TrabajadorPropiedad } = db.models;
 const get = async (req, res) => {
@@ -322,4 +323,53 @@ let updateEstado = async (req, res) => {
   }
 };
 
-module.exports = { get, post, update, delte, updateHabilitado, updateEstado };
+const getPropiedadCliente = async (req, res) => {
+  try {
+    const propiedad = await Propiedad.findAll({
+      where: {propiedadHabilitada: {[Op.not]: false}, estado:{[Op.not]: "Vendido"}},
+      include: [{ model: Propietario }, { model: ImagenVideo }],
+    });
+
+    const formatData = propiedad.map((item) => {
+      return {
+        cod_propiedad: item?.cod_propiedad,
+        nombre: item?.nombre,
+        tipo: item?.tipo,
+        zona: item?.zona,
+        direccion: item?.direccion,
+        precio: item?.precio,
+        estado: item?.estado,
+        descripcion: item?.descripcion,
+        caracteristicas: item?.caracteristicas,
+        metraje: item?.metraje,
+        propiedadHabilitada: item?.propiedadHabilitada,
+        areaLibre: item?.areaLibre,
+        cocheraAdicional: item?.cocheraAdicional,
+        comision: item?.comision,
+        observaciones: item?.observaciones,
+        creado_por: item?.creado_por,
+        video: item?.video,
+        createdAt: dayjs(item?.createdAt).format("DD/MM/YYYY"),
+        propietario: {
+          cod_propietario: item?.propietario?.cod_propietario,
+          nombre: item?.propietario?.nombre,
+          dni: item?.propietario?.dni,
+          celular: item?.propietario?.celular,
+          direccion: item?.propietario?.direccion,
+          titulo_propiedad: item?.propietario?.titulo_propiedad,
+        },
+
+        imagenes: item.imagenVideos,
+      };
+    });
+
+    return res.status(200).json({ data: formatData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
+  }
+};
+
+
+
+module.exports = { get, post, update, delte, updateHabilitado, updateEstado, getPropiedadCliente };

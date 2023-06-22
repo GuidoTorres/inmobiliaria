@@ -7,8 +7,9 @@ const get = async (req, res) => {
       include: [{ model: RegistroInicioSesion }],
     });
 
-    const formatData = usuarios.flatMap(usuario => 
+    const formatData = usuarios.flatMap((usuario, i) => 
       usuario.registro_inicio_sesions.map(ingreso => ({
+        id: item?.cod_registros,
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
         fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("DD-MM-YYYY"),

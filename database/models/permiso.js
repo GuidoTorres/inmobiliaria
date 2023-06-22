@@ -1,47 +1,48 @@
-"use strict"
+"use strict";
 
-
-module.exports = (sequelize, DataTypes) =>{
-
-    let Permiso = sequelize.define("permiso",{
-
-    cod_permiso:{
+module.exports = (sequelize, DataTypes) => {
+  let Permiso = sequelize.define(
+    "permiso",
+    {
+      cod_permiso: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        allowNull: false
-    },
-    permiso:{
+        allowNull: false,
+      },
+      permiso: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
-    descripcion:{
+      },
+      descripcion: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
+      },
+      key: {
+        type: DataTypes.STRING,
+      },
+      cod_modulo: {
+        type: DataTypes.INTEGER,
+      },
 
-    createdAt:{
+      createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-        allowNull:false
-
-    },
-    updatedAt:{
+        allowNull: false,
+      },
+      updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-        allowNull:false
-
+        allowNull: false,
+      },
     },
+    {
+      tableName: "permiso",
+      freezeTableName: true,
+    }
+  );
 
-    },{
-        tableName: "permiso",
-        freezeTableName: true
-    })
+  // Permiso.associate = models =>{
+  //     Permiso.hasMany(models.permiso)
+  // }
 
-    // Permiso.associate = models =>{
-    //     Permiso.hasMany(models.permiso)
-    // }
-
-    return Permiso
-
-}
+  return Permiso;
+};
