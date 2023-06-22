@@ -10,6 +10,7 @@ const {
   countUsers,
 } = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
+let html = fs.readFileSync(path.resolve(__dirname, './views/correo.html'), 'utf8');
 
 const get = async (req, res) => {
   try {
@@ -153,6 +154,7 @@ const codigoRecuperacion = async (req, res, next) => {
     }
 
     const recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+    html = html.replace('{{recoveryCode}}', recoveryCode);
 
     await Usuario.update(
       { cod_recuperacion: recoveryCode },
@@ -173,7 +175,7 @@ const codigoRecuperacion = async (req, res, next) => {
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
       to: "gt12930@gmail.com", // correo variable
       subject: "Código de recuperación de cuenta", // Subject line
-      text: `Tu codigo de recuperacion es: ${recoveryCode}`, // plain text body
+      html:html, // plain text body
     });
 
     if (info.messageId) {

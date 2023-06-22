@@ -37,8 +37,6 @@ const get = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de permisos" });
   }
 };
-
-
 const post = async (req, res) => {
   try {
     await Permiso.create(req.body);
@@ -47,7 +45,6 @@ const post = async (req, res) => {
     res.status(500).json({ msg: "No se pudo registrar el permiso." });
   }
 };
-
 const update = async (req, res) => {
   let id = req.params.id;
   try {
@@ -65,7 +62,6 @@ const update = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar el Permiso." });
   }
 };
-
 const delte = async (req, res) => {
   let id = req.params.id;
 
