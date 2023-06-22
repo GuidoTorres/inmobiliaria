@@ -120,7 +120,7 @@ const post = async (req, res) => {
     let newPropiedadData = { ...req.body };
 
     let { cod_propietario } = newPropiedadData;
-    let {creado_por} = newPropiedadData
+    let { creado_por } = newPropiedadData;
 
     // Validar el cod_propietario solo si existe
     if (cod_propietario) {
@@ -137,14 +137,14 @@ const post = async (req, res) => {
 
     let newPropiedad = await Propiedad.create(newPropiedadData);
 
-    const trabajador_prop={
+    const trabajador_prop = {
       cod_propiedad: newPropiedad.cod_propiedad,
       cod_trabajador: creado_por,
       tasacion: true,
-      valorizacion: true
-    }
+      valorizacion: true,
+    };
 
-    await TrabajadorPropiedad.create(trabajador_prop)
+    await TrabajadorPropiedad.create(trabajador_prop);
 
     if (req.fileValidationError) {
       return res.status(400).json({ error: req.fileValidationError });
@@ -308,10 +308,13 @@ let updateEstado = async (req, res) => {
     let { estado } = req.body;
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
-    propiedad.estado = estado;
+    propiedad.propiedadHabilitada = estado;
 
     if (propiedad.estado === "Vendido") {
-      propiedad.vender = true;
+      await TrabajadorPropiedad.update(
+        { vendido: true },
+        { where: { cod_propiedad: id } }
+      );
     }
 
     await propiedad.save();
@@ -326,7 +329,10 @@ let updateEstado = async (req, res) => {
 const getPropiedadCliente = async (req, res) => {
   try {
     const propiedad = await Propiedad.findAll({
-      where: {propiedadHabilitada: {[Op.not]: false}, estado:{[Op.not]: "Vendido"}},
+      where: {
+        propiedadHabilitada: { [Op.not]: false },
+        estado: { [Op.not]: "Vendido" },
+      },
       include: [{ model: Propietario }, { model: ImagenVideo }],
     });
 
@@ -370,6 +376,12 @@ const getPropiedadCliente = async (req, res) => {
   }
 };
 
-
-
-module.exports = { get, post, update, delte, updateHabilitado, updateEstado, getPropiedadCliente };
+module.exports = {
+  get,
+  post,
+  update,
+  delte,
+  updateHabilitado,
+  updateEstado,
+  getPropiedadCliente,
+};
