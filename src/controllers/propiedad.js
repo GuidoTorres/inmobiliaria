@@ -375,6 +375,29 @@ const getPropiedadCliente = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
 };
+const getPropiedadClienteById = async (req, res) => {
+  let id = req.params.id
+  try {
+    let propiedad = await Propiedad.findOne({
+      where: {
+        cod_propiedad: id,
+        propiedadHabilitada: { [Op.not]: false },
+        estado: { [Op.not]: "Vendido" },
+      },
+      include: [{ model: Propietario }, { model: ImagenVideo }],
+    });
+
+    propiedad = propiedad.toJSON();
+
+    // Cambiar la clave 'imagenVideos' a 'imagenes'
+    propiedad.imagenes = propiedad.imagenVideos;
+    delete propiedad.imagenVideos;
+    return res.status(200).json({ data: propiedad });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades", });
+  }
+};
 
 module.exports = {
   get,
@@ -384,4 +407,5 @@ module.exports = {
   updateHabilitado,
   updateEstado,
   getPropiedadCliente,
+  getPropiedadClienteById
 };

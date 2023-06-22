@@ -3,7 +3,7 @@ require("dotenv").config();
 const { encrypt } = require("./auth");
 const nodemailer = require("nodemailer");
 const { Usuario, Rol } = db.models;
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const {
   checkEmailInUse,
   checkDniInUse,
@@ -11,6 +11,7 @@ const {
 } = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 const fs = require('fs');
+const path = require("path");
 
 
 const get = async (req, res) => {
@@ -155,7 +156,7 @@ const codigoRecuperacion = async (req, res, next) => {
     }
 
     const recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
-    let html = fs.readFileSync(path.resolve(__dirname, './views/correo.html'), 'utf8');
+    let html = fs.readFileSync(path.resolve(__dirname, '../../views/correo.html'), 'utf8');
 
     html = html.replace('{{recoveryCode}}', recoveryCode);
 
@@ -176,7 +177,7 @@ const codigoRecuperacion = async (req, res, next) => {
     // Enviar correo con el objeto de transporte
     let info = await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: "gt12930@gmail.com", // correo variable
+      to: correo, // correo variable
       subject: "Código de recuperación de cuenta", // Subject line
       html:html, // plain text body
     });
@@ -202,4 +203,55 @@ const codigoRecuperacion = async (req, res, next) => {
   }
 };
 
-module.exports = { get, post, update, delte, codigoRecuperacion };
+const compararCodRecuperacion = async (req, res, next) => {
+  let id = req.params.id;
+
+  try {
+    const user = await Usuario.findOne({where:{cod_recuperacion:id}})
+
+    if(!user){
+      return res.status(404).json({ msg: "El código de recuperación no es válido o ha expirado." });
+    }
+  
+    // Aquí, el código de recuperación es correcto.
+    // Puedes continuar con el proceso de permitirle al usuario que cambie su contraseña.
+    // Nota: asegúrate de manejar esto de una manera segura.
+    return res.status(200).json({ msg: "Código de recuperación válido. Por favor, procede a cambiar tu contraseña." });
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Ha ocurrido un error al verificar el código de recuperación." });
+  }
+}
+
+const actualizarPassword = async (req, res, next) => {
+  try {
+    const { cod_recuperacion, password } = req.body;
+
+    // Buscar el usuario por el código de recuperación
+    const usuario = await Usuario.findOne({ where: { cod_recuperacion: cod_recuperacion } });
+
+    if (!usuario) {
+      return res.status(404).json({ msg: "El código de recuperación no es válido o ha expirado." });
+    }
+
+    // Hash de la nueva contraseña antes de guardarla
+    const hashedPassword = await encrypt(password);
+
+    // Actualizar la contraseña del usuario
+    await Usuario.update(
+      { password: hashedPassword, cod_recuperacion: null },
+      { where: { cod_recuperacion: cod_recuperacion } }
+    );
+
+    return res.status(200).json({ msg: "Contraseña actualizada con éxito." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Hubo un error al actualizar la contraseña." });
+  }
+};
+
+
+
+
+module.exports = { get, post, update, delte, codigoRecuperacion, compararCodRecuperacion,actualizarPassword };
