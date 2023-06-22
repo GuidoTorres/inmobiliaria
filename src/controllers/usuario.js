@@ -10,7 +10,8 @@ const {
   countUsers,
 } = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
-let html = fs.readFileSync(path.resolve(__dirname, './views/correo.html'), 'utf8');
+const fs = require('fs');
+
 
 const get = async (req, res) => {
   try {
@@ -154,6 +155,8 @@ const codigoRecuperacion = async (req, res, next) => {
     }
 
     const recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+    let html = fs.readFileSync(path.resolve(__dirname, './views/correo.html'), 'utf8');
+
     html = html.replace('{{recoveryCode}}', recoveryCode);
 
     await Usuario.update(
