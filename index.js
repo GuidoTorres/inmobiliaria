@@ -24,7 +24,6 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/imagenes", express.static(path.join(__dirname, "assets")));
 app.use("/img", express.static(path.join(__dirname, "upload/imagenesVideos")));
 app.use("/titulo", express.static(path.join(__dirname, "upload/titulosPropiedad")));
 
