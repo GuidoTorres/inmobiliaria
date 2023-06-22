@@ -1,5 +1,5 @@
 const db = require("../../database/models");
-const { Cotizacion, Usuario, Propiedad, ImagenVideo, Propietario } = db.models;
+const { Cotizacion, Usuario, Propiedad, ImagenVideo, Propietario, TrabajadorPropiedad } = db.models;
 
 const get = async (req, res) => {
   try {
@@ -80,8 +80,8 @@ const post = async (req, res) => {
     };
 
     await Cotizacion.create(nuevoUsuario);
-    await Propiedad.update(
-      { cotizar: true },
+    await TrabajadorPropiedad.update(
+      { cotizado: true },
       { where: { cod_propiedad: cod_propiedad } }
     );
 
