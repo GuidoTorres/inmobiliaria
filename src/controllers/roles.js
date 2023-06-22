@@ -11,19 +11,34 @@ const get = async (req, res) => {
       ],
     });
 
+    // Mapeamos los roles y sus permisos
     const formatRoles = roles.map((item) => {
+      let permisosByCategoria = {};
+
+      item.rol_permisos.forEach((permiso) => {
+        if (!permisosByCategoria[permiso.permiso.modulo.nombre]) {
+          permisosByCategoria[permiso.permiso.modulo.nombre] = {
+            cod_categoria: permiso.permiso.modulo.cod_modulo,
+            categoria: permiso.permiso.modulo.nombre,
+            permisos_categoria: [],
+          };
+        }
+
+        permisosByCategoria[permiso.permiso.modulo.nombre].permisos_categoria.push({
+          cod_permiso: permiso.cod_permiso,
+          permiso: permiso.permiso.permiso,
+          descripcion: permiso.permiso.descripcion,
+          key: permiso.permiso.key,
+        });
+      });
+
+      // Convertir el objeto a un array para el formato de respuesta
+      let permisosArray = Object.values(permisosByCategoria);
+
       return {
         cod_rol: item.cod_rol,
         rol: item.rol,
-        permisos: item.rol_permisos.map((ele) => {
-          return {
-            cod_permiso: ele.cod_permiso,
-            categoria: ele.permiso.modulo.nombre,
-            permiso: ele.permiso.permiso,
-            descripcion: ele.permiso.descripcion,
-            key: ele.permiso.key,
-          };
-        }),
+        permisos: permisosArray,
       };
     });
 
@@ -32,6 +47,7 @@ const get = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de roles" });
   }
 };
+
 
 const post = async (req, res) => {
   try {

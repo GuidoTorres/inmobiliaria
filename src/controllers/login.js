@@ -10,13 +10,12 @@ const jwt = require("jsonwebtoken");
 
 const authLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     // Primero busca en la tabla de Agentes
     let user = await db.models.Usuario.findOne({
       where: { correo: email },
       include: [{ model: db.models.Rol }],
     });
-    console.log(user);
     // Si el usuario no se encuentra en ninguna de las tablas, devuelve un error
     if (!user) {
       return res.status(404).json({ msg: "No se encontro el usuario." });
@@ -24,6 +23,10 @@ const authLogin = async (req, res) => {
     const checkPassword = await compare(password, user.password);
     const tokenSession = await tokenSign(user);
     const refreshToken = await refreshSign(user); // Generar el refresh token
+
+    if (user.rol.cod_rol !== role) {
+      return res.status(403).json({ msg: `Las credenciales proporcionadas no son válidas para un ${user.rol.rol}.` });
+    }
 
     if (checkPassword) {
       // Registrar inicio de sesión
@@ -62,6 +65,8 @@ const authLogin = async (req, res) => {
     });
   }
 };
+
+
 
 const refreshToken = async (req, res, next) => {
   try {

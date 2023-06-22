@@ -3,18 +3,41 @@ const { Permiso, Modulo } = db.models;
 
 const get = async (req, res) => {
   try {
-    const permiso = await Permiso.findAll({
+    const permisos = await Permiso.findAll({
       attributes: ["cod_permiso", "permiso", "descripcion", "key"],
       include: [
-        { model: Modulo, attributes: { exclude: ["createdAt", "updatedAt"] } },
+        { model: Modulo},
       ],
     });
-    return res.status(200).json({ data: permiso });
+
+    let permisosByCategoria = {};
+
+    permisos.forEach(permiso => {
+      if(!permisosByCategoria[permiso.modulo.nombre]) {
+        permisosByCategoria[permiso.modulo.nombre] = {
+          cod_categoria: permiso.modulo.id,
+          categoria: permiso.modulo.nombre,
+          permisos_categoria: [],
+        };
+      }
+
+      permisosByCategoria[permiso.modulo.nombre].permisos_categoria.push({
+        cod_permiso: permiso.cod_permiso,
+        permiso: permiso.permiso,
+        descripcion: permiso.descripcion,
+        key: permiso.key,
+      });
+    });
+
+    let permisosArray = Object.values(permisosByCategoria);
+
+    return res.status(200).json({ permisos: permisosArray });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de permisos" });
   }
 };
+
 
 const post = async (req, res) => {
   try {
