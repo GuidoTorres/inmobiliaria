@@ -231,6 +231,7 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
     let nuevoUsuario = {
       correo: correo,
       estado: true,
+      tipo: "Cliente trabajado"
     };
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
 
