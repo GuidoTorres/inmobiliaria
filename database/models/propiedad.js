@@ -30,10 +30,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       descripcion: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('medium'),
       },
       caracteristicas: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('medium'),
       },
       metraje: {
         type: DataTypes.FLOAT,
@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
       },
       observaciones: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('medium'),
       },
       video: {
         type: DataTypes.STRING,
