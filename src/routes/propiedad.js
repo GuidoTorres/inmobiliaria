@@ -5,6 +5,7 @@ const multer = require("../middlewares/multer")
 
 router.get("/",  propiedad.get);
 router.get("/cliente",  propiedad.getPropiedadCliente);
+router.get("/usuario/:id",  propiedad.getPropiedadByUser);
 router.get("/cliente/:id",  propiedad.getPropiedadClienteById);
 router.get("/habilitado/:id", propiedad.updateHabilitado);
 router.post("/", multer.uploadFile(), propiedad.post);

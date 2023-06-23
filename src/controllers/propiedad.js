@@ -1,7 +1,14 @@
 const dayjs = require("dayjs");
 const { Op } = require("sequelize");
 const db = require("../../database/models");
-const { Propiedad, ImagenVideo, Propietario, TrabajadorPropiedad } = db.models;
+const {
+  Propiedad,
+  ImagenVideo,
+  Propietario,
+  TrabajadorPropiedad,
+  Usuario,
+  Rol,
+} = db.models;
 const get = async (req, res) => {
   try {
     let whereClause = {};
@@ -376,7 +383,7 @@ const getPropiedadCliente = async (req, res) => {
   }
 };
 const getPropiedadClienteById = async (req, res) => {
-  let id = req.params.id
+  let id = req.params.id;
   try {
     let propiedad = await Propiedad.findOne({
       where: {
@@ -395,7 +402,78 @@ const getPropiedadClienteById = async (req, res) => {
     return res.status(200).json({ data: propiedad });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades", });
+    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
+  }
+};
+
+const getPropiedadByUser = async (req, res) => {
+  let id = req.params.id;
+  try {
+    console.log(id);
+    // Primero, obtenemos el usuario y su rol
+    const usuario = await Usuario.findOne({
+      where: { cod_usuario: id },
+      include: [{ model: Rol }],
+    });
+    // console.log(usuario);
+    if (!usuario) {
+      return res
+        .status(404)
+        .json({ msg: "El usuario no se encuentra registrado en el sistema." });
+    }
+ 
+    const rol_usuario = usuario.rol.dataValues.rol;
+    let propiedad;
+    if (rol_usuario === "Administrador") {
+      propiedad = await Propiedad.findAll({
+        include: [{ model: Propietario }, { model: ImagenVideo }],
+      });
+    } else if (rol_usuario === "Trabajador") {
+      propiedad = await Propiedad.findAll({
+        where: { creado_por: id },
+        include: [{ model: Propietario }, { model: ImagenVideo }],
+      });
+    } else {
+      return res.status(400).json({ msg: "Rol de usuario no válido." });
+    }
+
+    const formatData = propiedad.map((item) => {
+      return {
+        cod_propiedad: item?.cod_propiedad,
+        nombre: item?.nombre,
+        tipo: item?.tipo,
+        zona: item?.zona,
+        direccion: item?.direccion,
+        precio: item?.precio,
+        estado: item?.estado,
+        descripcion: item?.descripcion,
+        caracteristicas: item?.caracteristicas,
+        metraje: item?.metraje,
+        propiedadHabilitada: item?.propiedadHabilitada,
+        areaLibre: item?.areaLibre,
+        cocheraAdicional: item?.cocheraAdicional,
+        comision: item?.comision,
+        observaciones: item?.observaciones,
+        creado_por: item?.creado_por,
+        video: item?.video,
+        createdAt: dayjs(item?.createdAt).format("DD/MM/YYYY"),
+        propietario: {
+          cod_propietario: item?.propietario?.cod_propietario,
+          nombre: item?.propietario?.nombre,
+          dni: item?.propietario?.dni,
+          celular: item?.propietario?.celular,
+          direccion: item?.propietario?.direccion,
+          titulo_propiedad: item?.propietario?.titulo_propiedad,
+        },
+
+        imagenes: item.imagenVideos,
+      };
+    });
+
+    return res.status(200).json({ data: formatData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
 };
 
@@ -407,5 +485,6 @@ module.exports = {
   updateHabilitado,
   updateEstado,
   getPropiedadCliente,
-  getPropiedadClienteById
+  getPropiedadClienteById,
+  getPropiedadByUser,
 };

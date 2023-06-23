@@ -48,6 +48,57 @@ const get = async (req, res) => {
   }
 };
 
+const getById = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const roles = await Rol.findAll({
+      where:{cod_rol:id},
+      include: [
+        {
+          model: RolPermiso,
+          include: [{ model: Permiso, include:[{model:Modulo}] }],
+        },
+      ],
+    });
+
+    // Mapeamos los roles y sus permisos
+    const formatRoles = roles.map((item) => {
+      let permisosByCategoria = {};
+
+      item.rol_permisos.forEach((permiso) => {
+        if (!permisosByCategoria[permiso.permiso.modulo.nombre]) {
+          permisosByCategoria[permiso.permiso.modulo.nombre] = {
+            cod_categoria: permiso.permiso.modulo.cod_modulo,
+            categoria: permiso.permiso.modulo.nombre,
+            permisos_categoria: [],
+          };
+        }
+
+        permisosByCategoria[permiso.permiso.modulo.nombre].permisos_categoria.push({
+          cod_permiso: permiso.cod_permiso,
+          permiso: permiso.permiso.permiso,
+          descripcion: permiso.permiso.descripcion,
+          key: permiso.permiso.key,
+        });
+      });
+
+      // Convertir el objeto a un array para el formato de respuesta
+      let permisosArray = Object.values(permisosByCategoria);
+
+      return {
+        cod_rol: item.cod_rol,
+        rol: item.rol,
+        permisos: permisosArray,
+      };
+    });
+
+    return res.status(200).json({ data: formatRoles });
+  } catch (error) {
+    res.status(500).json({ msg: "No se pudo obtener la lista de roles" });
+  }
+};
+
 
 const post = async (req, res) => {
   try {
@@ -189,6 +240,7 @@ const updateRolPermisos = async (req, res) => {
 
 module.exports = {
   get,
+  getById,
   post,
   update,
   delte,

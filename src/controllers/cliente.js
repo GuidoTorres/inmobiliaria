@@ -124,6 +124,7 @@ const getPosibleCliente = async (req, res) => {
         cod_rol: item?.rol?.cod_rol,
         rol: item?.rol?.rol,
         estado: item?.estado,
+        creado_por: item?.creado_por
       };
     });
     return res.status(200).json({ data: formatData });
@@ -134,7 +135,7 @@ const getPosibleCliente = async (req, res) => {
 };
 const postPosibleCliente = async (req, res) => {
   try {
-    const { nombre, dni, celular, correo } = req.body;
+    const { nombre, dni, celular, correo, creado_por } = req.body;
 
     const userCount = await countUsers()
     const emailInUse = await checkEmailInUse(correo)
@@ -157,7 +158,8 @@ const postPosibleCliente = async (req, res) => {
       correo: correo,
       estado: false,
       cod_rol: 3,
-      tipo: "Posible cliente"
+      tipo: "Posible cliente",
+      creado_por: creado_por
     };
 
     await Usuario.create(nuevoUsuario);
@@ -276,6 +278,7 @@ const getClienteTrabajado = async (req, res) => {
         cod_rol: item?.cod_rol,
         rol: item?.rol?.rol,
         cod_venta: Number(cod_venta),
+        creado_por: creado_por,
         propiedad: propiedad
           ?.map((data) => {
             return {
@@ -304,7 +307,7 @@ const getClienteTrabajado = async (req, res) => {
 };
 const postClienteTrabajado = async (req, res) => {
   try {
-    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
+    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo, creado_por } =
       req.body;
 
       const userCount = await countUsers()
@@ -330,7 +333,8 @@ const postClienteTrabajado = async (req, res) => {
       correo: correo,
       cod_rol: 3,
       estado: true,
-      tipo: "Cliente trabajado"
+      tipo: "Cliente trabajado",
+      creado_por: creado_por
     };
 
     const usuario = await Usuario.create(nuevoUsuario);
