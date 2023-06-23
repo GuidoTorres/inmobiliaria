@@ -1,5 +1,16 @@
 const db = require("../../database/models");
-const { Cotizacion, Usuario, Propiedad, ImagenVideo, Propietario, TrabajadorPropiedad } = db.models;
+const {
+  Cotizacion,
+  Usuario,
+  Propiedad,
+  ImagenVideo,
+  Propietario,
+  TrabajadorPropiedad,
+} = db.models;
+const fs = require("fs");
+const nodemailer = require('nodemailer');
+const handlebars = require("handlebars");
+const generarPDF = require("../helpers/generarPdf");
 
 const get = async (req, res) => {
   try {
@@ -17,8 +28,11 @@ const get = async (req, res) => {
       include: [
         { model: Usuario, as: "Cliente" },
         { model: Usuario, as: "Trabajador" },
-        
-        { model: Propiedad, include: [{ model: Propietario },{ model: ImagenVideo }] },
+
+        {
+          model: Propiedad,
+          include: [{ model: Propietario }, { model: ImagenVideo }],
+        },
       ],
     });
     const formatData = cotizacion.map((item) => {
@@ -46,6 +60,8 @@ const get = async (req, res) => {
           dni: item.Trabajador.dni,
           correo: item.Trabajador.correo,
           celular: item.Trabajador.celular,
+          oficina: item.Trabajador.oficina
+
         },
         propiedad: propiedad,
       };
@@ -139,4 +155,174 @@ const delte = async (req, res) => {
   }
 };
 
-module.exports = { get, post, update, delte };
+const descargarCotizacion = async (req, res) => {
+  let id = req.params.id;
+  try {
+    const cotizacion = await Cotizacion.findOne({
+      where: { cod_cotizacion: id },
+      include: [
+        { model: Usuario, as: "Cliente" },
+        { model: Usuario, as: "Trabajador" },
+        {
+          model: Propiedad,
+          include: [{ model: Propietario }, { model: ImagenVideo }],
+        },
+      ],
+    });
+    let propiedad = {
+      ...cotizacion.propiedad.toJSON(),
+      imagenes: cotizacion.propiedad.imagenVideos,
+    };
+    delete propiedad.imagenVideos;
+    
+    const formatData = {
+      cod_cotizacion: cotizacion.cod_cotizacion,
+      fecha_emision: cotizacion.fecha_emision,
+      fecha_vencimiento: cotizacion.fecha_vencimiento,
+      creado_por: cotizacion?.creado_por,
+      cliente: {
+        cod_cliente: cotizacion.Cliente.cod_usuario,
+        nombre: cotizacion.Cliente.nombre,
+        dni: cotizacion.Cliente.dni,
+        correo: cotizacion.Cliente.correo,
+        celular: cotizacion.Cliente.celular,
+      },
+      trabajador: {
+        cod_trabajador: cotizacion.Trabajador.cod_usuario,
+        nombre: cotizacion.Trabajador.nombre,
+        dni: cotizacion.Trabajador.dni,
+        correo: cotizacion.Trabajador.correo,
+        celular: cotizacion.Trabajador.celular,
+        oficina: cotizacion.Trabajador.oficina
+      },
+      propiedad: propiedad,
+    };
+
+    console.log(formatData);
+    const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
+    let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
+
+    // Compila la plantilla de Handlebars
+    const template = handlebars.compile(contenidoHtml);
+
+    // Genera el HTML final a partir de la plantilla y los datos
+    const htmlFinal = template(formatData);
+
+    const pdf = await generarPDF(htmlFinal);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdf);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo descargar la cotización." });
+  }
+};
+
+const cotizacionPorCorreo = async (req, res, next) => {
+  let id = req.params.id
+  try {
+
+    const cotizacion = await Cotizacion.findOne({
+      where: { cod_cotizacion: id },
+      include: [
+        { model: Usuario, as: "Cliente" },
+        { model: Usuario, as: "Trabajador" },
+        {
+          model: Propiedad,
+          include: [{ model: Propietario }, { model: ImagenVideo }],
+        },
+      ],
+    });
+    if (!cotizacion) {
+      return res
+        .status(404)
+        .json({ msg: "No se encontro la cotización." });
+    }
+
+    let propiedad = {
+      ...cotizacion.propiedad.toJSON(),
+      imagenes: cotizacion.propiedad.imagenVideos,
+    };
+    delete propiedad.imagenVideos;
+    
+    const formatData = {
+      cod_cotizacion: cotizacion.cod_cotizacion,
+      fecha_emision: cotizacion.fecha_emision,
+      fecha_vencimiento: cotizacion.fecha_vencimiento,
+      creado_por: cotizacion?.creado_por,
+      cliente: {
+        cod_cliente: cotizacion.Cliente.cod_usuario,
+        nombre: cotizacion.Cliente.nombre,
+        dni: cotizacion.Cliente.dni,
+        correo: cotizacion.Cliente.correo,
+        celular: cotizacion.Cliente.celular,
+      },
+      trabajador: {
+        cod_trabajador: cotizacion.Trabajador.cod_usuario,
+        nombre: cotizacion.Trabajador.nombre,
+        dni: cotizacion.Trabajador.dni,
+        correo: cotizacion.Trabajador.correo,
+        celular: cotizacion.Trabajador.celular,
+        oficina: cotizacion.Trabajador.oficina
+      },
+      propiedad: propiedad,
+    };
+
+    console.log(formatData);
+    const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
+    let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
+
+    // Compila la plantilla de Handlebars
+    const template = handlebars.compile(contenidoHtml);
+
+    // Genera el HTML final a partir de la plantilla y los datos
+    const htmlFinal = template(formatData);
+
+    const pdf = await generarPDF(htmlFinal);
+
+
+    var transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Enviar correo con el objeto de transporte
+    let info = await transporter.sendMail({
+      from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
+      to: "hectortorresdurand@gmail.com", // correo variable
+      subject: "Cotizacion de la propiedata ...", // Subject line
+      // html:html, // plain text body
+      attachments: [{
+        filename: 'cotizacion.pdf',
+        content: pdf,
+      }],
+    });
+
+    if (info.messageId) {
+      return res
+        .status(200)
+        .json({ msg: "La cotización fue enviada con éxito!" });
+    } else {
+      throw new Error("Failed to send email");
+    }
+  } catch (error) {
+    console.log(error);
+    if (error.message === "Failed to send email") {
+      res
+        .status(500)
+        .json({ msg: "No se pudo enviar la cotización." });
+    } else {
+      res
+        .status(500)
+        .json({ msg: "No se pudo enviar la cotización." });
+    }
+  }
+};
+
+
+
+module.exports = { get, post, update, delte, descargarCotizacion, cotizacionPorCorreo };
