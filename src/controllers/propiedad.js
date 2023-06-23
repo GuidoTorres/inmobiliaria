@@ -312,7 +312,7 @@ let updateEstado = async (req, res) => {
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.estado = estado;
     // propiedad
-    if (estado=== "Vendido") {
+    if (estado=== "vendida") {
       await TrabajadorPropiedad.update(
         { vendido: true },
         { where: { cod_propiedad: id } }
