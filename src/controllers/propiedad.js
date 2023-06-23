@@ -121,7 +121,6 @@ const get = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
 };
-
 const post = async (req, res) => {
   try {
     let newPropiedadData = { ...req.body };
@@ -178,7 +177,6 @@ const post = async (req, res) => {
     res.status(500).json({ msg: "No se pudo registrar la propiedad." });
   }
 };
-
 let update = async (req, res) => {
   let id = req.params.id;
   try {
@@ -251,7 +249,6 @@ let update = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
-
 const delte = async (req, res) => {
   let id = req.params.id;
 
@@ -277,7 +274,6 @@ const delte = async (req, res) => {
     res.status(500).json({ msg: "No se pudo eliminar." });
   }
 };
-
 let updateHabilitado = async (req, res) => {
   let id = req.params.id;
   try {
@@ -302,7 +298,6 @@ let updateHabilitado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
-
 let updateEstado = async (req, res) => {
   let id = req.params.id;
   try {
@@ -316,8 +311,8 @@ let updateEstado = async (req, res) => {
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.propiedadHabilitada = estado;
-
-    if (propiedad.estado === "Vendido") {
+    // propiedad
+    if (propiedad.propiedadHabilitada === "Vendido") {
       await TrabajadorPropiedad.update(
         { vendido: true },
         { where: { cod_propiedad: id } }
@@ -332,7 +327,6 @@ let updateEstado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
-
 const getPropiedadCliente = async (req, res) => {
   try {
     const propiedad = await Propiedad.findAll({
@@ -402,8 +396,6 @@ const getPropiedadCliente = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
 };
-
-
 const getPropiedadClienteById = async (req, res) => {
   let id = req.params.id;
   try {
@@ -446,7 +438,6 @@ const getPropiedadClienteById = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
 };
-
 const getPropiedadByUser = async (req, res) => {
   let id = req.params.id;
   try {
