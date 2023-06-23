@@ -9,14 +9,14 @@ const get = async (req, res) => {
     });
 
     const formatData = usuarios.flatMap((usuario, i) => 
-      usuario.registro_inicio_sesions.map(ingreso => ({
-        id: ingreso?.cod_registros,
+      usuario.registro_inicio_sesions.map((ingreso, a) => ({
+        id: ingreso.cod_registro,
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
         fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("DD-MM-YYYY"),
         hora_ingreso: ingreso.hora_ingreso,
       }))
-    );
+    ).sort((a,b) => {return a.id-b.id});
 
     return res.status(200).json({ data: formatData });
   } catch (error) {

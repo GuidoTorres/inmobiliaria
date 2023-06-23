@@ -35,7 +35,6 @@ const authLogin = async (req, res) => {
         hora_ingreso: dayjs().format("HH:mm:ss"),
         cod_usuario: user.cod_usuario,
       });
-
       const data = {
         cod_usuario: user?.cod_usuario,
         nombre: user?.nombre,
@@ -44,9 +43,13 @@ const authLogin = async (req, res) => {
         celular: user?.celular,
         cod_rol: user?.rol?.cod_rol,
         rol: user?.rol?.rol,
+        
         token: tokenSession,
         refreshToken,
       };
+      if (user.rol.cod_rol === 1 || user.rol.cod_rol === 2) {
+        data.oficina = user.oficina;
+      }
 
       res.status(200).send({
         data: data,
