@@ -4,6 +4,7 @@ const { Usuario, RegistroInicioSesion } = db.models;
 const get = async (req, res) => {
   try {
     const usuarios = await Usuario.findAll({
+      where:{cod_rol: 2},
       include: [{ model: RegistroInicioSesion }],
     });
 

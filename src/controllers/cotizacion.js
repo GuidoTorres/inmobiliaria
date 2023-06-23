@@ -268,7 +268,6 @@ const cotizacionPorCorreo = async (req, res, next) => {
       propiedad: propiedad,
     };
 
-    console.log(formatData);
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
@@ -279,7 +278,6 @@ const cotizacionPorCorreo = async (req, res, next) => {
     const htmlFinal = template(formatData);
 
     const pdf = await generarPDF(htmlFinal);
-
 
     var transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -293,7 +291,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
     // Enviar correo con el objeto de transporte
     let info = await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: "hectortorresdurand@gmail.com", // correo variable
+      to: correo, // correo variable
       subject: "Cotizacion de la propiedata ...", // Subject line
       // html:html, // plain text body
       attachments: [{
@@ -310,7 +308,6 @@ const cotizacionPorCorreo = async (req, res, next) => {
       throw new Error("Failed to send email");
     }
   } catch (error) {
-    console.log(error);
     if (error.message === "Failed to send email") {
       res
         .status(500)

@@ -278,7 +278,7 @@ const getClienteTrabajado = async (req, res) => {
         cod_rol: item?.cod_rol,
         rol: item?.rol?.rol,
         cod_venta: Number(cod_venta),
-        creado_por: creado_por,
+        creado_por: item?.creado_por,
         propiedad: propiedad
           ?.map((data) => {
             return {
