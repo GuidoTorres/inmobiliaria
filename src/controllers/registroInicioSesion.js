@@ -16,7 +16,7 @@ const get = async (req, res) => {
         fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("DD-MM-YYYY"),
         hora_ingreso: ingreso.hora_ingreso,
       }))
-    ).sort((a,b) => {return a.id-b.id});
+    ).sort((a,b) => {return a.fecha_ingreso-b.fecha_ingreso});
 
     return res.status(200).json({ data: formatData });
   } catch (error) {

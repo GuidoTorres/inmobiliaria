@@ -230,7 +230,6 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
     
     let nuevoUsuario = {
       correo: correo,
-      cod_rol: 5,
       estado: true,
     };
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
