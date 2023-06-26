@@ -184,6 +184,9 @@ let update = async (req, res) => {
     if (!propiedad) {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
+    if (propiedad.estado === "vendida") {
+      return res.status(400).json({ msg: "No se puede actualizar una propiedad ya vendida." });
+    }
     let propiedadData = { ...req.body };
 
     let { cod_propietario } = propiedadData;
@@ -257,6 +260,9 @@ const delte = async (req, res) => {
     if (!propiedad) {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
+    if (propiedad.estado === "vendida") {
+      return res.status(400).json({ msg: "No se puede habilitar una propiedad ya vendida." });
+    }
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
     let imagenesVideos = await ImagenVideo.findAll({
       where: { cod_propiedad: id },
@@ -282,6 +288,10 @@ let updateHabilitado = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
 
+    if (propiedad.estado === "vendida") {
+      return res.status(400).json({ msg: "No se puede habilitar una propiedad ya vendida." });
+    }
+
     // Leer el valor actual del campo 'propiedadHabilitada'
     let estadoActual = propiedad.propiedadHabilitada;
 
@@ -298,6 +308,7 @@ let updateHabilitado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
+
 let updateEstado = async (req, res) => {
   let id = req.params.id;
   try {
@@ -306,13 +317,17 @@ let updateEstado = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
 
+    if (propiedad.estado === "vendida") {
+      return res.status(400).json({ msg: "No se puede actualizar una propiedad ya vendida." });
+    }
+
     // Leer el valor actual del campo 'propiedadHabilitada'
     let { estado } = req.body;
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.estado = estado;
     // propiedad
-    if (estado=== "vendida") {
+    if (estado === "vendida") {
       await TrabajadorPropiedad.update(
         { vendido: true },
         { where: { cod_propiedad: id } }
@@ -327,6 +342,7 @@ let updateEstado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar." });
   }
 };
+
 const getPropiedadCliente = async (req, res) => {
   try {
     const propiedad = await Propiedad.findAll({
@@ -342,8 +358,8 @@ const getPropiedadCliente = async (req, res) => {
         // Obtenemos los datos del usuario que creó la propiedad
         const usuarioCreador = await Usuario.findOne({
           where: {
-            cod_usuario: item.creado_por
-          }
+            cod_usuario: item.creado_por,
+          },
         });
 
         let agente = null;
@@ -354,8 +370,8 @@ const getPropiedadCliente = async (req, res) => {
             dni: usuarioCreador.dni,
             correo: usuarioCreador.correo,
             celular: usuarioCreador.celular,
-            oficina: usuarioCreador.oficina
-          }
+            oficina: usuarioCreador.oficina,
+          };
         }
 
         return {
@@ -403,7 +419,7 @@ const getPropiedadClienteById = async (req, res) => {
       where: {
         cod_propiedad: id,
         propiedadHabilitada: { [Op.not]: false },
-        estado: { [Op.not]: "Vendido" },
+        estado: { [Op.not]: "vendida" },
       },
       include: [{ model: Propietario }, { model: ImagenVideo }],
     });
@@ -413,8 +429,8 @@ const getPropiedadClienteById = async (req, res) => {
     // Obtenemos los datos del usuario que creó la propiedad
     const usuarioCreador = await Usuario.findOne({
       where: {
-        cod_usuario: propiedad.creado_por
-      }
+        cod_usuario: propiedad.creado_por,
+      },
     });
     const agente = {
       cod_agente: usuarioCreador.cod_usuario,
@@ -422,8 +438,8 @@ const getPropiedadClienteById = async (req, res) => {
       dni: usuarioCreador.dni,
       correo: usuarioCreador.correo,
       celular: usuarioCreador.celular,
-      oficina: usuarioCreador.oficina
-    }
+      oficina: usuarioCreador.oficina,
+    };
 
     if (usuarioCreador) {
       propiedad.agente = agente; // Agregamos los datos del usuario al objeto de la propiedad
@@ -453,16 +469,24 @@ const getPropiedadByUser = async (req, res) => {
         .status(404)
         .json({ msg: "El usuario no se encuentra registrado en el sistema." });
     }
- 
+
     const rol_usuario = usuario.rol.dataValues.rol;
     let propiedad;
     if (rol_usuario === "Administrador") {
       propiedad = await Propiedad.findAll({
+        where: {
+          propiedadHabilitada: { [Op.not]: false },
+          estado: { [Op.not]: "vendida" },
+        },
         include: [{ model: Propietario }, { model: ImagenVideo }],
       });
     } else if (rol_usuario === "Trabajador") {
       propiedad = await Propiedad.findAll({
-        where: { creado_por: id },
+        where: {
+          creado_por: id,
+          propiedadHabilitada: { [Op.not]: false },
+          estado: { [Op.not]: "vendida" },
+        },
         include: [{ model: Propietario }, { model: ImagenVideo }],
       });
     } else {

@@ -2,8 +2,12 @@ const dayjs = require("dayjs");
 const db = require("../../database/models");
 const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
-const { Op } = require("sequelize");
-const { countUsers, checkEmailInUse, checkDniInUse } = require("../../helpers/validacionUsuario");
+const { Op, where } = require("sequelize");
+const {
+  countUsers,
+  checkEmailInUse,
+  checkDniInUse,
+} = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 
 // REGISTRO DE CLIENTE COMO USUARIO
@@ -22,13 +26,9 @@ const get = async (req, res) => {
 const post = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
-    const userCount = await countUsers()
-    const emailInUse = await checkEmailInUse(correo)
-    const dniInUse = await checkDniInUse(dni)
+    const emailInUse = await checkEmailInUse(correo);
+    const dniInUse = await checkDniInUse(dni);
 
-    if(userCount >= 10){
-      return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
-    }
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
@@ -110,8 +110,9 @@ const delte = async (req, res) => {
 
 const getPosibleCliente = async (req, res) => {
   try {
-    const cliente = await Usuario.findAll({ where:{tipo: "Posible cliente"},
-      include: [{ model: Rol,}],
+    const cliente = await Usuario.findAll({
+      where: { tipo: "Posible cliente" },
+      include: [{ model: Rol }],
     });
 
     const formatData = cliente.map((item) => {
@@ -124,7 +125,7 @@ const getPosibleCliente = async (req, res) => {
         cod_rol: item?.rol?.cod_rol,
         rol: item?.rol?.rol,
         estado: item?.estado,
-        creado_por: item?.creado_por
+        creado_por: item?.creado_por,
       };
     });
     return res.status(200).json({ data: formatData });
@@ -137,13 +138,10 @@ const postPosibleCliente = async (req, res) => {
   try {
     const { nombre, dni, celular, correo, creado_por } = req.body;
 
-    const userCount = await countUsers()
-    const emailInUse = await checkEmailInUse(correo)
-    const dniInUse = await checkDniInUse(dni)
+    const emailInUse = await checkEmailInUse(correo);
+    const dniInUse = await checkDniInUse(dni);
 
-    if(userCount >= 10){
-      return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
-    }
+
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está en uso." });
     }
@@ -159,7 +157,7 @@ const postPosibleCliente = async (req, res) => {
       estado: false,
       cod_rol: 3,
       tipo: "Posible cliente",
-      creado_por: creado_por
+      creado_por: creado_por,
     };
 
     await Usuario.create(nuevoUsuario);
@@ -182,9 +180,9 @@ const updatePosibleCliente = async (req, res) => {
       correo: correo,
     };
 
-    const existeusuario = await checkUserExists(id)
-    const existeCorreo = await checkEmailInUse(id, correo)
-    const existeDNI = await checkDniInUse(id, dni)
+    const existeusuario = await checkUserExists(id);
+    const existeCorreo = await checkEmailInUse(id, correo);
+    const existeDNI = await checkDniInUse(id, dni);
 
     if (!existeusuario) {
       return res.status(400).json({ msg: "El cliente no está registrado." });
@@ -203,35 +201,33 @@ const updatePosibleCliente = async (req, res) => {
     res.status(500).json({ msg: "No se pudo actualizar el cliente." });
   }
 };
-const updatePosibleClienteaTrabajado = async(req,res)=>{
+const updatePosibleClienteaTrabajado = async (req, res) => {
   let id = req.params.id;
   try {
-    const {cod_propiedad, cod_trabajador, nombre, dni, celular, correo } = req.body;
+    const { cod_propiedad, cod_trabajador, nombre, dni, celular, correo } =
+      req.body;
 
     const user = await checkUserExists(id);
-    const propiedad = await Propiedad.findByPk(cod_propiedad)
-    const trabajador = await Usuario.findByPk(cod_trabajador)
+    const propiedad = await Propiedad.findByPk(cod_propiedad);
+    const trabajador = await Usuario.findByPk(cod_trabajador);
 
     if (!user) {
-      return res
-      .status(400)
-      .json({ msg: "El cliente no esta registrado." });
+      return res.status(400).json({ msg: "El cliente no esta registrado." });
     }
     if (!propiedad) {
-      return res
-      .status(400)
-      .json({ msg: "No se encontro la propiedad." });
+      return res.status(400).json({ msg: "No se encontro la propiedad." });
+    }
+    if (propiedad.estado === "vendida") {
+      return res.status(400).json({ msg: "La propiedad ya ha sido vendida." });
     }
     if (!trabajador) {
-      return res
-      .status(400)
-      .json({ msg: "No se encontro el cod_trabajador." });
+      return res.status(400).json({ msg: "No se encontro el cod_trabajador." });
     }
-    
+
     let nuevoUsuario = {
       correo: correo,
       estado: true,
-      tipo: "Cliente trabajado"
+      tipo: "Cliente trabajado",
     };
     await Usuario.update(nuevoUsuario, { where: { cod_usuario: id } });
 
@@ -241,20 +237,25 @@ const updatePosibleClienteaTrabajado = async(req,res)=>{
       cod_trabajador: cod_trabajador,
     };
     await Venta.create(info);
+
+    await Propiedad.update(
+      { estado: "vendida", propiedadHabilitada: false },
+      { where: { cod_propiedad: cod_propiedad } }
+    );
     return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo actualizar el cliente." });
   }
-
-}
+};
 
 // REGISTRO DE CLIENTE TRABAJADO NO ACCEDE AL SISTEMA
 const getClienteTrabajado = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({
-      where:{tipo: "Cliente trabajado"},
-      include: [{model: Rol},
+      where: { tipo: "Cliente trabajado" },
+      include: [
+        { model: Rol },
         {
           model: Venta,
           as: "VentasComoCliente",
@@ -307,16 +308,19 @@ const getClienteTrabajado = async (req, res) => {
 };
 const postClienteTrabajado = async (req, res) => {
   try {
-    const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo, creado_por } =
-      req.body;
+    const {
+      cod_trabajador,
+      cod_propiedad,
+      nombre,
+      dni,
+      celular,
+      correo,
+      creado_por,
+    } = req.body;
 
-      const userCount = await countUsers()
-      const emailInUse = await checkEmailInUse(correo)
-      const dniInUse = await checkDniInUse(dni)
-  
-      if(userCount >= 10){
-        return res.status(400).json({ msg: "No se pueden crear mas de 10 usuarios." });
-      }
+    const userCount = await countUsers();
+    const emailInUse = await checkEmailInUse(correo);
+    const dniInUse = await checkDniInUse(dni);
 
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está en uso." });
@@ -334,7 +338,7 @@ const postClienteTrabajado = async (req, res) => {
       cod_rol: 3,
       estado: true,
       tipo: "Cliente trabajado",
-      creado_por: creado_por
+      creado_por: creado_por,
     };
 
     const usuario = await Usuario.create(nuevoUsuario);
@@ -356,61 +360,75 @@ const postClienteTrabajado = async (req, res) => {
 };
 const updateClienteTrabajado = async (req, res) => {
   try {
-    const cod_cliente = parseInt(req.params.cod_cliente)
-    const cod_venta = parseInt(req.params.cod_venta)
+    const cod_cliente = parseInt(req.params.cod_cliente);
+    const cod_venta = parseInt(req.params.cod_venta);
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-      const userCount = await countUsers()
-      const existeCorreo = await checkEmailInUse(correo)
-      const existeDNI = await checkDniInUse(dni)
-      if (userCount >= 10) {
-        return res.status(400).json({ msg: "El correo ya está registrado." });
-      }
-  
-      if (existeCorreo) {
-        return res.status(400).json({ msg: "El correo ya está registrado." });
-      }
-  
-      if (existeDNI) {
-        return res.status(400).json({ msg: "El DNI ya está registrado." });
-      }
+    const userCount = await countUsers();
+    const existeCorreo = await checkEmailInUse(correo);
+    const existeDNI = await checkDniInUse(dni);
+    if (userCount >= 10) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
     // Start the transaction.
     const t = await db.sequelize.transaction();
 
     try {
-      const usuario = await Usuario.findOne({ where: { cod_usuario: cod_cliente } }, { transaction: t });
+      const usuario = await Usuario.findOne(
+        { where: { cod_usuario: cod_cliente } },
+        { transaction: t }
+      );
 
       if (!usuario) {
         await t.rollback();
         return res.status(404).json({ msg: "No se encontró el cliente." });
       }
-      const venta = await Venta.findOne({ where: { id: cod_venta } }, { transaction: t });
+      const venta = await Venta.findOne(
+        { where: { id: cod_venta } },
+        { transaction: t }
+      );
 
       if (!venta) {
         await t.rollback();
-        return res.status(404).json({ msg: "No se encontró la venta asociada al cliente." });
+        return res
+          .status(404)
+          .json({ msg: "No se encontró la venta asociada al cliente." });
       }
 
-      await usuario.update({
-        nombre: nombre,
-        dni: dni,
-        celular: celular,
-        correo: correo,
-        estado: true
-      }, { transaction: t });
+      await usuario.update(
+        {
+          nombre: nombre,
+          dni: dni,
+          celular: celular,
+          correo: correo,
+          estado: true,
+        },
+        { transaction: t }
+      );
 
-
-
-      await venta.update({
-        cod_propiedad: cod_propiedad,
-        cod_trabajador: cod_trabajador,
-        cod_cliente: cod_cliente
-      }, { transaction: t });
+      await venta.update(
+        {
+          cod_propiedad: cod_propiedad,
+          cod_trabajador: cod_trabajador,
+          cod_cliente: cod_cliente,
+        },
+        { transaction: t }
+      );
 
       await t.commit();
 
-      return res.status(200).json({ msg: "Cliente trabajado actualizado con éxito!" });
+      return res
+        .status(200)
+        .json({ msg: "Cliente trabajado actualizado con éxito!" });
     } catch (error) {
       await t.rollback();
       throw error;
@@ -423,11 +441,11 @@ const updateClienteTrabajado = async (req, res) => {
   }
 };
 const delteClienteTrabajado = async (req, res) => {
-  const cod_cliente = parseInt(req.params.cod_cliente)
-  const cod_venta = parseInt(req.params.cod_venta)
+  const cod_cliente = parseInt(req.params.cod_cliente);
+  const cod_venta = parseInt(req.params.cod_venta);
 
   try {
-    const user = await checkUserExists(cod_cliente)
+    const user = await checkUserExists(cod_cliente);
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el cliente." });
     }
@@ -457,5 +475,5 @@ module.exports = {
   postClienteTrabajado,
   updateClienteTrabajado,
   delteClienteTrabajado,
-  updatePosibleClienteaTrabajado
+  updatePosibleClienteaTrabajado,
 };

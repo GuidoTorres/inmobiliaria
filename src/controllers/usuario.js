@@ -44,15 +44,9 @@ const post = async (req, res) => {
   try {
     const { cod_rol, password, nombre, dni, celular, correo, oficina, estado } =
       req.body;
-    const count= await countUsers();
     const emailInUse = await checkEmailInUse(correo);
     const dniInUse = await checkDniInUse(dni);
-    console.log(count);
-    if (count >= 10) {
-      return res
-        .status(400)
-        .json({ msg: "No se pueden crear mas de 10 usuarios." });
-    }
+
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está en uso." });
     }

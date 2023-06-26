@@ -1,4 +1,5 @@
 const db = require("../../database/models");
+const trabajadorPropiedad = require("../../database/models/trabajadorPropiedad");
 const { Usuario, Rol } = db.models;
 
 const { encrypt } = require("./auth");
@@ -24,9 +25,7 @@ const post = async (req, res) => {
     // Verificar si el correo electrónico ya está en uso
     const emailInUse = await Usuario.findOne({ where: { correo: correo } });
     if (emailInUse) {
-      return res
-        .status(400)
-        .json({ msg: "El correo ya está en uso." });
+      return res.status(400).json({ msg: "El correo ya está en uso." });
     }
 
     // Verificar si el DNI ya está en uso
@@ -56,7 +55,7 @@ const post = async (req, res) => {
 const update = async (req, res) => {
   let id = req.params.id;
   try {
-    const { password, nombre, dni, celular, correo,oficina } = req.body;
+    const { password, nombre, dni, celular, correo, oficina } = req.body;
     const usuario = await Usuario.findOne({
       where: { cod_usuario: id },
     });
@@ -64,7 +63,6 @@ const update = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
     }
-
 
     let nuevoUsuario = {
       nombre: nombre,
@@ -100,6 +98,16 @@ const delte = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
     }
+    const trabajadorPropiedad = await trabajadorPropiedad.findOne({
+      where: { cod_trabajador: id },
+    });
+    if (trabajadorPropiedad) {
+      return res
+        .status(500)
+        .json({
+          msg: "No se pudo eliminar al trabajador, tiene propiedades registradas.",
+        });
+    }
     await Usuario.destroy({
       where: { cod_usuario: id },
     });
@@ -110,10 +118,6 @@ const delte = async (req, res) => {
   }
 };
 
-const reporteOfertasAgente = (req, res) =>{
-
-  
-
-}
+const reporteOfertasAgente = (req, res) => {};
 
 module.exports = { get, post, update, delte };

@@ -1,5 +1,5 @@
 const db = require("../../database/models");
-const {Propietario} = db.models
+const {Propietario, Propiedad} = db.models
 const get = async (req, res) => {
   try {
     const propietario = await Propietario.findAll();
@@ -91,11 +91,20 @@ const delte = async (req, res) => {
     if (!propietario) {
       return res.status(404).json({ msg: "No se encontró el propietario." });
     }
+
+    const propiedades = await Propiedad.findAll({
+      where: { cod_propietario: id },
+    });
+
+    if (propiedades && propiedades.length > 0) {
+      return res.status(400).json({ msg: "El propietario tiene propiedades asociadas. No puede ser eliminado."})}
+
     await Propietario.destroy({ where: { cod_propietario: id } });
     return res.status(200).json({ msg: "Propietario eliminado con éxito!" });
   } catch (error) {
     res.status(500).json({ msg: "No se pudo eliminar." });
   }
 };
+
 
 module.exports = { get, post, update, delte };

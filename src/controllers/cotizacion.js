@@ -142,12 +142,18 @@ const delte = async (req, res) => {
   try {
     const cotizacion = await Cotizacion.findOne({
       where: { cod_cotizacion: id },
+      // include:[{model:Propiedad}]
     });
-
+    console.log(cotizacion.cod_propiedad);
     if (!cotizacion) {
       return res.status(404).json({ msg: "No se encontró la cotización." });
     }
-    await Cotizacion.destroy({ where: { cod_cotizacion: id } });
+
+    await TrabajadorPropiedad.update(
+      { cotizado: false },
+      { where: { cod_propiedad: cotizacion.cod_propiedad } }
+    );
+    // await Cotizacion.destroy({ where: { cod_cotizacion: id } });
 
     return res.status(200).json({ msg: "Cotización eliminada con éxito!" });
   } catch (error) {
