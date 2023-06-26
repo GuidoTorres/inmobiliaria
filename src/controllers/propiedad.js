@@ -424,6 +424,12 @@ const getPropiedadClienteById = async (req, res) => {
       include: [{ model: Propietario }, { model: ImagenVideo }],
     });
 
+    if(!propiedad){
+
+      res.status(404).json({ msg: "No se encontro la propiedad." });
+
+    }
+
     propiedad = propiedad?.toJSON();
 
     // Obtenemos los datos del usuario que creó la propiedad
