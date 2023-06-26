@@ -176,30 +176,30 @@ const descargarCotizacion = async (req, res) => {
       ],
     });
     let propiedad = {
-      ...cotizacion.propiedad.toJSON(),
-      imagenes: cotizacion.propiedad.imagenVideos,
+      ...cotizacion?.propiedad?.toJSON(),
+      imagenes: cotizacion?.propiedad?.imagenVideos,
     };
-    delete propiedad.imagenVideos;
+    delete propiedad?.imagenVideos;
     
     const formatData = {
-      cod_cotizacion: cotizacion.cod_cotizacion,
-      fecha_emision: cotizacion.fecha_emision,
-      fecha_vencimiento: cotizacion.fecha_vencimiento,
+      cod_cotizacion: cotizacion?.cod_cotizacion,
+      fecha_emision: cotizacion?.fecha_emision,
+      fecha_vencimiento: cotizacion?.fecha_vencimiento,
       creado_por: cotizacion?.creado_por,
       cliente: {
-        cod_cliente: cotizacion.Cliente.cod_usuario,
-        nombre: cotizacion.Cliente.nombre,
-        dni: cotizacion.Cliente.dni,
-        correo: cotizacion.Cliente.correo,
-        celular: cotizacion.Cliente.celular,
+        cod_cliente: cotizacion?.Cliente?.cod_usuario,
+        nombre: cotizacion?.Cliente?.nombre,
+        dni: cotizacion?.Cliente?.dni,
+        correo: cotizacion?.Cliente?.correo,
+        celular: cotizacion?.Cliente?.celular,
       },
       trabajador: {
-        cod_trabajador: cotizacion.Trabajador.cod_usuario,
-        nombre: cotizacion.Trabajador.nombre,
-        dni: cotizacion.Trabajador.dni,
-        correo: cotizacion.Trabajador.correo,
-        celular: cotizacion.Trabajador.celular,
-        oficina: cotizacion.Trabajador.oficina
+        cod_trabajador: cotizacion?.Trabajador?.cod_usuario,
+        nombre: cotizacion?.Trabajador?.nombre,
+        dni: cotizacion?.Trabajador?.dni,
+        correo: cotizacion?.Trabajador?.correo,
+        celular: cotizacion?.Trabajador?.celular,
+        oficina: cotizacion?.Trabajador?.oficina
       },
       propiedad: propiedad,
     };
