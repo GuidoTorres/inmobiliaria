@@ -175,6 +175,13 @@ const descargarCotizacion = async (req, res) => {
         },
       ],
     });
+
+    if(!cotizacion){
+      res
+      .status(404)
+      .json({ msg: "No se encontro la cotización." });
+    }
+
     let propiedad = {
       ...cotizacion?.propiedad?.toJSON(),
       imagenes: cotizacion?.propiedad?.imagenVideos,

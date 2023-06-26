@@ -3,7 +3,6 @@ const pdf = require("html-pdf");
 const generarPDF = async (html) => {
   return new Promise((resolve, reject) => {
     const options = {
-      "phantomPath": "./node_modules/phantomjs-prebuilt/bin/phantomjs", 
       format: "A4",
       border: {
         top: "0px",
