@@ -134,6 +134,7 @@ const delte = async (req, res) => {
     await Usuario.destroy({ where: { cod_usuario: id } });
     return res.status(200).json({ msg: "Usuario eliminado con éxito!" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "No se pudo eliminar el usuario." });
   }
 };

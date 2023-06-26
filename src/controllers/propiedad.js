@@ -265,7 +265,7 @@ const delte = async (req, res) => {
     if (propiedad.estado === "vendida") {
       return res
         .status(400)
-        .json({ msg: "No se puede habilitar una propiedad ya vendida." });
+        .json({ msg: "No se puede eliminar una propiedad ya vendida." });
     }
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
     let imagenesVideos = await ImagenVideo.findAll({

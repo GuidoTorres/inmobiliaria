@@ -114,6 +114,7 @@ const delte = async (req, res) => {
 
     return res.status(200).json({ msg: "Trabajador eliminado con éxito!" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "No se pudo eliminar al trabajador." });
   }
 };

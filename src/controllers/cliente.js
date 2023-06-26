@@ -462,6 +462,11 @@ const delteClienteTrabajado = async (req, res) => {
     res.status(500).json({ msg: "No se pudo eliminar el cliente." });
   }
 };
+const getAllClients = async (req, res) =>{
+
+ 
+
+}
 
 module.exports = {
   get,
