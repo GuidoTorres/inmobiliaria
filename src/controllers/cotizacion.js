@@ -144,7 +144,6 @@ const delte = async (req, res) => {
       where: { cod_cotizacion: id },
       // include:[{model:Propiedad}]
     });
-    console.log(cotizacion.cod_propiedad);
     if (!cotizacion) {
       return res.status(404).json({ msg: "No se encontró la cotización." });
     }
