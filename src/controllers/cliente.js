@@ -318,17 +318,17 @@ const postClienteTrabajado = async (req, res) => {
       creado_por,
     } = req.body;
 
-    const userCount = await countUsers();
-    const emailInUse = await checkEmailInUse(correo);
-    const dniInUse = await checkDniInUse(dni);
+    // const userCount = await countUsers();
+    // const emailInUse = await checkEmailInUse(correo);
+    // const dniInUse = await checkDniInUse(dni);
 
-    if (emailInUse) {
-      return res.status(400).json({ msg: "El correo ya está en uso." });
-    }
+    // if (emailInUse) {
+    //   return res.status(400).json({ msg: "El correo ya está en uso." });
+    // }
 
-    if (dniInUse) {
-      return res.status(400).json({ msg: "El DNI ya está en uso." });
-    }
+    // if (dniInUse) {
+    //   return res.status(400).json({ msg: "El DNI ya está en uso." });
+    // }
 
     let nuevoUsuario = {
       nombre: nombre,
