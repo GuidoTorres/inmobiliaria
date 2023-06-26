@@ -33,7 +33,7 @@ db.models.TrabajadorPropiedad = trabajadorPropiedad(sequelize, DataTypes)
 db.models.Modulo = modulos(sequelize, DataTypes)
 
 // Configuración de las asociaciones
-const {Modulo,TrabajadorPropiedad, Venta, Usuario, RegistroInicioSesion, Rol, Permiso, Cliente, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
+const {Modulo,TrabajadorPropiedad, Venta, Usuario, RegistroInicioSesion, Rol, Permiso, Cotizacion, Propiedad, Propietario, RolPermiso, Agente, ImagenVideo } = db.models;
 Usuario.hasMany(RegistroInicioSesion, { foreignKey: "cod_usuario" });
 RegistroInicioSesion.belongsTo(Usuario, {foreignKey: "cod_usuario"})
 

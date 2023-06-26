@@ -185,7 +185,9 @@ let update = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
     if (propiedad.estado === "vendida") {
-      return res.status(400).json({ msg: "No se puede actualizar una propiedad ya vendida." });
+      return res
+        .status(400)
+        .json({ msg: "No se puede actualizar una propiedad ya vendida." });
     }
     let propiedadData = { ...req.body };
 
@@ -261,7 +263,9 @@ const delte = async (req, res) => {
       return res.status(404).json({ msg: "No se encontró la propiedad." });
     }
     if (propiedad.estado === "vendida") {
-      return res.status(400).json({ msg: "No se puede habilitar una propiedad ya vendida." });
+      return res
+        .status(400)
+        .json({ msg: "No se puede habilitar una propiedad ya vendida." });
     }
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
     let imagenesVideos = await ImagenVideo.findAll({
@@ -289,7 +293,9 @@ let updateHabilitado = async (req, res) => {
     }
 
     if (propiedad.estado === "vendida") {
-      return res.status(400).json({ msg: "No se puede habilitar una propiedad ya vendida." });
+      return res
+        .status(400)
+        .json({ msg: "No se puede habilitar una propiedad ya vendida." });
     }
 
     // Leer el valor actual del campo 'propiedadHabilitada'
@@ -318,7 +324,9 @@ let updateEstado = async (req, res) => {
     }
 
     if (propiedad.estado === "vendida") {
-      return res.status(400).json({ msg: "No se puede actualizar una propiedad ya vendida." });
+      return res
+        .status(400)
+        .json({ msg: "No se puede actualizar una propiedad ya vendida." });
     }
 
     // Leer el valor actual del campo 'propiedadHabilitada'
@@ -415,46 +423,72 @@ const getPropiedadCliente = async (req, res) => {
 const getPropiedadClienteById = async (req, res) => {
   let id = req.params.id;
   try {
-    let propiedad = await Propiedad.findOne({
-      where: {
-        cod_propiedad: id,
-        propiedadHabilitada: { [Op.not]: false },
-        estado: { [Op.not]: "vendida" },
-      },
-      include: [{ model: Propietario }, { model: ImagenVideo }],
+    const usuario = await Usuario.findOne({
+      where: { cod_usuario: id },
     });
-
-    if(!propiedad){
-
-      return res.status(404).json({ msg: "No se encontro la propiedad." });
-
+    console.log(usuario);
+    if (!usuario) {
+      return res.status(404).json({ msg: "No se encontro el usuario." });
+    }
+    let propiedades;
+    if (usuario.cod_rol === 1) {
+      propiedades = await TrabajadorPropiedad.findAll({
+        where: { cod_trabajador: usuario.cod_usuario },
+        include: [
+          {
+            model: Propiedad,
+            include: [{ model: Propietario }, { model: ImagenVideo }],
+          },
+        ],
+      });
+      // Realiza las operaciones necesarias con las propiedades obtenidas
     }
 
-    propiedad = propiedad?.toJSON();
-
-    // Obtenemos los datos del usuario que creó la propiedad
-    const usuarioCreador = await Usuario.findOne({
-      where: {
-        cod_usuario: propiedad.creado_por,
-      },
-    });
-    const agente = {
-      cod_agente: usuarioCreador.cod_usuario,
-      nombre: usuarioCreador.nombre,
-      dni: usuarioCreador.dni,
-      correo: usuarioCreador.correo,
-      celular: usuarioCreador.celular,
-      oficina: usuarioCreador.oficina,
-    };
-
-    if (usuarioCreador) {
-      propiedad.agente = agente; // Agregamos los datos del usuario al objeto de la propiedad
+    if (usuario.cod_rol === 2) {
+      propiedades = await TrabajadorPropiedad.findAll({
+        where: { cod_trabajador: usuario.cod_usuario },
+        include: [
+          {
+            model: Propiedad,
+            where: { creado_por: usuario.cod_usuario },
+            include: [{ model: Propietario }, { model: ImagenVideo }],
+          },
+        ],
+      });
     }
 
-    // Cambiar la clave 'imagenVideos' a 'imagenes'
-    propiedad.imagenes = propiedad.imagenVideos;
-    delete propiedad.imagenVideos;
-    return res.status(200).json({ data: propiedad });
+    if (!propiedades) {
+      return res.status(404).json({ msg: "No se encontraron propiedades del trabajador." });
+    }
+
+    let formatData = propiedades?.map(item=>{
+
+      return{
+        cod_propiedad: item?.propiedad?.cod_propiedad,
+        nombre: item?.propiedad?.nombre,
+        tipo: item?.propiedad?.tipo,
+        zona: item?.propiedad?.zona,
+        direccion: item?.propiedad?.direccion,
+        precio: item?.propiedad?.precio,
+        estado: item?.propiedad?.estado,
+        descripcion: item?.propiedad?.descripcion,
+        caracteristicas: item?.propiedad?.caracteristicas,
+        metraje: item?.propiedad?.metraje,
+        propiedadHabilitada: item?.propiedad?.propiedadHabilitada,
+        areaLibre: item?.propiedad?.areaLibre,
+        cocheraAdicional: item?.propiedad?.cocheraAdicional,
+        comision: item?.propiedad?.comision,
+        observaciones: item?.propiedad?.observaciones,
+        video: item?.propiedad?.video,
+        creado_por: item?.propiedad?.creado_por,
+        createdAt: dayjs(item?.createdAt)?.format("DD/MM/YYYY"),
+        agente: usuario, // Agregamos los datos del usuario como "agente"
+        propietario: item?.propiedad?.propietario,
+        imagenes: item?.propiedad?.imagenVideos,
+      }
+    })
+
+    return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
@@ -463,7 +497,6 @@ const getPropiedadClienteById = async (req, res) => {
 const getPropiedadByUser = async (req, res) => {
   let id = req.params.id;
   try {
-    console.log(id);
     // Primero, obtenemos el usuario y su rol
     const usuario = await Usuario.findOne({
       where: { cod_usuario: id },
@@ -476,61 +509,69 @@ const getPropiedadByUser = async (req, res) => {
         .json({ msg: "El usuario no se encuentra registrado en el sistema." });
     }
 
-    const rol_usuario = usuario.rol.dataValues.rol;
+    const rol_usuario = usuario.cod_rol;
     let propiedad;
-    if (rol_usuario === "Administrador") {
-      propiedad = await Propiedad.findAll({
-        where: {
-          propiedadHabilitada: { [Op.not]: false },
-          estado: { [Op.not]: "vendida" },
-        },
-        include: [{ model: Propietario }, { model: ImagenVideo }],
+    console.log(rol_usuario);
+    if (rol_usuario === 1) {
+      propiedad = await TrabajadorPropiedad.findAll({
+        // where: { cod_trabajador: usuario.cod_usuario },
+        include: [
+          {
+            model: Propiedad,
+            include: [{ model: Propietario }, { model: ImagenVideo }],
+          },
+        ],
       });
-    } else if (rol_usuario === "Trabajador") {
-      propiedad = await Propiedad.findAll({
-        where: {
-          creado_por: id,
-          propiedadHabilitada: { [Op.not]: false },
-          estado: { [Op.not]: "vendida" },
-        },
-        include: [{ model: Propietario }, { model: ImagenVideo }],
+    }
+    if (rol_usuario === 2) {
+      propiedad = await TrabajadorPropiedad.findAll({
+        where: { cod_trabajador: usuario.cod_usuario },
+        include: [
+          {
+            model: Propiedad,
+            where: { creado_por: usuario.cod_usuario },
+            include: [{ model: Propietario }, { model: ImagenVideo }],
+          },
+        ],
       });
-    } else {
-      return res.status(400).json({ msg: "Rol de usuario no válido." });
+    }
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontraron propiedades del trabajador." });
     }
 
-    const formatData = propiedad.map((item) => {
-      return {
-        cod_propiedad: item?.cod_propiedad,
-        nombre: item?.nombre,
-        tipo: item?.tipo,
-        zona: item?.zona,
-        direccion: item?.direccion,
-        precio: item?.precio,
-        estado: item?.estado,
-        descripcion: item?.descripcion,
-        caracteristicas: item?.caracteristicas,
-        metraje: item?.metraje,
-        propiedadHabilitada: item?.propiedadHabilitada,
-        areaLibre: item?.areaLibre,
-        cocheraAdicional: item?.cocheraAdicional,
-        comision: item?.comision,
-        observaciones: item?.observaciones,
-        creado_por: item?.creado_por,
-        video: item?.video,
-        createdAt: dayjs(item?.createdAt).format("DD/MM/YYYY"),
-        propietario: {
-          cod_propietario: item?.propietario?.cod_propietario,
-          nombre: item?.propietario?.nombre,
-          dni: item?.propietario?.dni,
-          celular: item?.propietario?.celular,
-          direccion: item?.propietario?.direccion,
-          titulo_propiedad: item?.propietario?.titulo_propiedad,
-        },
+    let formatData = propiedad?.map(item=>{
 
-        imagenes: item.imagenVideos,
-      };
-    });
+      return{
+        cod_propiedad: item?.propiedad?.cod_propiedad,
+        nombre: item?.propiedad?.nombre,
+        tipo: item?.propiedad?.tipo,
+        zona: item?.propiedad?.zona,
+        direccion: item?.propiedad?.direccion,
+        precio: item?.propiedad?.precio,
+        estado: item?.propiedad?.estado,
+        descripcion: item?.propiedad?.descripcion,
+        caracteristicas: item?.propiedad?.caracteristicas,
+        metraje: item?.propiedad?.metraje,
+        propiedadHabilitada: item?.propiedad?.propiedadHabilitada,
+        areaLibre: item?.propiedad?.areaLibre,
+        cocheraAdicional: item?.propiedad?.cocheraAdicional,
+        comision: item?.propiedad?.comision,
+        observaciones: item?.propiedad?.observaciones,
+        video: item?.propiedad?.video,
+        creado_por: item?.propiedad?.creado_por,
+        createdAt: dayjs(item?.createdAt)?.format("DD/MM/YYYY"),
+        agente: {
+          cod_agente:usuario.cod_usuario,
+          nombre: usuario.nombre,
+          dni: usuario.dni,
+          correo: usuario.correo,
+          celular: usuario.celular,
+          oficina: usuario.oficina,
+        }, // Agregamos los datos del usuario como "agente"
+        propietario: item?.propiedad?.propietario,
+        imagenes: item?.propiedad?.imagenVideos,
+      }
+    })
 
     return res.status(200).json({ data: formatData });
   } catch (error) {
