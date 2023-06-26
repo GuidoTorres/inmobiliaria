@@ -426,7 +426,7 @@ const getPropiedadClienteById = async (req, res) => {
 
     if(!propiedad){
 
-      res.status(404).json({ msg: "No se encontro la propiedad." });
+      return res.status(404).json({ msg: "No se encontro la propiedad." });
 
     }
 
