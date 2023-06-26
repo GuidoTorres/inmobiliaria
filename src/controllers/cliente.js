@@ -365,20 +365,20 @@ const updateClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-    const userCount = await countUsers();
-    const existeCorreo = await checkEmailInUse(correo);
-    const existeDNI = await checkDniInUse(dni);
-    if (userCount >= 10) {
-      return res.status(400).json({ msg: "El correo ya está registrado." });
-    }
+    // const userCount = await countUsers();
+    // const existeCorreo = await checkEmailInUse(correo);
+    // const existeDNI = await checkDniInUse(dni);
+    // if (userCount >= 10) {
+    //   return res.status(400).json({ msg: "El correo ya está registrado." });
+    // }
 
-    if (existeCorreo) {
-      return res.status(400).json({ msg: "El correo ya está registrado." });
-    }
+    // if (existeCorreo) {
+    //   return res.status(400).json({ msg: "El correo ya está registrado." });
+    // }
 
-    if (existeDNI) {
-      return res.status(400).json({ msg: "El DNI ya está registrado." });
-    }
+    // if (existeDNI) {
+    //   return res.status(400).json({ msg: "El DNI ya está registrado." });
+    // }
     // Start the transaction.
     const t = await db.sequelize.transaction();
 
