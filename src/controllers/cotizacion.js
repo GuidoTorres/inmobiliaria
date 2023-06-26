@@ -153,7 +153,7 @@ const delte = async (req, res) => {
       { cotizado: false },
       { where: { cod_propiedad: cotizacion.cod_propiedad } }
     );
-    // await Cotizacion.destroy({ where: { cod_cotizacion: id } });
+    await Cotizacion.destroy({ where: { cod_cotizacion: id } });
 
     return res.status(200).json({ msg: "Cotización eliminada con éxito!" });
   } catch (error) {
