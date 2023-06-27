@@ -29,7 +29,7 @@ const get = async (req, res) => {
       }
     }).map((item, i) => {
       return{
-        nro: i,
+        id: i,
         ...item
       }
     });
