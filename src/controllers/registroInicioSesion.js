@@ -11,12 +11,12 @@ const get = async (req, res) => {
       usuario.registro_inicio_sesions.map((ingreso, a) => ({
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
-        fecha_ingreso: ingreso.fecha_ingreso,
-        hora_ingreso: ingreso.hora_ingreso,
+        fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("dd/mm/yyyy"),
+        hora_ingreso: dayjs(ingreso.hora_ingreso).format("dd/mm/yyyy"),
       }))
     ).sort((a, b) => {
-      const fechaA = dayjs(a.fecha_ingreso, "dd-mm-YYYY");
-      const fechaB = dayjs(b.fecha_ingreso, "dd-mm-YYYY");
+      const fechaA = dayjs(a.fecha_ingreso, "dd/mm/YYYY");
+      const fechaB = dayjs(b.fecha_ingreso, "dd/mm/YYYY");
     
       if (fechaA.isBefore(fechaB)) {
         return -1;
