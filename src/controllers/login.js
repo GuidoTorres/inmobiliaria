@@ -31,7 +31,7 @@ const authLogin = async (req, res) => {
     if (checkPassword) {
       // Registrar inicio de sesión
       await db.models.RegistroInicioSesion.create({
-        fecha_ingreso: dayjs().startOf('day').format("DD/MM-YYYY"),
+        fecha_ingreso: dayjs().format("YYYY-MM-DD"),
         hora_ingreso: dayjs().format("HH:mm:ss"),
         cod_usuario: user.cod_usuario,
       });

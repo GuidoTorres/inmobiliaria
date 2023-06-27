@@ -24,7 +24,7 @@ const get = async (req, res) => {
         return 1;
       } else {
         // Las fechas son iguales, ordenar por hora_ingreso
-        return a.hora_ingreso.localeCompare(b.hora_ingreso);
+        return b.hora_ingreso.localeCompare(a.hora_ingreso);
       }
     }).map((item, i) => {
       return{
