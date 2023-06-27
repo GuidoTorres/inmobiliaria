@@ -11,31 +11,32 @@ const get = async (req, res) => {
     const formatData = usuarios.flatMap((usuario) =>
     usuario.registro_inicio_sesions.map((ingreso, a) => {
       const item = {
-        id: ingreso.cod_registro,
+        nro: iteracion, // Agregar el número de iteración consecutivo
+        id: iteracion,
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
         fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("DD-MM-YYYY"),
         hora_ingreso: ingreso.hora_ingreso,
-        iteracion: iteracion, // Agregar el número de iteración consecutivo
       };
   
       iteracion++; // Incrementar el número de iteración para la siguiente iteración
   
       return item;
     })
-  ).sort((a, b) => {
-      const fechaA = dayjs(a.fecha_ingreso, "DD-MM-YYYY");
-      const fechaB = dayjs(b.fecha_ingreso, "DD-MM-YYYY");
+  )
+  // .sort((a, b) => {
+  //     const fechaA = dayjs(a.fecha_ingreso, "DD-MM-YYYY");
+  //     const fechaB = dayjs(b.fecha_ingreso, "DD-MM-YYYY");
     
-      if (fechaA.isBefore(fechaB)) {
-        return -1;
-      } else if (fechaA.isAfter(fechaB)) {
-        return 1;
-      } else {
-        // Las fechas son iguales, ordenar por hora_ingreso
-        return a.hora_ingreso.localeCompare(b.hora_ingreso);
-      }
-    });
+  //     if (fechaA.isBefore(fechaB)) {
+  //       return -1;
+  //     } else if (fechaA.isAfter(fechaB)) {
+  //       return 1;
+  //     } else {
+  //       // Las fechas son iguales, ordenar por hora_ingreso
+  //       return a.hora_ingreso.localeCompare(b.hora_ingreso);
+  //     }
+  //   });
 
     return res.status(200).json({ data: formatData });
   } catch (error) {
