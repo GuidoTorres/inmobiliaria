@@ -2,7 +2,7 @@ const db = require("../../database/models");
 require("dotenv").config();
 const { encrypt } = require("./auth");
 const nodemailer = require("nodemailer");
-const { Usuario, Rol } = db.models;
+const { Usuario, Rol, RegistroInicioSesion } = db.models;
 const { Op, where } = require("sequelize");
 const {
   checkEmailInUse,
@@ -131,6 +131,7 @@ const delte = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
     }
+    await RegistroInicioSesion.destroy({ where: { cod_usuario: id } });
     await Usuario.destroy({ where: { cod_usuario: id } });
     return res.status(200).json({ msg: "Usuario eliminado con éxito!" });
   } catch (error) {

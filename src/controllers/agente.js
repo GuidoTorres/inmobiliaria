@@ -112,6 +112,7 @@ const delte = async (req, res) => {
       where: { cod_usuario: id },
     });
 
+
     return res.status(200).json({ msg: "Trabajador eliminado con éxito!" });
   } catch (error) {
     console.log(error);
