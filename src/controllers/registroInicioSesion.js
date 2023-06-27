@@ -19,12 +19,12 @@ const get = async (req, res) => {
       const fechaB = dayjs(b.fecha_ingreso, "DD/MM/YYYY");
     
       if (fechaA.isBefore(fechaB)) {
-        return -1;
+        return 1; // Cambiado de -1 a 1 para ordenar de mayor a menor
       } else if (fechaA.isAfter(fechaB)) {
-        return 1;
+        return -1; // Cambiado de 1 a -1 para ordenar de mayor a menor
       } else {
         // Las fechas son iguales, ordenar por hora_ingreso
-        return b.hora_ingreso.localeCompare(a.hora_ingreso);
+        return a.hora_ingreso.localeCompare(b.hora_ingreso);
       }
     }).map((item, i) => {
       return{
