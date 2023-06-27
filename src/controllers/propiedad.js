@@ -540,6 +540,10 @@ const getPropiedadByUser = async (req, res) => {
         include: [
           {
             model: Propiedad,
+            where: {
+              propiedadHabilitada: { [Op.not]: false },
+              estado: { [Op.not]: "Vendido" },
+            },
             where: { creado_por: usuario.cod_usuario },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
