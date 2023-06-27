@@ -112,7 +112,7 @@ const update = async (req, res) => {
   let id = req.params.id;
 
   try {
-    const { fecha_emision, fecha_vencimiento, cod_propiedad } = req.body;
+    const { fecha_emision, fecha_vencimiento, cod_propiedad, cod_trabajador, cod_cliente } = req.body;
 
     const cotizacion = await Cotizacion.findOne({
       where: { cod_cotizacion: id },
@@ -126,6 +126,8 @@ const update = async (req, res) => {
       fecha_emision: fecha_emision,
       fecha_vencimiento: fecha_vencimiento,
       cod_propiedad: cod_propiedad,
+      cod_trabajador: cod_trabajador,
+      cod_cliente: cod_cliente
     };
 
     await Cotizacion.update(actualizar, { where: { cod_cotizacion: id } });
