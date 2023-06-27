@@ -272,7 +272,7 @@ const delte = async (req, res) => {
       where: { cod_propiedad: id },
     });
 
-    await TrabajadorPropiedad.destroy({where:{cod_propiedad: id}})
+    await TrabajadorPropiedad.destroy({ where: { cod_propiedad: id } });
 
     await Propiedad.destroy({ where: { cod_propiedad: id } });
     return res.status(200).json({ msg: "Propiedad eliminada con éxito!" });
@@ -434,7 +434,16 @@ const getPropiedadClienteById = async (req, res) => {
         include: [
           {
             model: Propiedad,
-            include: [{ model: Propietario }, { model: ImagenVideo }],
+            include: [
+              {
+                model: Propietario,
+                where: {
+                  propiedadHabilitada: { [Op.not]: false },
+                  estado: { [Op.not]: "Vendido" },
+                },
+              },
+              { model: ImagenVideo },
+            ],
           },
         ],
       });
@@ -516,6 +525,10 @@ const getPropiedadByUser = async (req, res) => {
         include: [
           {
             model: Propiedad,
+            where: {
+              propiedadHabilitada: { [Op.not]: false },
+              estado: { [Op.not]: "Vendido" },
+            },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
         ],

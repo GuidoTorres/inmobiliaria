@@ -1,51 +1,34 @@
 const pdfMake = require("pdfmake");
+const htmlToPdfMake = require('html-to-pdfmake');
 
 const generarPDF = async (html) => {
   return new Promise((resolve, reject) => {
     try {
-      
-      const fonts={
+      const fonts = {
         Roboto: {
           normal: 'fonts/Roboto-Regular.ttf',
           bold: 'fonts/Roboto-Medium.ttf',
           italics: 'fonts/Roboto-Italic.ttf',
           bolditalics: 'fonts/Roboto-MediumItalic.ttf'
         }
-      }
-      const printer = new pdfMake(fonts);
-
-      const docDefinition = {
-        content: [
-          { text: `${html}`, style: "content" }
-        ],
-        styles: {
-          header: { fontSize: 18 },
-          content: { fontSize: 12,htmlToText: true  },
-        },
-        
       };
 
-      const pdfDoc = printer.createPdfKitDocument(docDefinition);
-      const chunks = [];
+      const pdfContent = htmlToPdfMake(html);
+      
+      const docDefinition = {
+        content: pdfContent
+      };
 
-      pdfDoc.on("data", (chunk) => {
-        chunks.push(chunk);
+      pdfMake.createPdf(docDefinition).getBuffer((buffer) => {
+        resolve(buffer); // buffer es el buffer del PDF
       });
-
-      pdfDoc.on("end", () => {
-        const buffer = Buffer.concat(chunks);
-        resolve(buffer);
-      });
-
-      pdfDoc.on("error", (err) => {
-        reject(err);
-      });
-
-      pdfDoc.end();
-    } catch (err) {
-      reject(err);
+    } catch (error) {
+      reject(error);
     }
   });
 };
+
+
+
 
 module.exports = generarPDF;
