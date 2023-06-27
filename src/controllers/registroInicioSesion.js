@@ -12,7 +12,7 @@ const get = async (req, res) => {
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
         fecha_ingreso: dayjs(ingreso.fecha_ingreso).format("DD/MM/YYYY"),
-        hora_ingreso: dayjs(ingreso.hora_ingreso).format("DD/MM/YYYY"),
+        hora_ingreso: ingreso.hora_ingreso,
       }))
     ).sort((a, b) => {
       const fechaA = dayjs(a.fecha_ingreso, "DD/MM/YYYY");
