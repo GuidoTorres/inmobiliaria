@@ -449,12 +449,23 @@ const delteClienteTrabajado = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "No se encontró el cliente." });
     }
+    let nuevoUsuario = {
+      estado: false,
+      tipo: null,
+    };
+
+    const getVenta = await Venta.findOne({where:{id:cod_venta}})
+
+    await Propiedad.update(
+      { estado: "activo", propiedadHabilitada: true },
+      { where: { cod_propiedad: getVenta.cod_propiedad } }
+    );
+    
     await Venta.destroy({
-      where: { cod_cliente: cod_venta },
+      where: { id: cod_venta },
     });
-    await Usuario.destroy({
-      where: { cod_usuario: cod_cliente },
-    });
+    await Usuario.update(nuevoUsuario, { where: { cod_usuario: cod_cliente } });
+
 
     return res.status(200).json({ msg: "Cliente eliminado con éxito!" });
   } catch (error) {
@@ -464,7 +475,29 @@ const delteClienteTrabajado = async (req, res) => {
 };
 const getAllClients = async (req, res) =>{
 
- 
+ try {
+  const cliente = await Usuario.findAll({
+    where: {
+      tipo: {
+        [Op.not]: null,
+      },
+    },
+  });
+
+  const formatData = cliente.map(item => {
+    return{
+      cod_cliente: item.cod_usuario,
+      nombre: item.nombre,
+      dni: item.dni,
+      correo: item.correo,
+      celular: item.celular
+    }
+  })
+  return res.status(200).json({ data: formatData });
+} catch (error) {
+  console.log(error);
+  res.status(500).json({ msg: "No se pudo obtener la lista de clientes" });
+}
 
 }
 
@@ -473,6 +506,7 @@ module.exports = {
   post,
   update,
   delte,
+  getAllClients,
   getPosibleCliente,
   postPosibleCliente,
   updatePosibleCliente,

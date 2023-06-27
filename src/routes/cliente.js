@@ -9,6 +9,7 @@ const cliente = require("../controllers/cliente");
 // router.put("/:id",checkAuth, checkRoleAuth([1,2]), validate(actualizarCliente), cliente.update);
 // router.delete("/:id",checkAuth, checkRoleAuth([1,2]), cliente.delte);
 router.get("/", cliente.get);
+router.get("/todos", cliente.getAllClients);
 router.get("/trabajado", cliente.getClienteTrabajado);
 router.get("/posible", cliente.getPosibleCliente);
 router.post("/", cliente.post);
