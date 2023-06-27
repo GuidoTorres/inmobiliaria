@@ -527,7 +527,7 @@ const getPropiedadByUser = async (req, res) => {
             model: Propiedad,
             where: {
               propiedadHabilitada: { [Op.not]: false },
-              estado: { [Op.not]: "Vendido" },
+              estado: { [Op.not]: "vendida" },
             },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
@@ -542,7 +542,7 @@ const getPropiedadByUser = async (req, res) => {
             model: Propiedad,
             where: {
               propiedadHabilitada: { [Op.not]: false },
-              estado: { [Op.not]: "Vendido" },
+              estado: { [Op.not]: "vendida" },
             },
             where: { creado_por: usuario.cod_usuario },
             include: [{ model: Propietario }, { model: ImagenVideo }],
