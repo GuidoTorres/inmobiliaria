@@ -11,7 +11,7 @@ const get = async (req, res) => {
       usuario.registro_inicio_sesions.map((ingreso, a) => ({
         cod_usuario: usuario.cod_usuario,
         nombre: usuario.nombre,
-        fecha_ingreso: usuario.fecha_ingreso,
+        fecha_ingreso: ingreso.fecha_ingreso,
         hora_ingreso: ingreso.hora_ingreso,
       }))
     ).sort((a, b) => {
