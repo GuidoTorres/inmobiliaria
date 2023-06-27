@@ -451,7 +451,7 @@ const delteClienteTrabajado = async (req, res) => {
     }
     let nuevoUsuario = {
       estado: false,
-      tipo: null,
+      tipo: "Posible cliente",
     };
 
     const getVenta = await Venta.findOne({where:{id:cod_venta}})
