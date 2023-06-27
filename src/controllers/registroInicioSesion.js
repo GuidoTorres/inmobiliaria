@@ -15,17 +15,13 @@ const get = async (req, res) => {
         hora_ingreso: ingreso.hora_ingreso,
       }))
     ).sort((a, b) => {
-      const fechaA = dayjs(a.fecha_ingreso, "DD/MM/YYYY");
-      const fechaB = dayjs(b.fecha_ingreso, "DD/MM/YYYY");
-    
-      if (fechaA.isBefore(fechaB)) {
-        return -1;
-      } else if (fechaA.isAfter(fechaB)) {
-        return 1;
-      } else {
-        // Las fechas son iguales, ordenar por hora_ingreso
-        return a.hora_ingreso.localeCompare(b.hora_ingreso);
+      const fechaA = new Date(a.fecha_ingreso); const fechaB = new Date(b.fecha_ingreso);
+      if (fechaA.getTime() === fechaB.getTime()) {
+        return b.hora_ingreso.localeCompare(a.hora_ingreso);
       }
+      
+      // Si no, ordenar por fecha de mayor a menor
+      return fechaB - fechaA;
     }).reverse().map((item, i) => {
       return{
         id: i+1,
