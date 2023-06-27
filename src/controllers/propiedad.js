@@ -268,15 +268,12 @@ const delte = async (req, res) => {
         .json({ msg: "No se puede eliminar una propiedad ya vendida." });
     }
     // Buscar y eliminar todas las entradas de ImagenVideo para esta propiedad
-    let imagenesVideos = await ImagenVideo.findAll({
+    await ImagenVideo.destroy({
       where: { cod_propiedad: id },
     });
-    for (let i = 0; i < imagenesVideos.length; i++) {
-      // Aquí también podrías eliminar los archivos del servidor si es necesario
-      await imagenesVideos[i].destroy();
-    }
 
-    // Después de eliminar todas las imágenes y videos, eliminar la propiedad
+    await TrabajadorPropiedad.destroy({where:{cod_propiedad: id}})
+
     await Propiedad.destroy({ where: { cod_propiedad: id } });
     return res.status(200).json({ msg: "Propiedad eliminada con éxito!" });
   } catch (error) {
@@ -458,12 +455,13 @@ const getPropiedadClienteById = async (req, res) => {
     }
 
     if (!propiedades) {
-      return res.status(404).json({ msg: "No se encontraron propiedades del trabajador." });
+      return res
+        .status(404)
+        .json({ msg: "No se encontraron propiedades del trabajador." });
     }
 
-    let formatData = propiedades?.map(item=>{
-
-      return{
+    let formatData = propiedades?.map((item) => {
+      return {
         cod_propiedad: item?.propiedad?.cod_propiedad,
         nombre: item?.propiedad?.nombre,
         tipo: item?.propiedad?.tipo,
@@ -485,8 +483,8 @@ const getPropiedadClienteById = async (req, res) => {
         agente: usuario, // Agregamos los datos del usuario como "agente"
         propietario: item?.propiedad?.propietario,
         imagenes: item?.propiedad?.imagenVideos,
-      }
-    })
+      };
+    });
 
     return res.status(200).json({ data: formatData });
   } catch (error) {
@@ -536,12 +534,13 @@ const getPropiedadByUser = async (req, res) => {
       });
     }
     if (!propiedad) {
-      return res.status(404).json({ msg: "No se encontraron propiedades del trabajador." });
+      return res
+        .status(404)
+        .json({ msg: "No se encontraron propiedades del trabajador." });
     }
 
-    let formatData = propiedad?.map(item=>{
-
-      return{
+    let formatData = propiedad?.map((item) => {
+      return {
         cod_propiedad: item?.propiedad?.cod_propiedad,
         nombre: item?.propiedad?.nombre,
         tipo: item?.propiedad?.tipo,
@@ -561,7 +560,7 @@ const getPropiedadByUser = async (req, res) => {
         creado_por: item?.propiedad?.creado_por,
         createdAt: dayjs(item?.createdAt)?.format("DD/MM/YYYY"),
         agente: {
-          cod_agente:usuario.cod_usuario,
+          cod_agente: usuario.cod_usuario,
           nombre: usuario.nombre,
           dni: usuario.dni,
           correo: usuario.correo,
@@ -570,8 +569,8 @@ const getPropiedadByUser = async (req, res) => {
         }, // Agregamos los datos del usuario como "agente"
         propietario: item?.propiedad?.propietario,
         imagenes: item?.propiedad?.imagenVideos,
-      }
-    })
+      };
+    });
 
     return res.status(200).json({ data: formatData });
   } catch (error) {
