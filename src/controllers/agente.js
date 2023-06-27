@@ -1,6 +1,5 @@
 const db = require("../../database/models");
-const trabajadorPropiedad = require("../../database/models/trabajadorPropiedad");
-const { Usuario, Rol } = db.models;
+const { Usuario, Rol, TrabajadorPropiedad } = db.models;
 
 const { encrypt } = require("./auth");
 
@@ -98,7 +97,7 @@ const delte = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
     }
-    const trabajadorPropiedad = await trabajadorPropiedad.findOne({
+    const trabajadorPropiedad = await TrabajadorPropiedad.findOne({
       where: { cod_trabajador: id },
     });
     if (trabajadorPropiedad) {
