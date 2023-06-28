@@ -245,7 +245,7 @@ const descargarCotizacion = async (req, res) => {
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
-        // res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
+        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
         stream.pipe(res);
       }
@@ -345,7 +345,6 @@ const cotizacionPorCorreo = async (req, res, next) => {
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
       to: formatData.cliente.correo,
       subject: "Cotizacion de la propiedad ...", // Subject line
-      // html:html, // plain text body
       attachments: [
         {
           filename: pdfName,
