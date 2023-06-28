@@ -7,95 +7,207 @@
     <title>Cotización</title>
     <style>
       body {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        width: 100%;
+        width: 160mm;
+        height: 221mm;
       }
-      .container {
+      img {
+        width: 100%;
         height: 100%;
-        width: 100%;
-        /* background-image: url('http://3.86.194.103/assets/bg-doc.png');
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover; */
+        object-fit: cover; /* Agrega esta línea para asegurarte de que la imagen se ajuste correctamente */
       }
+
       .title-container {
-        background-color: #99AFD6;
+        background-color: #99afd6;
         border-radius: 6px;
         padding: 5px;
+        padding-top: 10px;
+        display: flex;
+        flex-direction: row;
+        height: 20px;
+        margin-top: 40px;
+        width: 60%;
+      }
+
+      .data-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        border: 1px solid red;
+      }
+
+      .item {
+        border: 1px solid black;
+        padding: 10px;
+        width: 40%;
+      }
+
+      .title-container .nro {
+        display: inline-block;
+        border: 1.5px solid black;
+        border-radius: 50%;
+        width: 13px;
+        height: 13px;
+        padding-left: 8px;
+        padding-top: 2px;
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 5px;
+        font-size: 10px;
+        font-weight: bold;
+      }
+      .title-container div {
+        font-size: 15px;
+        font-weight: bold;
+      }
+
+      .table {
+        margin-top: 20px;
+        font-size: 10px;
+        width: 100%;
+      }
+      .columna-ancho {
+        width: 200px;
+        border: 1px solid red;
+        text-align: center;
+      }
+      .columna-ancho-doble {
+        width: 300px;
+        border: 1px solid green;
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <img
-        src="http://3.86.194.103/assets/bg-doc.png"
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-      />
-      <div style="position: absolute; top: 50px; left: 50px">
-        <h1>Cotización de propiedad</h1>
-        <div class="title-container">1. Datos del cliente</div>
-        <table>
-          <tr>
-            <th>Nombre Completo</th>
-            <th>{{cliente.nombre}}</th>
-          </tr>
-          <tr>
-            <th>Dni</th>
-            <th>{{cliente.dni}}</th>
-          </tr>
-          <tr>
-            <th>Correo</th>
-            <th>{{cliente.correo}}</th>
-          </tr>
-          <tr>
-            <th>Celular</th>
-            <th>{{cliente.celular}}</th>
-          </tr>
-        </table>
-
-        <br>
-        <div class="title-container">2. Datos de las propiedades</div>
-        <table>
-          <tr>
-            <th>Nombre Completo</th>
-            <th>{{cliente.nombre}}</th>
-          </tr>
-          <tr>
-            <th>Dni</th>
-            <th>{{cliente.dni}}</th>
-          </tr>
-          <tr>
-            <th>Correo</th>
-            <th>{{cliente.correo}}</th>
-          </tr>
-          <tr>
-            <th>Celular</th>
-            <th>{{cliente.celular}}</th>
-          </tr>
-        </table>
-
-        <br>
-        <div class="title-container">2. Datos del agente</div>
-        <table>
-          <tr>
-            <th>Nombre Completo</th>
-            <th>{{trabajador.nombre}}</th>
-          </tr>
-          <tr>
-            <th>Oficina</th>
-            <th>{{trabajador.oficina}}</th>
-          </tr>
-          <tr>
-            <th>Correo</th>
-            <th>{{trabajador.correo}}</th>
-          </tr>
-          <tr>
-            <th>Celular</th>
-            <th>{{trabajador.celular}}</th>
-          </tr>
-        </table>
+    <img src="{{base64}}" />
+    <div style="position: absolute; top: 50px; left: 50px">
+      <h1 style="font-size: 18px; margin-top: 40px">COTIZACIÓN DE PROPIEDAD</h1>
+      <div class="title-container">
+        <div class="nro">1</div>
+        <div style="display: inline-block">Datos del cliente</div>
       </div>
+      <div class="data-container">
+        <div class="item">
+          <label>Nombre Completo</label>
+        </div>
+        <div class="item">
+          <label>{{formatData.cliente.nombre}}</label>
+        </div>
+      </div>
+      <div class="data-container">
+        <label>DNI</label>
+        <label>{{formatData.cliente.dni}}</label>
+      </div>
+      <div class="data-container">
+        <label>Correo</label>
+        <label>{{formatData.cliente.correo}}</label>
+      </div>
+      <div class="data-container">
+        <label>Celular</label>
+        <label>{{formatData.cliente.celular}}</label>
+      </div>
+
+      <!-- <table class="table">
+          <tr>
+            <p>Nombre Completo</p>
+            <p>{{formatData.cliente.nombre}}</p>
+          </tr>
+          <tr>
+            <th>DNI</th>
+            <th>{{formatData.cliente.dni}}</th>
+          </tr>
+          <tr>
+            <th>Correo</th>
+            <th>{{formatData.cliente.correo}}</th>
+          </tr>
+          <tr>
+            <th>Celular</th>
+            <th>{{formatData.cliente.celular}}</th>
+          </tr>
+        </table> -->
+
+      <br />
+      <div class="title-container">
+        <div class="nro">2</div>
+        <div style="display: inline-block">Datos de las propiedades</div>
+      </div>
+      <table class="table">
+        <tr style="width: 100%">
+          <th class="columna-ancho" colspan="2">Nombre</th>
+          <th class="columna-ancho" colspan="2">Tipo</th>
+          <th class="columna-ancho" colspan="2">Precio</th>
+          <th class="columna-ancho" colspan="2">Zona</th>
+        </tr>
+        <tr>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.nombre}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.tipo}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.precio}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.zona}}
+          </td>
+        </tr>
+        <tr>
+          <th class="columna-ancho-doble" colspan="4">Descripción</th>
+          <th class="columna-ancho-doble" colspan="4">Caracteristicas</th>
+          <th class="columna-ancho" colspan="2">Metraje</th>
+          <th class="columna-ancho" colspan="2">Área Libre</th>
+          <th class="columna-ancho" colspan="2">Cochera</th>
+          <th class="columna-ancho" colspan="2">Observaciones</th>
+        </tr>
+        <tr>
+          <td class="columna-ancho-doble" colspan="4">
+            {{formatData.propiedad.descripcion}}
+          </td>
+          <td class="columna-ancho-doble" colspan="4">
+            {{formatData.propiedad.caracteristicas}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.metraje}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.areaLibre}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{#if formatData.propiedad.cocheraAdicional}} Sí {{else}} No {{/if}}
+          </td>
+          <td class="columna-ancho" colspan="2">
+            {{formatData.propiedad.observaciones}}
+          </td>
+        </tr>
+      </table>
+
+      <br />
+      <div class="title-container">
+        <div class="nro">3</div>
+        <div style="display: inline-block">Datos del agente</div>
+      </div>
+      <table class="table">
+        <tr>
+          <th>Nombre Completo</th>
+          <th>{{formatData.trabajador.nombre}}</th>
+        </tr>
+        <tr>
+          <th>Oficina</th>
+          <th>{{formatData.trabajador.oficina}}</th>
+        </tr>
+        <tr>
+          <th>Correo</th>
+          <th>{{formatData.trabajador.correo}}</th>
+        </tr>
+        <tr>
+          <th>Celular</th>
+          <th>{{formatData.trabajador.celular}}</th>
+        </tr>
+      </table>
     </div>
   </body>
 </html>

@@ -4,7 +4,6 @@ const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
 const { Op, where } = require("sequelize");
 const {
-  countUsers,
   checkEmailInUse,
   checkDniInUse,
 } = require("../../helpers/validacionUsuario");
@@ -107,7 +106,6 @@ const delte = async (req, res) => {
 };
 
 // REGISTRO DE POSIBLE CLIENTE NO ACCEDE AL SISTEMA
-
 const getPosibleCliente = async (req, res) => {
   try {
     const cliente = await Usuario.findAll({
@@ -238,10 +236,6 @@ const updatePosibleClienteaTrabajado = async (req, res) => {
     };
     await Venta.create(info);
 
-    await Propiedad.update(
-      { estado: "vendida", propiedadHabilitada: false },
-      { where: { cod_propiedad: cod_propiedad } }
-    );
     return res.status(200).json({ msg: "Cliente actualizado con éxito!" });
   } catch (error) {
     console.log(error);

@@ -8,9 +8,10 @@ const {
   TrabajadorPropiedad,
 } = db.models;
 const fs = require("fs");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
-const generarPDF = require("../helpers/generarPdf");
+const pdf = require("html-pdf");
+const path = require('path');
 
 const get = async (req, res) => {
   try {
@@ -60,8 +61,7 @@ const get = async (req, res) => {
           dni: item.Trabajador.dni,
           correo: item.Trabajador.correo,
           celular: item.Trabajador.celular,
-          oficina: item.Trabajador.oficina
-
+          oficina: item.Trabajador.oficina,
         },
         propiedad: propiedad,
       };
@@ -112,7 +112,13 @@ const update = async (req, res) => {
   let id = req.params.id;
 
   try {
-    const { fecha_emision, fecha_vencimiento, cod_propiedad, cod_trabajador, cod_cliente } = req.body;
+    const {
+      fecha_emision,
+      fecha_vencimiento,
+      cod_propiedad,
+      cod_trabajador,
+      cod_cliente,
+    } = req.body;
 
     const cotizacion = await Cotizacion.findOne({
       where: { cod_cotizacion: id },
@@ -127,7 +133,7 @@ const update = async (req, res) => {
       fecha_vencimiento: fecha_vencimiento,
       cod_propiedad: cod_propiedad,
       cod_trabajador: cod_trabajador,
-      cod_cliente: cod_cliente
+      cod_cliente: cod_cliente,
     };
 
     await Cotizacion.update(actualizar, { where: { cod_cotizacion: id } });
@@ -177,10 +183,8 @@ const descargarCotizacion = async (req, res) => {
       ],
     });
 
-    if(!cotizacion){
-      res
-      .status(404)
-      .json({ msg: "No se encontro la cotización." });
+    if (!cotizacion) {
+      res.status(404).json({ msg: "No se encontro la cotización." });
     }
 
     let propiedad = {
@@ -188,7 +192,7 @@ const descargarCotizacion = async (req, res) => {
       imagenes: cotizacion?.propiedad?.imagenVideos,
     };
     delete propiedad?.imagenVideos;
-    
+
     const formatData = {
       cod_cotizacion: cotizacion?.cod_cotizacion,
       fecha_emision: cotizacion?.fecha_emision,
@@ -207,25 +211,45 @@ const descargarCotizacion = async (req, res) => {
         dni: cotizacion?.Trabajador?.dni,
         correo: cotizacion?.Trabajador?.correo,
         celular: cotizacion?.Trabajador?.celular,
-        oficina: cotizacion?.Trabajador?.oficina
+        oficina: cotizacion?.Trabajador?.oficina,
       },
       propiedad: propiedad,
     };
-
-    console.log(formatData);
+    // Ruta de la imagen
+    const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
+    const imageData = fs.readFileSync(imagePath);
+    const base64Image = Buffer.from(imageData).toString("base64");
+    const mimeType = path.extname(imagePath).replace(".", "");
+    const base64 = `data:image/${mimeType};base64,${base64Image}`;
+
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
     // Compila la plantilla de Handlebars
     const template = handlebars.compile(contenidoHtml);
-
+    const data = {
+      formatData: formatData,
+      base64: base64,
+    };
+    console.log(formatData);
     // Genera el HTML final a partir de la plantilla y los datos
-    const htmlFinal = template(formatData);
+    const htmlFinal = template(data);
+    const options = {
+      format: 'A4', // Establece el tamaño del PDF como A4
+      // Resto de opciones...
+    };
+    const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
 
-    const pdf = await generarPDF(htmlFinal);
+    pdf.create(htmlFinal, options).toStream((error, stream) => {
+      if (error) {
+        res.end("Error creando PDF: " + error);
+      } else {
+        res.setHeader("Content-Type", "application/pdf");
+        // res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(pdf);
+        stream.pipe(res);
+      }
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo descargar la cotización." });
@@ -233,9 +257,8 @@ const descargarCotizacion = async (req, res) => {
 };
 
 const cotizacionPorCorreo = async (req, res, next) => {
-  let id = req.params.id
+  let id = req.params.id;
   try {
-
     const cotizacion = await Cotizacion.findOne({
       where: { cod_cotizacion: id },
       include: [
@@ -248,9 +271,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
       ],
     });
     if (!cotizacion) {
-      return res
-        .status(404)
-        .json({ msg: "No se encontro la cotización." });
+      return res.status(404).json({ msg: "No se encontro la cotización." });
     }
 
     let propiedad = {
@@ -258,7 +279,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
       imagenes: cotizacion.propiedad.imagenVideos,
     };
     delete propiedad.imagenVideos;
-    
+
     const formatData = {
       cod_cotizacion: cotizacion.cod_cotizacion,
       fecha_emision: cotizacion.fecha_emision,
@@ -277,22 +298,39 @@ const cotizacionPorCorreo = async (req, res, next) => {
         dni: cotizacion.Trabajador.dni,
         correo: cotizacion.Trabajador.correo,
         celular: cotizacion.Trabajador.celular,
-        oficina: cotizacion.Trabajador.oficina
+        oficina: cotizacion.Trabajador.oficina,
       },
       propiedad: propiedad,
     };
 
+    const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
+    const imageData = fs.readFileSync(imagePath);
+    const base64Image = Buffer.from(imageData).toString("base64");
+    const mimeType = path.extname(imagePath).replace(".", "");
+    const base64 = `data:image/${mimeType};base64,${base64Image}`;
+
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
     // Compila la plantilla de Handlebars
     const template = handlebars.compile(contenidoHtml);
-
+    const data = {
+      formatData: formatData,
+      base64: base64,
+    };
     // Genera el HTML final a partir de la plantilla y los datos
-    const htmlFinal = template(formatData);
+    const htmlFinal = template(data);
+    const options = {
+      format: 'A4', // Establece el tamaño del PDF como A4
+      // Resto de opciones...
+    };
+    const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
 
-    const pdf = await generarPDF(htmlFinal);
-
+    pdf.create(htmlFinal, options).toBuffer(async(error, buffer) => {
+      if (error) {
+        res.end("Error creando PDF: " + error);
+      } else {
+        
     var transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: 587,
@@ -305,13 +343,16 @@ const cotizacionPorCorreo = async (req, res, next) => {
     // Enviar correo con el objeto de transporte
     let info = await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: formatData.cliente.correo, // correo variable
-      subject: "Cotizacion de la propiedata ...", // Subject line
+      to: "hectortorresdurand@gmail.com",
+      subject: "Cotizacion de la propiedad ...", // Subject line
       // html:html, // plain text body
-      attachments: [{
-        filename: 'cotizacion.pdf',
-        content: pdf,
-      }],
+      attachments: [
+        {
+          filename: pdfName,
+          content: buffer,
+          contentType: 'application/pdf',
+        },
+      ],
     });
 
     if (info.messageId) {
@@ -321,19 +362,25 @@ const cotizacionPorCorreo = async (req, res, next) => {
     } else {
       throw new Error("Failed to send email");
     }
+      }
+    });
+
+    // const pdf = await generarPDF(htmlFinal);
+
   } catch (error) {
     if (error.message === "Failed to send email") {
-      res
-        .status(500)
-        .json({ msg: "No se pudo enviar la cotización." });
+      res.status(500).json({ msg: "No se pudo enviar la cotización." });
     } else {
-      res
-        .status(500)
-        .json({ msg: "No se pudo enviar la cotización." });
+      res.status(500).json({ msg: "No se pudo enviar la cotización." });
     }
   }
 };
 
-
-
-module.exports = { get, post, update, delte, descargarCotizacion, cotizacionPorCorreo };
+module.exports = {
+  get,
+  post,
+  update,
+  delte,
+  descargarCotizacion,
+  cotizacionPorCorreo,
+};

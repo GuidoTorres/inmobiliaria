@@ -9,6 +9,11 @@ const {
   Usuario,
   Rol,
 } = db.models;
+const path = require('path');
+const handlebars = require("handlebars");
+const pdf = require("html-pdf");
+const fs = require("fs");
+
 const get = async (req, res) => {
   try {
     let whereClause = {};
@@ -331,6 +336,7 @@ let updateEstado = async (req, res) => {
 
     // Actualizar el campo 'propiedadHabilitada' en la base de datos
     propiedad.estado = estado;
+    propiedad.propiedadHabilitada = false;
     // propiedad
     if (estado === "vendida") {
       await TrabajadorPropiedad.update(
@@ -352,8 +358,8 @@ const getPropiedadCliente = async (req, res) => {
   try {
     const propiedad = await Propiedad.findAll({
       where: {
-        propiedadHabilitada: { [Op.not]: false },
-        estado: { [Op.not]: "Vendido" },
+        propiedadHabilitada: true,
+        estado: { [Op.ne]: "vendida" },
       },
       include: [{ model: Propietario }, { model: ImagenVideo }],
     });
@@ -438,8 +444,8 @@ const getPropiedadClienteById = async (req, res) => {
               {
                 model: Propietario,
                 where: {
-                  propiedadHabilitada: { [Op.not]: false },
-                  estado: { [Op.not]: "Vendido" },
+                  propiedadHabilitada: true,
+                  estado: { [Op.ne]: "vendida" },
                 },
               },
               { model: ImagenVideo },
@@ -456,7 +462,11 @@ const getPropiedadClienteById = async (req, res) => {
         include: [
           {
             model: Propiedad,
-            where: { creado_por: usuario.cod_usuario },
+            where: {
+              creado_por: usuario.cod_usuario,
+              propiedadHabilitada: true,
+              estado: { [Op.ne]: "vendida" },
+            },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
         ],
@@ -518,7 +528,6 @@ const getPropiedadByUser = async (req, res) => {
 
     const rol_usuario = usuario.cod_rol;
     let propiedad;
-    console.log(rol_usuario);
     if (rol_usuario === 1) {
       propiedad = await TrabajadorPropiedad.findAll({
         // where: { cod_trabajador: usuario.cod_usuario },
@@ -526,8 +535,8 @@ const getPropiedadByUser = async (req, res) => {
           {
             model: Propiedad,
             where: {
-              propiedadHabilitada: { [Op.not]: false },
-              estado: { [Op.not]: "vendida" },
+              propiedadHabilitada: true,
+              estado: { [Op.ne]: "vendida" },
             },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
@@ -541,10 +550,11 @@ const getPropiedadByUser = async (req, res) => {
           {
             model: Propiedad,
             where: {
-              propiedadHabilitada: { [Op.not]: false },
-              estado: { [Op.not]: "vendida" },
+              creado_por: usuario.cod_usuario,
+
+              propiedadHabilitada: true,
+              estado: { [Op.ne]: "vendida" },
             },
-            where: { creado_por: usuario.cod_usuario },
             include: [{ model: Propietario }, { model: ImagenVideo }],
           },
         ],
@@ -596,6 +606,81 @@ const getPropiedadByUser = async (req, res) => {
   }
 };
 
+const descargarPropiedad = async (req, res) => {
+  let id = req.params.id;
+  try {
+    const propiedad = await Propiedad.findOne({
+      where: { cod_propiedad: id },
+      include: [{ model: Propietario }, { model: ImagenVideo }],
+    });
+
+    if (!propiedad) {
+      return res.status(404).json({ msg: "No se encontraro la propiedad." });
+    }
+
+    let formatData = {
+
+        cod_propiedad: propiedad?.cod_propiedad,
+        nombre: propiedad?.nombre,
+        tipo: propiedad?.tipo,
+        zona: propiedad?.zona,
+        direccion: propiedad?.direccion,
+        precio: propiedad?.precio,
+        estado: propiedad?.estado,
+        descripcion: propiedad?.descripcion,
+        caracteristicas: propiedad?.caracteristicas,
+        metraje: propiedad?.metraje,
+        propiedadHabilitada: propiedad?.propiedadHabilitada,
+        areaLibre: propiedad?.areaLibre,
+        cocheraAdicional: propiedad?.cocheraAdicional,
+        comision: propiedad?.comision,
+        observaciones: propiedad?.observaciones,
+        video: propiedad?.video,
+        creado_por: propiedad?.creado_por,
+        createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
+        propietario: propiedad?.propietario,
+        imagenes: propiedad?.imagenVideos,
+    };
+
+    const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
+    const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
+    const imageData = fs.readFileSync(imagePath);
+    const base64Image = Buffer.from(imageData).toString("base64");
+    const mimeType = path.extname(imagePath).replace(".", "");
+    const base64 = `data:image/${mimeType};base64,${base64Image}`;
+
+    let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
+
+    // Compila la plantilla de Handlebars
+    const template = handlebars.compile(contenidoHtml);
+    const data = {
+      formatData: formatData,
+      base64: base64,
+    };
+    // Genera el HTML final a partir de la plantilla y los datos
+    const htmlFinal = template(data);
+    const options = {
+      format: "A4", // Establece el tamaño del PDF como A4
+      // Resto de opciones...
+    };
+    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
+
+    pdf.create(htmlFinal, options).toStream((error, stream) => {
+      if (error) {
+        res.end("Error creando PDF: " + error);
+      } else {
+        res.setHeader("Content-Type", "application/pdf");
+        // res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
+
+        stream.pipe(res);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
+  }
+};
+
 module.exports = {
   get,
   post,
@@ -606,4 +691,5 @@ module.exports = {
   getPropiedadCliente,
   getPropiedadClienteById,
   getPropiedadByUser,
+  descargarPropiedad,
 };

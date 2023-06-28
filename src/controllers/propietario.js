@@ -1,19 +1,20 @@
 const db = require("../../database/models");
-const {Propietario, Propiedad} = db.models
+const ExcelJS = require("exceljs");
+
+const { Propietario, Propiedad } = db.models;
 const get = async (req, res) => {
   try {
     const propietario = await Propietario.findAll();
-    const formatData = propietario.map(item =>{
-      return{
-
+    const formatData = propietario.map((item) => {
+      return {
         cod_propietario: item?.cod_propietario,
         nombre: item?.nombre,
         dni: item?.dni,
         celular: item?.celular,
         direccion: item?.direccion,
-        titulo_propiedad: item?.titulo_propiedad
-      }
-    })
+        titulo_propiedad: item?.titulo_propiedad,
+      };
+    });
     return res.status(200).json({ data: formatData });
   } catch (error) {
     res
@@ -97,7 +98,12 @@ const delte = async (req, res) => {
     });
 
     if (propiedades && propiedades.length > 0) {
-      return res.status(400).json({ msg: "El propietario tiene propiedades asociadas. No puede ser eliminado."})}
+      return res
+        .status(400)
+        .json({
+          msg: "El propietario tiene propiedades asociadas. No puede ser eliminado.",
+        });
+    }
 
     await Propietario.destroy({ where: { cod_propietario: id } });
     return res.status(200).json({ msg: "Propietario eliminado con éxito!" });
@@ -106,5 +112,44 @@ const delte = async (req, res) => {
   }
 };
 
+const descargarPropietarios = async (req, res) => {
+  try {
+    const propietario = await Propietario.findAll();
 
-module.exports = { get, post, update, delte };
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Hoja1");
+    worksheet.getCell('A1').value = 'Nombre';
+    worksheet.getCell('B1').value = 'Dni';
+    worksheet.getCell('C1').value = 'Dirección';
+    worksheet.getCell('D1').value = 'Celular';
+
+    propietario.forEach((item, index) => {
+      const rowIndex = index + 3; // Comenzar desde la fila 2 para dejar espacio para los encabezados
+      worksheet.getCell(`A${rowIndex}`).value = item.nombre;
+      worksheet.getCell(`B${rowIndex}`).value = item.dni;
+      worksheet.getCell(`C${rowIndex}`).value = item.direccion;
+      worksheet.getCell(`D${rowIndex}`).value = item.celular;
+
+    });
+    
+    // Guardar el archivo Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // Configurar las cabeceras de la respuesta para la descarga del archivo
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=propietarios.xlsx');
+    res.setHeader('Content-Length', buffer.length);
+
+    // Enviar el archivo como respuesta
+    res.send(buffer);
+
+
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ msg: "No se pudo obtener la lista de propietarios" });
+  }
+};
+
+module.exports = { get, post, update, delte, descargarPropietarios };
