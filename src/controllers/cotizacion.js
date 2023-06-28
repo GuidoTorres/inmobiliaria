@@ -242,6 +242,7 @@ const descargarCotizacion = async (req, res) => {
 
     pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
       if (error) {
+        console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
@@ -328,6 +329,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
 
     pdf.create(htmlFinal, options).toBuffer(async(error, buffer) => {
       if (error) {
+        console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
         
