@@ -673,10 +673,12 @@ const descargarPropiedad = async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
-        res.pipe(buffer).on('error', function(e) { 
-
-          
-        })
+        res.pipe(buffer).on("error", function (e) {
+          console.log("res.pipe has error: " + e.message);
+        });
+        res.on("close", function () {
+          console.log('Client closed the connection');
+        });
     }});
   } catch (error) {
     console.log(error);

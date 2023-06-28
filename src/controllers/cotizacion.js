@@ -11,7 +11,7 @@ const fs = require("fs");
 const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
-const path = require('path');
+const path = require("path");
 
 const get = async (req, res) => {
   try {
@@ -235,7 +235,7 @@ const descargarCotizacion = async (req, res) => {
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     const options = {
-      format: 'A4', // Establece el tamaño del PDF como A4
+      format: "A4", // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
     const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
@@ -246,12 +246,17 @@ const descargarCotizacion = async (req, res) => {
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${pdfName}"`
+        ); // Establece el nombre del archivo en el encabezado de respuesta
 
-        res.pipe(buffer).on('error', function(e) { 
-
-          
-        })
+        res.pipe(buffer).on("error", function (e) {
+          console.log("res.pipe has error: " + e.message);
+        });
+        res.on("close", function () {
+          console.log('Client closed the connection');
+        });
       }
     });
   } catch (error) {
@@ -325,52 +330,50 @@ const cotizacionPorCorreo = async (req, res, next) => {
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     const options = {
-      format: 'A4', // Establece el tamaño del PDF como A4
+      format: "A4", // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
     const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
 
-    pdf.create(htmlFinal, options).toBuffer(async(error, buffer) => {
+    pdf.create(htmlFinal, options).toBuffer(async (error, buffer) => {
       if (error) {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
-        
-    var transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+        var transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: 587,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        });
 
-    // Enviar correo con el objeto de transporte
-    let info = await transporter.sendMail({
-      from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: formatData.cliente.correo,
-      subject: "Cotizacion de la propiedad ...", // Subject line
-      attachments: [
-        {
-          filename: pdfName,
-          content: buffer,
-          contentType: 'application/pdf',
-        },
-      ],
-    });
+        // Enviar correo con el objeto de transporte
+        let info = await transporter.sendMail({
+          from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
+          to: formatData.cliente.correo,
+          subject: "Cotizacion de la propiedad ...", // Subject line
+          attachments: [
+            {
+              filename: pdfName,
+              content: buffer,
+              contentType: "application/pdf",
+            },
+          ],
+        });
 
-    if (info.messageId) {
-      return res
-        .status(200)
-        .json({ msg: "La cotización fue enviada con éxito!" });
-    } else {
-      throw new Error("Failed to send email");
-    }
+        if (info.messageId) {
+          return res
+            .status(200)
+            .json({ msg: "La cotización fue enviada con éxito!" });
+        } else {
+          throw new Error("Failed to send email");
+        }
       }
     });
 
     // const pdf = await generarPDF(htmlFinal);
-
   } catch (error) {
     if (error.message === "Failed to send email") {
       res.status(500).json({ msg: "No se pudo enviar la cotización." });
