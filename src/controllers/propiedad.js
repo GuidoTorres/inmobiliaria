@@ -673,9 +673,11 @@ const descargarPropiedad = async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
-        res.end(buffer);
-            }
-    });
+        res.pipe(buffer).on('error', function(e) { 
+
+          
+        })
+    }});
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
