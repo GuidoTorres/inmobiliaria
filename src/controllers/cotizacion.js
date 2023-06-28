@@ -343,7 +343,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
     // Enviar correo con el objeto de transporte
     let info = await transporter.sendMail({
       from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-      to: "hectortorresdurand@gmail.com",
+      to: formatData.cliente.correo,
       subject: "Cotizacion de la propiedad ...", // Subject line
       // html:html, // plain text body
       attachments: [
