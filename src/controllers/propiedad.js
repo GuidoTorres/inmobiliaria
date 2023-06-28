@@ -671,14 +671,7 @@ const descargarPropiedad = async (req, res) => {
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
-
-        res.pipe(buffer).on("error", function (e) {
-          console.log("res.pipe has error: " + e.message);
-        });
-        res.on("close", function () {
-          console.log('Client closed the connection');
-        });
+    res.send(buffer);
     }});
   } catch (error) {
     console.log(error);
