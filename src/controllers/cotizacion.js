@@ -245,17 +245,33 @@ const descargarCotizacion = async (req, res) => {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${pdfName}"`
-        ); // Establece el nombre del archivo en el encabezado de respuesta
-
-        res.write(buffer); // Escribe el contenido del buffer en la respuesta
-        res.end(); // Finaliza la respuesta
-    
-        res.on("close", function () {
-          console.log('Client closed the connection');
+        const filePath = path.join(__dirname, "../../public/cotizacion/cotizacion.pdf"); // Ruta donde se almacenará el archivo PDF en el servidor
+        fs.writeFile(filePath, buffer, (error) => {
+          if (error) {
+            console.log("Error guardando el archivo PDF:", error);
+            res.end("Error guardando el archivo PDF: " + error);
+          } else {
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+              "Content-Disposition",
+              `attachment; filename="${pdfName}"`
+            );
+            res.download(filePath, pdfName, (error) => {
+              if (error) {
+                console.log("Error al descargar el archivo PDF:", error);
+                res.end("Error al descargar el archivo PDF: " + error);
+              } else {
+                // Elimina el archivo del servidor después de la descarga si deseas
+                fs.unlink(filePath, (error) => {
+                  if (error) {
+                    console.log("Error al eliminar el archivo PDF:", error);
+                  } else {
+                    console.log("Archivo PDF eliminado del servidor:", filePath);
+                  }
+                });
+              }
+            });
+          }
         });
       }
     });
