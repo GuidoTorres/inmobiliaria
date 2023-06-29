@@ -671,7 +671,7 @@ const descargarPropiedad = async (req, res) => {
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
-    res.send(buffer);
+        res.send(buffer);
     }});
   } catch (error) {
     console.log(error);

@@ -251,9 +251,9 @@ const descargarCotizacion = async (req, res) => {
           `attachment; filename="${pdfName}"`
         ); // Establece el nombre del archivo en el encabezado de respuesta
 
-        res.pipe(buffer).on("error", function (e) {
-          console.log("res.pipe has error: " + e.message);
-        });
+        res.write(buffer); // Escribe el contenido del buffer en la respuesta
+        res.end(); // Finaliza la respuesta
+    
         res.on("close", function () {
           console.log('Client closed the connection');
         });
