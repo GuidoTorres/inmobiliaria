@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <title>Document</title>
     <style>
       body {
@@ -12,6 +20,8 @@
         padding: 0;
         width: 160mm;
         height: 221mm;
+        font-family: "Inter", sans-serif;
+
       }
       img {
         width: 100%;
@@ -28,46 +38,76 @@
       h1 {
         font-size: 18px;
         margin-top: 70px;
+        color: #292E7F;
+        margin-top: 15px;
+        margin-bottom: -20px;
       }
       h2 {
         font-size: 20px;
         font-weight: 100;
       }
       h3 {
-        font-size: 15px;
+        font-size: 13px;
         margin-top: -10px;
-        color: grey;
+        color: #060606;
+        font-weight: bold;
+      }
+      h5 {
+        font-size: 14px;
+        color: #060606;
+        
+      }
+      .hr1 {
+        margin-top: -20px;
+        border-top: 1px double #E5E5E5;
+        border-bottom: none;
+        width: 80%;
+        margin-left: 0;
+      }
+      hr {
+        margin-top: -20px;
+        border-top: 1px double #E5E5E5;
+        border-bottom: none;
+        width: 100%;
       }
 
     </style>
   </head>
   <body>
     <img src="{{base64}}" />
-    <div style="position: absolute; top: 50px; left: 40px; right: 40px">
+    <div style="position: absolute; top: 50px; left: 50px; right: 50px; margin-top: 40px;">
       <h1>INFORMACIÓN DE PROPIEDAD</h1>
-      <h2>{{formatData.nombre}}</h2>
-      <label>{{formatData.tipo}}</label>
-      <hr />
+      <h5 >{{formatData.nombre}}</h3>
+      <hr class="hr1"/>
 
-      <label for="">Precio</label>
-      <p>S/ {{formatData.precio}}</p>
-      <label for="">{{formatData.zona}}</label>
-      <label for="">{{formatData.areaLibre}}</label>
-      <label for="">{{formatData.metraje}}</label>
-      <label for="">{{formatData.cochera}}</label>
+      <label for="" style="color: #292E7F; font-size: 9px;">Precio</label>
+      <p style="color: #292E7F; margin-top: -1px; font-size: 18px; font-weight: bold;">S/ {{formatData.precio}}</p>
+      <table style="width: 100%; margin-bottom: 20px;">
+        <tr>
+          <td style="width: 50%; text-align: left; height: 30px; font-size: 12px;"><i class="fa-solid fa-location-dot" style="color: #E38102 ;"></i>
+            <label for=""><strong>Zona:</strong>  <label for="">{{formatData.zona}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-ruler-combined" style="color: #E38102 ;"></i><label for=""> <strong>Metraje:</strong>  <label for="">{{formatData.metraje}}</label></label></td>
+        </tr>    
+        <tr>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-tree" style="color: #E38102 ;"></i><label for=""> <strong>Área libre:</strong>  <label for="">{{formatData.areaLibre}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-warehouse" style="color: #E38102 ;"></i><label for=""> <strong>Cochera adicional:</strong>  <label for="">{{#if formatData.cocheraAdicional}} Sí {{else}} No
+            {{/if}}</label></label></td>
+        </tr>      
+
+      </table>
         <hr>
       <div style="display: flex; gap:5px;">
         <div class="data-container">
-          <p style="font-size: 13px; font-weight:bold">Descripción</p>
-          <p style="font-size: 12px;">{{formatData.descripcion}}</p>
+          <p style="font-size: 12px; font-weight:bold">Descripción</p>
+          <p style="font-size: 10px;">{{formatData.descripcion}}</p>
         </div>
         <div class="data-container">
-          <p style="font-size: 13px; font-weight:bold">Caracteristicas</p>
-          <p style="font-size: 12px;">{{formatData.caracteristicas}}</p>
+          <p style="font-size: 12px; font-weight:bold">Caracteristicas</p>
+          <p style="font-size: 10px;">{{formatData.caracteristicas}}</p>
         </div>
         <div class="data-container">
-          <p style="font-size: 13px; font-weight:bold">Observaciones</p>
-          <p style="font-size: 12px;">{{formatData.observaciones}}</p>
+          <p style="font-size: 12px; font-weight:bold">Observaciones</p>
+          <p style="font-size: 10px;">{{formatData.observaciones}}</p>
         </div>
       </div>
     </div>

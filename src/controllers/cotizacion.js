@@ -12,6 +12,7 @@ const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const path = require("path");
+const { where } = require("sequelize");
 
 const get = async (req, res) => {
   try {
@@ -231,7 +232,7 @@ const descargarCotizacion = async (req, res) => {
       formatData: formatData,
       base64: base64,
     };
-    console.log(formatData);
+    console.log(formatData.propiedad.imagenes);
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     const options = {
@@ -239,40 +240,18 @@ const descargarCotizacion = async (req, res) => {
       // Resto de opciones...
     };
     const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
+    const trabaProp = await TrabajadorPropiedad.findOne({where:{cod_propiedad: formatData.propiedad.cod_propiedad}})
 
     pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
       if (error) {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
-        const filePath = path.join(__dirname, "../../public/cotizacion/cotizacion.pdf"); // Ruta donde se almacenará el archivo PDF en el servidor
-        fs.writeFile(filePath, buffer, (error) => {
-          if (error) {
-            console.log("Error guardando el archivo PDF:", error);
-            res.end("Error guardando el archivo PDF: " + error);
-          } else {
-            res.setHeader("Content-Type", "application/pdf");
-            res.setHeader(
-              "Content-Disposition",
-              `attachment; filename="${pdfName}"`
-            );
-            res.download(filePath, pdfName, (error) => {
-              if (error) {
-                console.log("Error al descargar el archivo PDF:", error);
-                res.end("Error al descargar el archivo PDF: " + error);
-              } else {
-                // Elimina el archivo del servidor después de la descarga si deseas
-                fs.unlink(filePath, (error) => {
-                  if (error) {
-                    console.log("Error al eliminar el archivo PDF:", error);
-                  } else {
-                    console.log("Archivo PDF eliminado del servidor:", filePath);
-                  }
-                });
-              }
-            });
-          }
-        });
+        trabaProp.exportado = true
+        trabaProp.save()
+        res.setHeader("Content-Type", "application/pdf");
+        // res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
+        res.send(buffer)
       }
     });
   } catch (error) {

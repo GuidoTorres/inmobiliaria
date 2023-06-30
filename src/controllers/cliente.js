@@ -2,7 +2,7 @@ const dayjs = require("dayjs");
 const db = require("../../database/models");
 const { Usuario, Rol, Venta, Propiedad } = db.models;
 const { encrypt } = require("./auth");
-const { Op, where } = require("sequelize");
+const { Op } = require("sequelize");
 const {
   checkEmailInUse,
   checkDniInUse,
@@ -56,8 +56,8 @@ const update = async (req, res) => {
   let id = req.params.id;
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
-    const emailInUse = await checkEmailInUseUpdate(id, correo);
-    const dniInUse = await checkDniInUseUpdate(id, dni);
+    const emailInUse = await checkEmailInUse(id, correo);
+    const dniInUse = await checkDniInUse(id, dni);
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
