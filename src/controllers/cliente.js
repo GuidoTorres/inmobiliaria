@@ -6,6 +6,8 @@ const { Op } = require("sequelize");
 const {
   checkEmailInUse,
   checkDniInUse,
+  checkEmailInUseUpate,
+  checkDniInUseUpdate,
 } = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 
@@ -56,8 +58,8 @@ const update = async (req, res) => {
   let id = req.params.id;
   try {
     const { cod_rol, password, nombre, dni, celular, correo } = req.body;
-    const emailInUse = await checkEmailInUse(id, correo);
-    const dniInUse = await checkDniInUse(id, dni);
+    const emailInUse = await checkEmailInUseUpate( correo,id);
+    const dniInUse = await checkDniInUseUpdate(dni,id);
     if (emailInUse) {
       return res.status(400).json({ msg: "El correo ya está registrado." });
     }
@@ -179,8 +181,8 @@ const updatePosibleCliente = async (req, res) => {
     };
 
     const existeusuario = await checkUserExists(id);
-    const existeCorreo = await checkEmailInUse(id, correo);
-    const existeDNI = await checkDniInUse(id, dni);
+    const existeCorreo = await checkEmailInUseUpate(correo, id);
+    const existeDNI = await checkDniInUseUpdate(dni,id);
 
     if (!existeusuario) {
       return res.status(400).json({ msg: "El cliente no está registrado." });
@@ -312,17 +314,16 @@ const postClienteTrabajado = async (req, res) => {
       creado_por,
     } = req.body;
 
-    // const userCount = await countUsers();
-    // const emailInUse = await checkEmailInUse(correo);
-    // const dniInUse = await checkDniInUse(dni);
+    const emailInUse = await checkEmailInUse(correo);
+    const dniInUse = await checkDniInUse(dni);
 
-    // if (emailInUse) {
-    //   return res.status(400).json({ msg: "El correo ya está en uso." });
-    // }
+    if (emailInUse) {
+      return res.status(400).json({ msg: "El correo ya está en uso." });
+    }
 
-    // if (dniInUse) {
-    //   return res.status(400).json({ msg: "El DNI ya está en uso." });
-    // }
+    if (dniInUse) {
+      return res.status(400).json({ msg: "El DNI ya está en uso." });
+    }
 
     let nuevoUsuario = {
       nombre: nombre,
@@ -359,21 +360,16 @@ const updateClienteTrabajado = async (req, res) => {
     const { cod_trabajador, cod_propiedad, nombre, dni, celular, correo } =
       req.body;
 
-    // const userCount = await countUsers();
-    // const existeCorreo = await checkEmailInUse(correo);
-    // const existeDNI = await checkDniInUse(dni);
-    // if (userCount >= 10) {
-    //   return res.status(400).json({ msg: "El correo ya está registrado." });
-    // }
+    const existeCorreo = await checkEmailInUseUpate(correo, cod_cliente);
+    const existeDNI = await checkDniInUseUpdate(dni, cod_cliente);
 
-    // if (existeCorreo) {
-    //   return res.status(400).json({ msg: "El correo ya está registrado." });
-    // }
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
 
-    // if (existeDNI) {
-    //   return res.status(400).json({ msg: "El DNI ya está registrado." });
-    // }
-    // Start the transaction.
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
+    }
     const t = await db.sequelize.transaction();
 
     try {

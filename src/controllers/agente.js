@@ -1,4 +1,5 @@
 const db = require("../../database/models");
+const { checkEmailInUseUpate, checkDniInUseUpdate } = require("../../helpers/validacionUsuario");
 const { Usuario, Rol, TrabajadorPropiedad } = db.models;
 
 const { encrypt } = require("./auth");
@@ -61,6 +62,17 @@ const update = async (req, res) => {
 
     if (!usuario) {
       return res.status(404).json({ msg: "No se encontró el usuario." });
+    }
+
+    const existeCorreo = await checkEmailInUseUpate(correo, id);
+    const existeDNI = await checkDniInUseUpdate(dni, id);
+
+    if (existeCorreo) {
+      return res.status(400).json({ msg: "El correo ya está registrado." });
+    }
+
+    if (existeDNI) {
+      return res.status(400).json({ msg: "El DNI ya está registrado." });
     }
 
     let nuevoUsuario = {

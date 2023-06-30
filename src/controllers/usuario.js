@@ -8,10 +8,13 @@ const {
   checkEmailInUse,
   checkDniInUse,
   countUsers,
+  checkEmailInUseUpate,
+  checkDniInUseUpdate,
 } = require("../../helpers/validacionUsuario");
 const { checkUserExists } = require("../../helpers/validacionUsuarioUpdate");
 const fs = require('fs');
 const path = require("path");
+const { log } = require("console");
 
 
 const get = async (req, res) => {
@@ -85,9 +88,10 @@ const update = async (req, res) => {
       req.body;
 
     const existeusuario = await checkUserExists(id);
-    const existeCorreo = await checkEmailInUse(id, correo);
-    const existeDNI = await checkDniInUse(id, dni);
-
+    const existeCorreo = await checkEmailInUseUpate(correo,id);
+    const existeDNI = await checkDniInUseUpdate(dni,id);
+    console.log(existeCorreo);
+    console.log(existeusuario);
     if (!existeusuario) {
       return res.status(400).json({ msg: "El usuario no está registrado." });
     }
