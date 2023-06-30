@@ -660,11 +660,12 @@ const descargarPropiedad = async (req, res) => {
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     const options = {
-      format: "A4", // Establece el tamaño del PDF como A4
+      format: "A4",
+      phantomPath: '/path/to/phantomjs'
+      // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
     const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-
     pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
       if (error) {
         console.log("Error creando PDF:", error);
