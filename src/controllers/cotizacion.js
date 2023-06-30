@@ -252,6 +252,7 @@ const descargarCotizacion = async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
         res.send(buffer)
+        return 
       }
     });
   } catch (error) {

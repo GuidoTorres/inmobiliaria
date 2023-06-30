@@ -142,7 +142,7 @@ const descargarPropietarios = async (req, res) => {
 
     // Enviar el archivo como respuesta
     res.send(buffer);
-
+    return
 
   } catch (error) {
     console.log(error);

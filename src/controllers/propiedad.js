@@ -675,6 +675,7 @@ const descargarPropiedad = async (req, res) => {
         res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
         res.send(buffer);
+        return
     }});
   } catch (error) {
     console.log(error);
