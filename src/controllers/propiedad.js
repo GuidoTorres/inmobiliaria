@@ -14,6 +14,7 @@ const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
 
+
 const get = async (req, res) => {
   try {
     let whereClause = {};
@@ -668,14 +669,12 @@ const descargarPropiedad = async (req, res) => {
     res.on('error', function(err) {
       console.error("An error occurred:", err);
     });
-    pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
+    pdf.create(htmlFinal, options).toFile(path.join(__dirname, pdfName), (error, result) => {
       if (error) {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
-        res.attachment(pdfName);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.send(buffer);
+        res.download(result.filename);  // Esto enviará al cliente la URL de descarga del archivo
       }
     });
     
