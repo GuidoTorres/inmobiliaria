@@ -665,15 +665,15 @@ const descargarPropiedad = async (req, res) => {
       // Resto de opciones...
     };
     const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
+    pdf.create(htmlFinal, options).toStream((error, stream) => {
       if (error) {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
         res.setHeader("Content-Type", "application/pdf");
-        // res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
+        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
 
-        res.send(buffer);
+        stream.pipe(res); // Conecta el stream con la respuesta
         return
     }});
   } catch (error) {
