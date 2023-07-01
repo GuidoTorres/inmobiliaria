@@ -671,6 +671,12 @@ const descargarPropiedad = async (req, res) => {
         res.end("Error creando PDF: " + error);
       } else {
         res.attachment(pdfName);
+        res.on('finish', () => {
+          console.log('Respuesta enviada completamente');
+        });
+        res.on('close', () => {
+          console.log('La conexión se cerró antes de que la respuesta se pudiera enviar completamente');
+        });
         res.send(buffer);
       }
     });
