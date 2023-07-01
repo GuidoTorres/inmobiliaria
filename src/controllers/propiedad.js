@@ -13,6 +13,7 @@ const path = require('path');
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
+const { log } = require("console");
 
 
 const get = async (req, res) => {
@@ -669,9 +670,13 @@ const descargarPropiedad = async (req, res) => {
     res.on('error', function(err) {
       console.error("An error occurred:", err);
     });
+    
     pdf.create(htmlFinal, options).toStream(function(err, stream){
+      console.log(err);
       if (err) return res.status(500).send(err);
+      
       res.setHeader('Content-type', 'application/pdf');
+      console.log(res);
       stream.pipe(res);
     });
     
