@@ -15,23 +15,25 @@ const reporteInicioSesionRouter = require("./src/routes/registroInicioSesion");
 const usuarioRouter = require("./src/routes/usuario");
 const cotizacionRouter = require("./src/routes/cotizacion");
 
-
-
 const app = express();
 const PORT = process.env.PORTSERVER || 3002;
 
 app.use(express.json());
-app.use(cors({
-  origin: "http://localhost:3000",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // Esto permite las cookies
-}));
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 app.use("/img", express.static(path.join(__dirname, "upload/imagenesVideos")));
-app.use("/titulo", express.static(path.join(__dirname, "upload/titulosPropiedad")));
-
+app.use(
+  "/titulo",
+  express.static(path.join(__dirname, "upload/titulosPropiedad"))
+);
 
 // Configuración y conexión a la base de datos
 (async () => {
@@ -55,9 +57,6 @@ app.use("/api/v1/propiedad", propiedadRouter);
 app.use("/api/v1/reporte", reporteInicioSesionRouter);
 app.use("/api/v1/usuario", usuarioRouter);
 app.use("/api/v1/cotizacion", cotizacionRouter);
-
-
-
 
 app.listen(PORT, () => {
   console.log("Servidor funcionando en el puerto", PORT);
