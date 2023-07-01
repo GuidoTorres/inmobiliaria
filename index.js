@@ -18,7 +18,7 @@ const cotizacionRouter = require("./src/routes/cotizacion");
 
 
 const app = express();
-const PORT = process.env.PORTSERVER || 3000;
+const PORT = process.env.PORTSERVER || 3002;
 
 app.use(express.json());
 app.use(cors({ origin: "*" }));
