@@ -9,7 +9,7 @@ const {
   Usuario,
   Rol,
 } = db.models;
-const path = require('path');
+const path = require("path");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
@@ -619,27 +619,26 @@ const descargarPropiedad = async (req, res) => {
     }
 
     let formatData = {
-
-        cod_propiedad: propiedad?.cod_propiedad,
-        nombre: propiedad?.nombre,
-        tipo: propiedad?.tipo,
-        zona: propiedad?.zona,
-        direccion: propiedad?.direccion,
-        precio: propiedad?.precio,
-        estado: propiedad?.estado,
-        descripcion: propiedad?.descripcion,
-        caracteristicas: propiedad?.caracteristicas,
-        metraje: propiedad?.metraje,
-        propiedadHabilitada: propiedad?.propiedadHabilitada,
-        areaLibre: propiedad?.areaLibre,
-        cocheraAdicional: propiedad?.cocheraAdicional,
-        comision: propiedad?.comision,
-        observaciones: propiedad?.observaciones,
-        video: propiedad?.video,
-        creado_por: propiedad?.creado_por,
-        createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
-        propietario: propiedad?.propietario,
-        imagenes: propiedad?.imagenVideos,
+      cod_propiedad: propiedad?.cod_propiedad,
+      nombre: propiedad?.nombre,
+      tipo: propiedad?.tipo,
+      zona: propiedad?.zona,
+      direccion: propiedad?.direccion,
+      precio: propiedad?.precio,
+      estado: propiedad?.estado,
+      descripcion: propiedad?.descripcion,
+      caracteristicas: propiedad?.caracteristicas,
+      metraje: propiedad?.metraje,
+      propiedadHabilitada: propiedad?.propiedadHabilitada,
+      areaLibre: propiedad?.areaLibre,
+      cocheraAdicional: propiedad?.cocheraAdicional,
+      comision: propiedad?.comision,
+      observaciones: propiedad?.observaciones,
+      video: propiedad?.video,
+      creado_por: propiedad?.creado_por,
+      createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
+      propietario: propiedad?.propietario,
+      imagenes: propiedad?.imagenVideos,
     };
 
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
@@ -665,32 +664,24 @@ const descargarPropiedad = async (req, res) => {
       // Resto de opciones...
     };
     const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    const pdfPath = path.join('/var/www/html/pdf', pdfName); // Ruta completa del archivo PDF
+    const pdfPath = path.join("/var/www/html/pdf", pdfName); // Ruta completa del archivo PDF
 
-    pdf.create(htmlFinal, options).toFile(pdfPath, (error, result) => {
-      if (error) {
-        console.log('Error creando PDF:', error);
-        res.end('Error creando PDF: ' + error);
-      } else {
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${pdfName}"`);
-    
-        const fileStream = fs.createReadStream(pdfPath);
-        fileStream.pipe(res); // Conecta el stream del archivo con la respuesta
-    
-        // Eliminar el archivo después de la descarga
-        fs.unlink(pdfPath, (unlinkErr) => {
-          if (unlinkErr) {
-            console.log('Error al eliminar el archivo PDF:', unlinkErr);
-          } else {
-            console.log('Archivo PDF eliminado:', pdfPath);
-          }
-        });
-      }
+    pdf.create(htmlFinal, options)
+    .then((pdfFile) => {
+      res.download(pdfFile);
+      // Eliminar el archivo después de la descarga
+      fs.unlink(pdfFile, (unlinkErr) => {
+        if (unlinkErr) {
+          console.log("Error al eliminar el archivo PDF:", unlinkErr);
+        } else {
+          console.log("Archivo PDF eliminado:", pdfFile);
+        }
+      });
+    })
+    .catch((error) => {
+      console.log("Error creando PDF:", error);
+      res.end("Error creando PDF: " + error);
     });
-
-      
-    
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
