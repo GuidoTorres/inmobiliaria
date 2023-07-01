@@ -21,7 +21,11 @@ const app = express();
 const PORT = process.env.PORTSERVER || 3002;
 
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // Esto permite las cookies
+}));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
