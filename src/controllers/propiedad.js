@@ -664,40 +664,32 @@ const descargarPropiedad = async (req, res) => {
       // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
-    const pdfName = "../../propiedad.pdf"; // Establece el nombre del archivo PDF
-    pdf.create(htmlFinal, options).toFile(pdfName, (error, result) => {
+    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
+    const pdfPath = path.join('/var/www/html/pdf', pdfName); // Ruta completa del archivo PDF
+
+    pdf.create(htmlFinal, options).toFile(pdfPath, (error, result) => {
       if (error) {
         console.log('Error creando PDF:', error);
         res.end('Error creando PDF: ' + error);
       } else {
-        // El PDF se ha guardado correctamente en el archivo
-        fs.readFile(pdfName, (err, data) => {
-          if (err) {
-            console.log('Error al leer el archivo PDF:', err);
-            res.end('Error al leer el archivo PDF: ' + err);
-          } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${pdfName}"`);
-            res.send(data);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${pdfName}"`);
     
-            // Eliminar el archivo después de la descarga
-            fs.unlink(pdfName, (unlinkErr) => {
-              if (unlinkErr) {
-                console.log('Error al eliminar el archivo PDF:', unlinkErr);
-              } else {
-                console.log('Archivo PDF eliminado:', pdfName);
-              }
-            });
+        const fileStream = fs.createReadStream(pdfPath);
+        fileStream.pipe(res); // Conecta el stream del archivo con la respuesta
+    
+        // Eliminar el archivo después de la descarga
+        fs.unlink(pdfPath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.log('Error al eliminar el archivo PDF:', unlinkErr);
+          } else {
+            console.log('Archivo PDF eliminado:', pdfPath);
           }
         });
       }
     });
-    
-    
-    
-    
-    
-    
+
+      
     
   } catch (error) {
     console.log(error);
