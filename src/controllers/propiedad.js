@@ -661,7 +661,6 @@ const descargarPropiedad = async (req, res) => {
     const htmlFinal = template(data);
     const options = {
       format: "A4",
-      phantomPath: "../../node_modules/phantomjs-prebuilt/bin/phantomjs",
       // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
