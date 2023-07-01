@@ -9,7 +9,7 @@ const {
   Usuario,
   Rol,
 } = db.models;
-const path = require("path");
+const path = require('path');
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
@@ -619,26 +619,27 @@ const descargarPropiedad = async (req, res) => {
     }
 
     let formatData = {
-      cod_propiedad: propiedad?.cod_propiedad,
-      nombre: propiedad?.nombre,
-      tipo: propiedad?.tipo,
-      zona: propiedad?.zona,
-      direccion: propiedad?.direccion,
-      precio: propiedad?.precio,
-      estado: propiedad?.estado,
-      descripcion: propiedad?.descripcion,
-      caracteristicas: propiedad?.caracteristicas,
-      metraje: propiedad?.metraje,
-      propiedadHabilitada: propiedad?.propiedadHabilitada,
-      areaLibre: propiedad?.areaLibre,
-      cocheraAdicional: propiedad?.cocheraAdicional,
-      comision: propiedad?.comision,
-      observaciones: propiedad?.observaciones,
-      video: propiedad?.video,
-      creado_por: propiedad?.creado_por,
-      createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
-      propietario: propiedad?.propietario,
-      imagenes: propiedad?.imagenVideos,
+
+        cod_propiedad: propiedad?.cod_propiedad,
+        nombre: propiedad?.nombre,
+        tipo: propiedad?.tipo,
+        zona: propiedad?.zona,
+        direccion: propiedad?.direccion,
+        precio: propiedad?.precio,
+        estado: propiedad?.estado,
+        descripcion: propiedad?.descripcion,
+        caracteristicas: propiedad?.caracteristicas,
+        metraje: propiedad?.metraje,
+        propiedadHabilitada: propiedad?.propiedadHabilitada,
+        areaLibre: propiedad?.areaLibre,
+        cocheraAdicional: propiedad?.cocheraAdicional,
+        comision: propiedad?.comision,
+        observaciones: propiedad?.observaciones,
+        video: propiedad?.video,
+        creado_por: propiedad?.creado_por,
+        createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
+        propietario: propiedad?.propietario,
+        imagenes: propiedad?.imagenVideos,
     };
 
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
@@ -658,28 +659,29 @@ const descargarPropiedad = async (req, res) => {
     };
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    const options = { format: "A4" }; // tus opciones
-    const pdfName = "propiedad.pdf";
-
-    const buffer = await createPdfBuffer(htmlFinal, options);
-    res.attachment(pdfName);
-    res.send(buffer);
+    const options = {
+      format: "A4",
+      // Establece el tamaño del PDF como A4
+      // Resto de opciones...
+    };
+    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
+    res.on('error', function(err) {
+      console.error("An error occurred:", err);
+    });
+    pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
+      if (error) {
+        console.log("Error creando PDF:", error);
+        res.end("Error creando PDF: " + error);
+      } else {
+        res.attachment(pdfName);
+        res.send(buffer);
+      }
+    });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
-};
-
-const createPdfBuffer = (html, options) => {
-  return new Promise((resolve, reject) => {
-    pdf.create(html, options).toBuffer((err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buffer);
-      }
-    });
-  });
 };
 
 module.exports = {
