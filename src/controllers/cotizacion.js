@@ -247,12 +247,8 @@ const descargarCotizacion = async (req, res) => {
         console.log("Error creando PDF:", error);
         res.end("Error creando PDF: " + error);
       } else {
-        trabaProp.exportado = true
-        trabaProp.save()
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
-        res.send(buffer)
-        return 
+        res.attachment(pdfName);
+        res.send(buffer);
       }
     });
   } catch (error) {
