@@ -9,11 +9,12 @@ const {
   Usuario,
   Rol,
 } = db.models;
-const path = require("path");
+const path = require('path');
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
 const { log } = require("console");
+
 
 const get = async (req, res) => {
   try {
@@ -620,40 +621,32 @@ const descargarPropiedad = async (req, res) => {
     }
 
     let formatData = {
-      cod_propiedad: propiedad?.cod_propiedad,
-      nombre: propiedad?.nombre,
-      tipo: propiedad?.tipo,
-      zona: propiedad?.zona,
-      direccion: propiedad?.direccion,
-      precio: propiedad?.precio,
-      estado: propiedad?.estado,
-      descripcion: propiedad?.descripcion,
-      caracteristicas: propiedad?.caracteristicas,
-      metraje: propiedad?.metraje,
-      propiedadHabilitada: propiedad?.propiedadHabilitada,
-      areaLibre: propiedad?.areaLibre,
-      cocheraAdicional: propiedad?.cocheraAdicional,
-      comision: propiedad?.comision,
-      observaciones: propiedad?.observaciones,
-      video: propiedad?.video,
-      creado_por: propiedad?.creado_por,
-      createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
-      propietario: propiedad?.propietario,
-      imagenes: propiedad?.imagenVideos,
+
+        cod_propiedad: propiedad?.cod_propiedad,
+        nombre: propiedad?.nombre,
+        tipo: propiedad?.tipo,
+        zona: propiedad?.zona,
+        direccion: propiedad?.direccion,
+        precio: propiedad?.precio,
+        estado: propiedad?.estado,
+        descripcion: propiedad?.descripcion,
+        caracteristicas: propiedad?.caracteristicas,
+        metraje: propiedad?.metraje,
+        propiedadHabilitada: propiedad?.propiedadHabilitada,
+        areaLibre: propiedad?.areaLibre,
+        cocheraAdicional: propiedad?.cocheraAdicional,
+        comision: propiedad?.comision,
+        observaciones: propiedad?.observaciones,
+        video: propiedad?.video,
+        creado_por: propiedad?.creado_por,
+        createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
+        propietario: propiedad?.propietario,
+        imagenes: propiedad?.imagenVideos,
     };
 
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
-    console.log("About to read image at path:", imagePath);
-    let imageData;
-    try {
-      imageData = fs.readFileSync(imagePath);
-    } catch (error) {
-      console.error("Failed to read image:", error);
-      return res.status(500).json({ msg: "Failed to read image for PDF" });
-    }
-    console.log("Successfully read image");
-
+    const imageData = fs.readFileSync(imagePath);
     const base64Image = Buffer.from(imageData).toString("base64");
     const mimeType = path.extname(imagePath).replace(".", "");
     const base64 = `data:image/${mimeType};base64,${base64Image}`;
@@ -674,18 +667,23 @@ const descargarPropiedad = async (req, res) => {
       // Resto de opciones...
     };
     const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    res.on("error", function (err) {
+    res.on('error', function(err) {
       console.error("An error occurred:", err);
     });
+    console.log("apunto de entral al pdf");
+    pdf.create(htmlFinal, options).toFile(path.join(__dirname, pdfName), (error, result) => {
+      console.log("en el pdf");
 
-    pdf.create(htmlFinal, options).toStream(function (err, stream) {
-      console.log(err);
-      if (err) return res.status(500).send(err);
-
-      res.setHeader("Content-type", "application/pdf");
-      console.log(res);
-      stream.pipe(res);
+      if (error) {
+        console.log("Error creating PDF:", error);
+        console.log("Result object:", result);
+        res.status(500).send("Error creating PDF: " + error);
+      } else {
+        console.log("Successfully created PDF");
+        res.download(result.filename);  // Esto enviará al cliente la URL de descarga del archivo
+      }
     });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
