@@ -664,18 +664,41 @@ const descargarPropiedad = async (req, res) => {
       // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
-    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    pdf.create(htmlFinal, options).toStream((error, stream) => {
+    const pdfName = "../../propiedad.pdf"; // Establece el nombre del archivo PDF
+    pdf.create(htmlFinal, options).toFile(pdfName, (error, result) => {
       if (error) {
-        console.log("Error creando PDF:", error);
-        res.end("Error creando PDF: " + error);
+        console.log('Error creando PDF:', error);
+        res.end('Error creando PDF: ' + error);
       } else {
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="${pdfName}"`); // Establece el nombre del archivo en el encabezado de respuesta
-
-        stream.pipe(res); // Conecta el stream con la respuesta
-        return
-    }});
+        // El PDF se ha guardado correctamente en el archivo
+        fs.readFile(pdfName, (err, data) => {
+          if (err) {
+            console.log('Error al leer el archivo PDF:', err);
+            res.end('Error al leer el archivo PDF: ' + err);
+          } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${pdfName}"`);
+            res.send(data);
+    
+            // Eliminar el archivo después de la descarga
+            fs.unlink(pdfName, (unlinkErr) => {
+              if (unlinkErr) {
+                console.log('Error al eliminar el archivo PDF:', unlinkErr);
+              } else {
+                console.log('Archivo PDF eliminado:', pdfName);
+              }
+            });
+          }
+        });
+      }
+    });
+    
+    
+    
+    
+    
+    
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
