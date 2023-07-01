@@ -669,13 +669,10 @@ const descargarPropiedad = async (req, res) => {
     res.on('error', function(err) {
       console.error("An error occurred:", err);
     });
-    pdf.create(htmlFinal, options).toFile(path.join(__dirname, pdfName), (error, result) => {
-      if (error) {
-        console.log("Error creando PDF:", error);
-        res.end("Error creando PDF: " + error);
-      } else {
-        res.download(result.filename);  // Esto enviará al cliente la URL de descarga del archivo
-      }
+    pdf.create(htmlFinal, options).toStream(function(err, stream){
+      if (err) return res.status(500).send(err);
+      res.setHeader('Content-type', 'application/pdf');
+      stream.pipe(res);
     });
     
   } catch (error) {
