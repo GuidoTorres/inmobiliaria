@@ -670,10 +670,9 @@ const descargarPropiedad = async (req, res) => {
     res.on('error', function(err) {
       console.error("An error occurred:", err);
     });
-    console.log("apunto de entral al pdf");
-    pdf.create(htmlFinal, options).toFile(path.join(__dirname, pdfName), (error, result) => {
-      console.log("en el pdf");
-
+    console.log("About to create PDF");
+    pdf.create('Hello world').toFile(path.join(__dirname, 'test.pdf'), (error, result) => {
+      console.log("Inside PDF creation");
       if (error) {
         console.log("Error creating PDF:", error);
         console.log("Result object:", result);
