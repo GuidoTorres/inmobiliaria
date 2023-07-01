@@ -661,6 +661,7 @@ const descargarPropiedad = async (req, res) => {
     const htmlFinal = template(data);
     const options = {
       format: "A4",
+      phantomPath: '/home/ubuntu/.nvm/versions/node/v20.3.1/bin/phantomjs'
       // Establece el tamaño del PDF como A4
       // Resto de opciones...
     };
