@@ -658,38 +658,28 @@ const descargarPropiedad = async (req, res) => {
     };
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    const options = {
-      format: "A4",
-      // Establece el tamaño del PDF como A4
-      // Resto de opciones...
-    };
-    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    const pdfProcess = pdf.create(htmlFinal, options);
+    const options = { format: "A4" }; // tus opciones
+    const pdfName = "propiedad.pdf";
 
-    pdfProcess.on("error", function (err) {
-      console.log("Error del proceso pdf:", err);
-    });
-    pdfProcess.toBuffer((error, buffer) => {
-      if (error) {
-        console.log("Error creando PDF:", error);
-        res.end("Error creando PDF: " + error);
-      } else {
-        res.attachment(pdfName);
-        res.on("finish", () => {
-          console.log("Respuesta enviada completamente");
-        });
-        res.on("close", () => {
-          console.log(
-            "La conexión se cerró antes de que la respuesta se pudiera enviar completamente"
-          );
-        });
-        res.send(buffer);
-      }
-    });
+    const buffer = await createPdfBuffer(htmlFinal, options);
+    res.attachment(pdfName);
+    res.send(buffer);
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
   }
+};
+
+const createPdfBuffer = (html, options) => {
+  return new Promise((resolve, reject) => {
+    pdf.create(html, options).toBuffer((err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
 };
 
 module.exports = {
