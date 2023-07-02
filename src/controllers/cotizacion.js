@@ -242,7 +242,7 @@ const descargarCotizacion = async (req, res) => {
     const page = await browser.newPage();
 
     // Carga tu HTML en la página
-    await page.setContent(htmlFinal);
+    await page.setContent(htmlFinal, {timeout: 60000});
 
     // Opciones para la generación del PDF
     const options = {
