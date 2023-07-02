@@ -217,11 +217,8 @@ const descargarCotizacion = async (req, res) => {
     };
     // Ruta de la imagen
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
-    const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
+    const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
     const imageData = fs.readFileSync(imagePath);
-    const base64Image = Buffer.from(imageData).toString("base64");
-    const mimeType = path.extname(imagePath).replace(".", "");
-    const base64 = `data:image/${mimeType};base64,${base64Image}`;
 
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
@@ -229,11 +226,12 @@ const descargarCotizacion = async (req, res) => {
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: base64,
+      base64: imageData,
     };
-    const pdfName = "cotizacion.pdf";
+    const pdfName = "propiedad.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
+    // Lanza una nueva instancia de Puppeteer
     // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],

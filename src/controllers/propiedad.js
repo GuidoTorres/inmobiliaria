@@ -642,42 +642,47 @@ const descargarPropiedad = async (req, res) => {
       imagenes: propiedad?.imagenVideos,
     };
 
-    const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
+    const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const imageData = fs.readFileSync(imagePath);
-
+    
+    // Convertir el buffer de la imagen a base64
+    const base64Image = Buffer.from(imageData).toString('base64');
+    
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
-
+    
     // Compila la plantilla de Handlebars
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: imageData,
+      base64: 'data:image/png;base64,' + base64Image,
     };
     const pdfName = "propiedad.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     // Lanza una nueva instancia de Puppeteer
+    // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
       headless: "new",
-  });
-  
-  const page = await browser.newPage();
-  
-  // Carga tu HTML en la página
-  await page.setContent(htmlFinal);
-  
-  // Genera el PDF y obténlo como un Buffer
-  const pdfBuffer = await page.pdf({format: "A4"});
-  
-  // Cierra la instancia de Puppeteer
-  await browser.close();
-  
-  // Envía el PDF como respuesta
-  res.set('Content-Type', 'application/pdf');
-  res.set('Content-Disposition', 'attachment;filename=propiedad.pdf');
-  res.send(pdfBuffer);
+    });
+
+    const page = await browser.newPage();
+
+    // Carga tu HTML en la página
+    await page.setContent(htmlFinal);
+
+    // Genera el PDF y obténlo como un Buffer
+    const pdfBuffer = await page.pdf({ format: "A4",printBackground: true});
+
+    // Cierra la instancia de Puppeteer
+    await browser.close();
+
+    // Envía el PDF como respuesta
+    res.set("Content-Type", "application/pdf");
+    res.set("Content-Disposition", "attachment;filename=propiedad.pdf");
+    res.send(pdfBuffer);
+
     return;
   } catch (error) {
     console.log(error);

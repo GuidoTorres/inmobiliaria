@@ -18,96 +18,74 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        width: 100%;
+        width: 210mm;
+        height: 270mm;
         font-family: "Inter", sans-serif;
+      }
+      .page {
+        position: relative;
+        width: 100%;
+        height: 270mm;
+        padding: 50px;
+        z-index: 10;
+        margin-top: 80px;
+      }
 
-      }
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Agrega esta línea para asegurarte de que la imagen se ajuste correctamente */
-      }
-      .data-container {
-        background-color: #E5EAFB;
-        border-radius: 10px;
-        padding: 8px;
-        margin-top: 20px;
-        text-align: justify;
-      }
-      h1 {
-        font-size: 18px;
-        margin-top: 70px;
-        color: #292E7F;
-        margin-top: 15px;
-        margin-bottom: -20px;
-      }
-      h2 {
-        font-size: 20px;
-        font-weight: 100;
-      }
-      h3 {
-        font-size: 13px;
-        margin-top: -10px;
-        color: #060606;
-        font-weight: bold;
-      }
-      h5 {
-        font-size: 14px;
-        color: #060606;
-        
-      }
-      .hr1 {
-        margin-top: -20px;
-        border-top: 1px double #E5E5E5;
-        border-bottom: none;
-        width: 80%;
-        margin-left: 0;
-      }
-      hr {
-        margin-top: -20px;
-        border-top: 1px double #E5E5E5;
-        border-bottom: none;
-        width: 100%;
-      }
 
     </style>
   </head>
   <body>
-    <img src="{{base64}}" />
-    <div style="position: absolute; top: 50px; left: 50px; right: 50px; margin-top: 40px;">
-      <h1>INFORMACIÓN DE PROPIEDAD</h1>
-      <h5 >{{formatData.nombre}}</h3>
-      <hr class="hr1"/>
+    <img
+    src="{{base64}}"
+    style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    "
+  />
+    <div class="page" >
+      <h1 style="font-size: 26px">COTIZACIÓN DE PROPIEDAD</h1>
+      <h5 style="margin-top: 30px; font-size: 18px; font-weight: bold;">{{formatData.nombre}}</h3>
+      <hr style="margin-top: -20px; width: 75%; margin-left: 0;"/>
 
-      <label for="" style="color: #292E7F; font-size: 9px;">Precio</label>
-      <p style="color: #292E7F; margin-top: -1px; font-size: 18px; font-weight: bold;">S/ {{formatData.precio}}</p>
+      <div style="margin-top: 30px;">
+
+        <label for="" style="color: #292E7F; font-size: 16px; ">Precio</label>
+        <p style="color: #292E7F; font-size: 18px; font-weight: bold;margin-top: -1px;">S/ {{formatData.precio}}</p>
+      </div>
       <table style="width: 100%; margin-bottom: 20px;">
         <tr>
-          <td style="width: 50%; text-align: left; height: 30px; font-size: 12px;"><i class="fa-solid fa-location-dot" style="color: #E38102 ;"></i>
+          <td style="width: 50%; text-align: left; height: 30px; font-size: 16px;"><i class="fa-solid fa-location-dot" style="color: #E38102 ;"></i>
             <label for=""><strong>Zona:</strong>  <label for="">{{formatData.zona}}</label></label></td>
-          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-ruler-combined" style="color: #E38102 ;"></i><label for=""> <strong>Metraje:</strong>  <label for="">{{formatData.metraje}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-ruler-combined" style="color: #E38102 ;"></i><label for=""> <strong>Metraje:</strong>  <label for="">{{formatData.metraje}}</label></label></td>
         </tr>    
         <tr>
-          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-tree" style="color: #E38102 ;"></i><label for=""> <strong>Área libre:</strong>  <label for="">{{formatData.areaLibre}}</label></label></td>
-          <td style="width: 50%; text-align: left; height: 30px;font-size: 12px;"><i class="fa-solid fa-warehouse" style="color: #E38102 ;"></i><label for=""> <strong>Cochera adicional:</strong>  <label for="">{{#if formatData.cocheraAdicional}} Sí {{else}} No
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-tree" style="color: #E38102 ;"></i><label for=""> <strong>Área libre:</strong>  <label for="">{{formatData.areaLibre}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-warehouse" style="color: #E38102 ;"></i><label for=""> <strong>Cochera adicional:</strong>  <label for="">{{#if formatData.cocheraAdicional}} Sí {{else}} No
             {{/if}}</label></label></td>
         </tr>      
 
       </table>
         <hr>
-      <div style="display: flex; flex-direction: column; gap:5px;">
-        <div class="data-container">
-          <p style="font-size: 12px; font-weight:bold">Descripción</p>
-          <p style="font-size: 10px;">{{formatData.descripcion}}</p>
-        </div>
-        <div class="data-container">
-          <p style="font-size: 12px; font-weight:bold">Caracteristicas</p>
-          <p style="font-size: 10px;">{{formatData.caracteristicas}}</p>
-        </div>
-        <div class="data-container">
-          <p style="font-size: 12px; font-weight:bold">Observaciones</p>
-          <p style="font-size: 10px;">{{formatData.observaciones}}</p>
-        </div>
+      <div style="display: flex; flex-direction: column; gap:30px; margin-top: 40px;">
+          
+          <div style="font-size: 16px; text-align: justify; background: #E5EAFB; border-radius: 8px; padding: 8px; padding-left: 10px; padding-right: 10px;">
+            <p style="font-size: 16px; font-weight:bold">Descripción</p>
+            {{formatData.descripcion}}
+          </div>
+
+          <div style="font-size: 16px; text-align: justify; background: #E5EAFB; border-radius: 8px; padding: 8px;">
+            <p style="font-size: 16px; font-weight:bold">Caracteristicas</p>
+            {{formatData.caracteristicas}}
+          </div>
+
+          <div style="font-size: 16px; text-align: justify; background: #E5EAFB; border-radius: 8px; padding: 8px;">
+            <p style="font-size: 16px; font-weight:bold">Observaciones</p>
+            {{formatData.observaciones}}
+          </div>
       </div>
     </div>
   </body>
