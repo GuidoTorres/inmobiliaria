@@ -658,6 +658,7 @@ const descargarPropiedad = async (req, res) => {
       formatData: formatData,
       base64: base64,
     };
+    const pdfName = "propiedad.pdf"
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     // Lanza una nueva instancia de Puppeteer
