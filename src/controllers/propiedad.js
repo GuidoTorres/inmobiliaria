@@ -668,7 +668,7 @@ const descargarPropiedad = async (req, res) => {
     await page.setContent(htmlFinal);
     // Opciones para la generación del PDF
     const options = {
-      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      path: path.join(__dirname, "../../upload/pdf/propiedad.pdf"),
       format: "A4",
     };
 

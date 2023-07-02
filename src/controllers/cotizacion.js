@@ -246,7 +246,7 @@ const descargarCotizacion = async (req, res) => {
 
     // Opciones para la generación del PDF
     const options = {
-      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      path: path.join(__dirname, "../../upload/pdf/cotizacion.pdf"),
       format: "A4",
     };
 
