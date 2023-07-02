@@ -32,6 +32,7 @@
     "nodemon": "^2.0.22",
     "path": "^0.12.7",
     "pdfmake": "^0.2.7",
+    "puppeteer": "^20.7.4",
     "sequelize": "^6.32.0"
   },
   "devDependencies": {

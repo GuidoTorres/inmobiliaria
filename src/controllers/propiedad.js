@@ -9,11 +9,11 @@ const {
   Usuario,
   Rol,
 } = db.models;
-const path = require('path');
+const path = require("path");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
-const { log } = require("console");
+const puppeteer = require('puppeteer');
 
 
 const get = async (req, res) => {
@@ -621,27 +621,26 @@ const descargarPropiedad = async (req, res) => {
     }
 
     let formatData = {
-
-        cod_propiedad: propiedad?.cod_propiedad,
-        nombre: propiedad?.nombre,
-        tipo: propiedad?.tipo,
-        zona: propiedad?.zona,
-        direccion: propiedad?.direccion,
-        precio: propiedad?.precio,
-        estado: propiedad?.estado,
-        descripcion: propiedad?.descripcion,
-        caracteristicas: propiedad?.caracteristicas,
-        metraje: propiedad?.metraje,
-        propiedadHabilitada: propiedad?.propiedadHabilitada,
-        areaLibre: propiedad?.areaLibre,
-        cocheraAdicional: propiedad?.cocheraAdicional,
-        comision: propiedad?.comision,
-        observaciones: propiedad?.observaciones,
-        video: propiedad?.video,
-        creado_por: propiedad?.creado_por,
-        createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
-        propietario: propiedad?.propietario,
-        imagenes: propiedad?.imagenVideos,
+      cod_propiedad: propiedad?.cod_propiedad,
+      nombre: propiedad?.nombre,
+      tipo: propiedad?.tipo,
+      zona: propiedad?.zona,
+      direccion: propiedad?.direccion,
+      precio: propiedad?.precio,
+      estado: propiedad?.estado,
+      descripcion: propiedad?.descripcion,
+      caracteristicas: propiedad?.caracteristicas,
+      metraje: propiedad?.metraje,
+      propiedadHabilitada: propiedad?.propiedadHabilitada,
+      areaLibre: propiedad?.areaLibre,
+      cocheraAdicional: propiedad?.cocheraAdicional,
+      comision: propiedad?.comision,
+      observaciones: propiedad?.observaciones,
+      video: propiedad?.video,
+      creado_por: propiedad?.creado_por,
+      createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
+      propietario: propiedad?.propietario,
+      imagenes: propiedad?.imagenVideos,
     };
 
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
@@ -661,28 +660,29 @@ const descargarPropiedad = async (req, res) => {
     };
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
+    // Lanza una nueva instancia de Puppeteer
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+
+    // Carga tu HTML en la página
+    await page.setContent(htmlFinal);
+
+    // Opciones para la generación del PDF
     const options = {
+      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
       format: "A4",
-      // Establece el tamaño del PDF como A4
-      // Resto de opciones...
     };
-    const pdfName = "propiedad.pdf"; // Establece el nombre del archivo PDF
-    res.on('error', function(err) {
-      console.error("An error occurred:", err);
-    });
-    console.log("About to create PDF");
-    pdf.create('Hello world').toFile(path.join(__dirname, 'test.pdf'), (error, result) => {
-      console.log("Inside PDF creation");
-      if (error) {
-        console.log("Error creating PDF:", error);
-        console.log("Result object:", result);
-        res.status(500).send("Error creating PDF: " + error);
-      } else {
-        console.log("Successfully created PDF");
-        res.download(result.filename);  // Esto enviará al cliente la URL de descarga del archivo
-      }
-    });
-    
+
+    // Genera el PDF
+    await page.pdf(options);
+
+    // Cierra la instancia de Puppeteer
+    await browser.close();
+
+    // Envía el PDF como respuesta
+    res.download(options.path);
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
