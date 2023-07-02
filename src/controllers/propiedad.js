@@ -684,6 +684,7 @@ const descargarPropiedad = async (req, res) => {
 
     // Envía el PDF como respuesta
     res.download(options.path);
+    return
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
