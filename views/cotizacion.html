@@ -16,414 +16,271 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        width: 160mm;
-        height: 221mm;
+        width: 210mm;
+        height: 270mm;
         font-family: "Inter", sans-serif;
       }
-      img {
+      .page {
+        position: relative;
         width: 100%;
-        height: 100%;
-        object-fit: cover; /* Agrega esta línea para asegurarte de que la imagen se ajuste correctamente */
+        height: 270mm;
+        padding: 40px;
+        z-index: 10;
       }
-
-      .title-container {
-        display: flex;
-        height: 20px;
+      .page2 {
+        position: relative;
+        width: 100%;
+        height: 270mm;
+      }
+      .page2-data {
+        position: relative; /* o absolute */
+        z-index: 20; /* un valor mayor que el z-index de la imagen */
+      }
+      .cliente {
+        width: 20%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .cliente-data {
+        width: 60%;
+        font-size: 16px;
+      }
+      .propiedad {
+        width: 14.5%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .propiedad:nth-child(1) {
+        width: 20%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .propiedad:nth-child(2) {
+        width: 15%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .propiedad-data {
+        width: 14.5%;
+        font-size: 16px;
+        text-align: center;
+      }
+      .propieda-descripcion {
+        width: 30%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .propieda-descripcion-data {
         width: 70%;
-      }
-      hr {
-        margin-top: -0.3px;
-        border-top: 1px double #8c8b8b;
-        border-bottom: none;
-        width: 100%;
-      }
-
-      .data-container {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
+        text-align: center;
+        font-size: 16px;
+        padding: 6px;
+        text-align: justify;
       }
     </style>
   </head>
   <body>
-    <img src="{{base64}}" />
-    <div
+    <img
+      src="{{base64}}"
       style="
         position: absolute;
-        top: 40px;
-        left: 30px;
-        right: 30px;
-        width: 90%;
-        height: 200mm;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       "
-    >
-      <h1 style="font-size: 18px; margin-top: 30px">COTIZACIÓN DE PROPIEDAD</h1>
-      <div class="title-container">
+    />
+    <div class="page">
+      <h1 style="font-size: 22px; margin-top: 90px">COTIZACIÓN DE PROPIEDAD</h1>
+      <div
+        class="title-container"
+        style="margin-top: 30px; font-size: 18px; font-weight: bold"
+      >
         <div>Datos del cliente</div>
-        <hr />
+        <hr style="width: 75%; margin-left: 0" />
       </div>
       <table style="margin-top: 10px; width: 100%">
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Nombre Completo</label>
           </td>
-          <td style="width: 60%; font-size: 10px">
+          <td class="cliente-data">
             <label>{{formatData.cliente.nombre}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>DNI</label>
           </td>
-          <td style="width: 60%; font-size: 10px">
+          <td class="cliente-data">
             <label>{{formatData.cliente.dni}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Correo</label>
           </td>
-          <td style="width: 60%; font-size: 10px">
+          <td class="cliente-data">
             <label>{{formatData.cliente.correo}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Celular</label>
           </td>
-          <td style="width: 60%; font-size: 10px">
+          <td class="cliente-data">
             <label>{{formatData.cliente.celular}}</label>
           </td>
         </tr>
       </table>
       <br />
-      <div class="title-container">
+      <div
+        class="title-container"
+        style="margin-top: 10px; font-size: 18px; font-weight: bold"
+      >
         <div>Datos de las propiedades</div>
-        <hr />
+        <hr style="width: 75%; margin-left: 0" />
       </div>
       <table style="margin-top: 10px; width: 100%">
         <tr style="margin-top: 5px">
-          <th
-            style="
-              width: 25%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            Nombre
-          </th>
-          <th
-            style="
-              width: 25%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            Tipo
-          </th>
-          <th
-            style="
-              width: 25%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            Precio
-          </th>
-          <th
-            style="
-              width: 25%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            Zona
-          </th>
+          <th class="propiedad">Nombre</th>
+          <th class="propiedad">Tipo</th>
+          <th class="propiedad">Precio</th>
+          <th class="propiedad">Zona</th>
+          <th class="propiedad">Metraje</th>
+          <th class="propiedad">Area Libre</th>
+          <th class="propiedad">Cochera</th>
         </tr>
         <tr>
-          <td style="text-align: center; font-size: 10px">
-            {{formatData.propiedad.nombre}}
-          </td>
-          <td style="text-align: center; font-size: 10px">
-            {{formatData.propiedad.tipo}}
-          </td>
-          <td style="text-align: center; font-size: 10px">
-            {{formatData.propiedad.precio}}
-          </td>
-          <td style="text-align: center; font-size: 10px">
-            {{formatData.propiedad.zona}}
+          <td class="propiedad-data">{{formatData.propiedad.nombre}}</td>
+          <td class="propiedad-data">{{formatData.propiedad.tipo}}</td>
+          <td class="propiedad-data">S/ {{formatData.propiedad.precio}}</td>
+          <td class="propiedad-data">{{formatData.propiedad.zona}}</td>
+          <td class="propiedad-data">{{formatData.propiedad.metraje}}</td>
+          <td class="propiedad-data">{{formatData.propiedad.areaLibre}}</td>
+          <td class="propiedad-data">
+            {{#if formatData.propiedad.cocheraAdicional}} Sí {{else}} No {{/if}}
           </td>
         </tr>
       </table>
-      <table style="margin-top: 10px; width: 100%">
+      <table style="margin-top: 20px; width: 100%">
         <tr style="border: 1px solid green">
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="propieda-descripcion">
             <label>Descripción</label>
           </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 2px;
-              text-align: justify;
-            "
-          >
+          <td class="propieda-descripcion-data">
             <label>{{formatData.propiedad.descripcion}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="propieda-descripcion">
             <label>Caracteristicas</label>
           </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 4px;
-              text-align: justify;
-            "
-          >
+          <td class="propieda-descripcion-data">
             <label>{{formatData.propiedad.caracteristicas}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            <label>Metraje</label>
-          </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 4px;
-              text-align: justify;
-            "
-          >
-            <label>{{formatData.propiedad.metraje}}</label>
-          </td>
-        </tr>
-        <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            <label>Área libre</label>
-          </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 4px;
-              text-align: justify;
-            "
-          >
-            <label>{{formatData.propiedad.areaLibre}}</label>
-          </td>
-        </tr>
-        <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
-            <label>Cochera</label>
-          </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 4px;
-              text-align: justify;
-            "
-          >
-            <label
-              >{{#if formatData.propiedad.cocheraAdicional}} Sí {{else}} No
-              {{/if}}</label
-            >
-          </td>
-        </tr>
-        <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="propieda-descripcion">
             <label>Observaciones</label>
           </td>
-          <td
-            style="
-              width: 80%;
-              font-size: 10px;
-              padding: 4px;
-              text-align: justify;
-            "
-          >
+          <td class="propieda-descripcion-data">
             <label>{{formatData.propiedad.observaciones}}</label>
           </td>
         </tr>
       </table>
 
       <br />
-      <div class="title-container">
+      <div
+        class="title-container"
+        style="margin-top: 10px; font-size: 18px; font-weight: bold"
+      >
         <div>Datos del agente</div>
-        <hr />
+        <hr style="width: 75%; margin-left: 0" />
       </div>
-      <table style="margin-top: 10px; margin-top: 20px; width: 100%">
+      <table style="margin-top: 10px; width: 100%">
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Nombre Completo</label>
           </td>
-          <td style="width: 60%; font-size: 12px">
+          <td class="cliente-data">
             <label>{{formatData.trabajador.nombre}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>DNI</label>
           </td>
-          <td style="width: 60%; font-size: 12px">
+          <td class="cliente-data">
             <label>{{formatData.trabajador.dni}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Correo</label>
           </td>
-          <td style="width: 60%; font-size: 12px">
+          <td class="cliente-data">
             <label>{{formatData.trabajador.correo}}</label>
           </td>
         </tr>
         <tr>
-          <td
-            style="
-              width: 20%;
-              text-align: center;
-              font-size: 12px;
-              font-weight: bold;
-            "
-          >
+          <td class="cliente">
             <label>Celular</label>
           </td>
-          <td style="width: 60%; font-size: 12px">
+          <td class="cliente-data">
             <label>{{formatData.trabajador.celular}}</label>
           </td>
         </tr>
       </table>
     </div>
-    <img src="{{base64}}" />
-    <div
-      style="
-        position: absolute;
-        top: 230mm;
-        left: 30px;
-        right: 30px;
-        width: 90%;
-        height: 200mm;
-      "
-    >
-      <br />
-      <h1 style="font-size: 16px; margin-top: 30px">ANEXO A:</h1>
-      <h1 style="font-size: 16px; margin-top: 10px">
-        IMAGENES DE LAS PROPIEDADES
-      </h1>
 
-      <br />
-      <br />
-      <div style="display: block; overflow: auto;">
-        {{#each formatData.propiedad.imagenes}}
-        <div style="width: 33%; box-sizing: border-box; padding: 10px; float: left;">
-          <img
-            src="{{this.dataValues.url}}"
-            alt="Imagen"
-            style="width: 100%; height: auto;"
-          />
+    <div class="page2" style="page-break-before: always">
+      <img
+        src="{{base64}}"
+        style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 1;
+        "
+      />
+      <div class="page2-data">
+        <br>
+        <h1 style="font-size: 16px; margin-top: 30px">ANEXO A:</h1>
+        <h1 style="font-size: 16px; margin-top: 10px">
+          IMAGENES DE LAS PROPIEDADES
+        </h1>
+
+        <br />
+        <br />
+        <div style="display: block; overflow: auto">
+          {{#each formatData.propiedad.imagenes}}
+          <div
+            style="
+              width: 33%;
+              box-sizing: border-box;
+              padding: 10px;
+              float: left;
+            "
+          >
+            <img
+              src="{{this.dataValues.url}}"
+              alt="Imagen"
+              style="width: 100%; height: auto"
+            />
+          </div>
+          {{/each}}
         </div>
-        {{/each}}
-
       </div>
-
     </div>
   </body>
 </html>

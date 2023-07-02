@@ -12,8 +12,7 @@ const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const path = require("path");
-const { where } = require("sequelize");
-
+const puppeteer = require("puppeteer");
 const get = async (req, res) => {
   try {
     const { fecha_emision, fecha_vencimiento } = req.query;
@@ -232,25 +231,34 @@ const descargarCotizacion = async (req, res) => {
       formatData: formatData,
       base64: base64,
     };
-    console.log(formatData.propiedad.imagenes);
+    const pdfName = "cotizacion.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    const options = {
-      format: "A4", // Establece el tamaño del PDF como A4
-      // Resto de opciones...
-    };
-    const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
-    const trabaProp = await TrabajadorPropiedad.findOne({where:{cod_propiedad: formatData.propiedad.cod_propiedad}})
-
-    pdf.create(htmlFinal, options).toBuffer((error, buffer) => {
-      if (error) {
-        console.log("Error creando PDF:", error);
-        res.end("Error creando PDF: " + error);
-      } else {
-        res.attachment(pdfName);
-        res.send(buffer);
-      }
+    // Lanza una nueva instancia de Puppeteer
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
     });
+    const page = await browser.newPage();
+
+    // Carga tu HTML en la página
+    await page.setContent(htmlFinal);
+
+    // Opciones para la generación del PDF
+    const options = {
+      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      format: "A4",
+    };
+
+    // Genera el PDF
+    await page.pdf(options);
+
+    // Cierra la instancia de Puppeteer
+    await browser.close();
+
+    // Envía el PDF como respuesta
+    res.download(options.path);
+    return;
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo descargar la cotización." });

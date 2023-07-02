@@ -13,8 +13,7 @@ const path = require("path");
 const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const fs = require("fs");
-const puppeteer = require('puppeteer');
-
+const puppeteer = require("puppeteer");
 
 const get = async (req, res) => {
   try {
@@ -646,9 +645,6 @@ const descargarPropiedad = async (req, res) => {
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
     const imageData = fs.readFileSync(imagePath);
-    const base64Image = Buffer.from(imageData).toString("base64");
-    const mimeType = path.extname(imagePath).replace(".", "");
-    const base64 = `data:image/${mimeType};base64,${base64Image}`;
 
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
@@ -656,20 +652,20 @@ const descargarPropiedad = async (req, res) => {
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: base64,
+      base64: imageData,
     };
-    const pdfName = "propiedad.pdf"
+    const pdfName = "propiedad.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
     });
     const page = await browser.newPage();
 
     // Carga tu HTML en la página
     await page.setContent(htmlFinal);
-
     // Opciones para la generación del PDF
     const options = {
       path: path.join(__dirname, pdfName), // Ruta del archivo de salida
@@ -684,7 +680,7 @@ const descargarPropiedad = async (req, res) => {
 
     // Envía el PDF como respuesta
     res.download(options.path);
-    return
+    return;
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de propiedades" });
