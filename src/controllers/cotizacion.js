@@ -258,7 +258,6 @@ const descargarCotizacion = async (req, res) => {
       formatData: formatData,
       base64: "data:image/png;base64," + base64Image,
     };
-    const pdfName = "cotizacion.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     const browser = await puppeteer.launch({
@@ -267,7 +266,6 @@ const descargarCotizacion = async (req, res) => {
     });
     const page = await browser.newPage();
     await page.setContent(htmlFinal);
-    console.log("Contenido HTML cargado en la página.");
     const options = {
       path: path.join(__dirname,
         "../../upload/pdf/cotizacion.pdf"),

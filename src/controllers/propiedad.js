@@ -619,6 +619,40 @@ const descargarPropiedad = async (req, res) => {
       return res.status(404).json({ msg: "No se encontraro la propiedad." });
     }
 
+    let propiedades = {
+      ...propiedad?.toJSON(),
+      imagenes: cotizacion?.propiedad?.imagenVideos,
+    };
+    let imagenesBase64 = [];
+    for (let imagen of propiedades.imagenes) {
+      try {
+        // Obtiene el nombre del archivo de la URL
+        const url = new URL(imagen.dataValues.url);
+        const imageName = path.basename(url.pathname);
+
+        // Ruta del archivo de imagen en el sistema de archivos
+        const imagePath = path.join(
+          __dirname,
+          "../../upload/imagenesVideos",
+          imageName
+        );
+
+        // Leer el archivo de imagen como un buffer
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        // Convertir el buffer a una cadena base64
+        const base64Image = imageBuffer.toString("base64");
+
+        // Agregar la cadena base64 a la matriz
+        imagenesBase64.push("data:image/jpeg;base64," + base64Image);
+      } catch (error) {
+        console.error(`Error leyendo el archivo de imagen `);
+        // Continúa con la siguiente iteración del ciclo
+        continue;
+      }
+    }
+    propiedad.imagenesBase64 = imagenesBase64;
+
     let formatData = {
       cod_propiedad: propiedad?.cod_propiedad,
       nombre: propiedad?.nombre,
@@ -639,51 +673,48 @@ const descargarPropiedad = async (req, res) => {
       creado_por: propiedad?.creado_por,
       createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
       propietario: propiedad?.propietario,
-      imagenes: propiedad?.imagenVideos,
+      imagenes: propiedad?.imagenesBase64,
     };
 
     const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const imageData = fs.readFileSync(imagePath);
-    
+
     // Convertir el buffer de la imagen a base64
-    const base64Image = Buffer.from(imageData).toString('base64');
-    
+    const base64Image = Buffer.from(imageData).toString("base64");
+
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
-    
+
     // Compila la plantilla de Handlebars
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: 'data:image/png;base64,' + base64Image,
+      base64: "data:image/png;base64," + base64Image,
     };
-    const pdfName = "propiedad.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
     });
     const page = await browser.newPage();
-
-    // Carga tu HTML en la página
     await page.setContent(htmlFinal);
-
-    // Opciones para la generación del PDF
     const options = {
-      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      path: path.join(__dirname,
+        "../../upload/pdf/propiedad.pdf"),
       format: "A4",
+      printBackground: true,
     };
-
-    // Genera el PDF
-    await page.pdf(options);
-
-    // Cierra la instancia de Puppeteer
+    try {
+      await page.pdf(options);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    }
     await browser.close();
 
     // Envía el PDF como respuesta
     res.download(options.path);
-
     return;
   } catch (error) {
     console.log(error);
