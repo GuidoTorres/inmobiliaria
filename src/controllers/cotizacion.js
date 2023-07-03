@@ -235,7 +235,7 @@ const descargarCotizacion = async (req, res) => {
     // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      headless: "new", timeout: 0
+      headless: "new", timeout: 6000
     });
 
     const page = await browser.newPage();
