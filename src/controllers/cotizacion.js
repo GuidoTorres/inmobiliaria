@@ -269,7 +269,8 @@ const descargarCotizacion = async (req, res) => {
     await page.setContent(htmlFinal);
     console.log("Contenido HTML cargado en la página.");
     const options = {
-      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      path: path.join(__dirname,
+        "../../upload/pdf/cotizacion.pdf"),
       format: "A4",
       printBackground: true,
     };
@@ -381,7 +382,6 @@ const cotizacionPorCorreo = async (req, res, next) => {
       formatData: formatData,
       base64: "data:image/png;base64," + base64Image,
     };
-    const pdfName = "cotizacion.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     console.log(data.formatData.propiedad.imagenes);
@@ -393,7 +393,8 @@ const cotizacionPorCorreo = async (req, res, next) => {
     await page.setContent(htmlFinal);
     console.log("Contenido HTML cargado en la página.");
     const options = {
-      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      path: path.join(__dirname,
+      "../../upload/pdf/cotizacion.pdf"),
       format: "A4",
       printBackground: true,
     };
