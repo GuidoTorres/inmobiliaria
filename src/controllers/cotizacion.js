@@ -13,6 +13,7 @@ const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const path = require("path");
 const puppeteer = require("puppeteer");
+const { log } = require("console");
 const get = async (req, res) => {
   try {
     const { fecha_emision, fecha_vencimiento } = req.query;
@@ -193,63 +194,90 @@ const descargarCotizacion = async (req, res) => {
     };
     delete propiedad?.imagenVideos;
 
+    let imagenesBase64 = [];
+    for (let imagen of propiedad.imagenes) {
+      try {
+        // Obtiene el nombre del archivo de la URL
+        const url = new URL(imagen.dataValues.url);
+        const imageName = path.basename(url.pathname);
+
+        // Ruta del archivo de imagen en el sistema de archivos
+        const imagePath = path.join(
+          __dirname,
+          "../../upload/imagenesVideos",
+          imageName
+        );
+
+        // Leer el archivo de imagen como un buffer
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        // Convertir el buffer a una cadena base64
+        const base64Image = imageBuffer.toString("base64");
+
+        // Agregar la cadena base64 a la matriz
+        imagenesBase64.push("data:image/jpeg;base64," + base64Image);
+      } catch (error) {
+        console.error(`Error leyendo el archivo de imagen `);
+        // Continúa con la siguiente iteración del ciclo
+        continue;
+      }
+    }
+    propiedad.imagenesBase64 = imagenesBase64;
+
     const formatData = {
-      cod_cotizacion: cotizacion?.cod_cotizacion,
-      fecha_emision: cotizacion?.fecha_emision,
-      fecha_vencimiento: cotizacion?.fecha_vencimiento,
+      cod_cotizacion: cotizacion.cod_cotizacion,
+      fecha_emision: cotizacion.fecha_emision,
+      fecha_vencimiento: cotizacion.fecha_vencimiento,
       creado_por: cotizacion?.creado_por,
       cliente: {
-        cod_cliente: cotizacion?.Cliente?.cod_usuario,
-        nombre: cotizacion?.Cliente?.nombre,
-        dni: cotizacion?.Cliente?.dni,
-        correo: cotizacion?.Cliente?.correo,
-        celular: cotizacion?.Cliente?.celular,
+        cod_cliente: cotizacion.Cliente.cod_usuario,
+        nombre: cotizacion.Cliente.nombre,
+        dni: cotizacion.Cliente.dni,
+        correo: cotizacion.Cliente.correo,
+        celular: cotizacion.Cliente.celular,
       },
       trabajador: {
-        cod_trabajador: cotizacion?.Trabajador?.cod_usuario,
-        nombre: cotizacion?.Trabajador?.nombre,
-        dni: cotizacion?.Trabajador?.dni,
-        correo: cotizacion?.Trabajador?.correo,
-        celular: cotizacion?.Trabajador?.celular,
-        oficina: cotizacion?.Trabajador?.oficina,
+        cod_trabajador: cotizacion.Trabajador.cod_usuario,
+        nombre: cotizacion.Trabajador.nombre,
+        dni: cotizacion.Trabajador.dni,
+        correo: cotizacion.Trabajador.correo,
+        celular: cotizacion.Trabajador.celular,
+        oficina: cotizacion.Trabajador.oficina,
       },
       propiedad: propiedad,
     };
-    // Ruta de la imagen
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
-    const ubiacionPlantilla = require.resolve("../../views/propiedad.html");
+    const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
     const imageData = fs.readFileSync(imagePath);
-
+    // Convertir el buffer de la imagen a base64
+    const base64Image = Buffer.from(imageData).toString("base64");
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
-
     // Compila la plantilla de Handlebars
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: imageData,
+      base64: "data:image/png;base64," + base64Image,
     };
-    const pdfName = "propiedad.pdf";
+    const pdfName = "cotizacion.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
     });
     const page = await browser.newPage();
-
-    // Carga tu HTML en la página
     await page.setContent(htmlFinal);
-
-    // Opciones para la generación del PDF
+    console.log("Contenido HTML cargado en la página.");
     const options = {
       path: path.join(__dirname, pdfName), // Ruta del archivo de salida
       format: "A4",
+      printBackground: true,
     };
-
-    // Genera el PDF
-    await page.pdf(options);
-
-    // Cierra la instancia de Puppeteer
+    try {
+      await page.pdf(options);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    }
     await browser.close();
 
     // Envía el PDF como respuesta
@@ -285,6 +313,36 @@ const cotizacionPorCorreo = async (req, res, next) => {
     };
     delete propiedad.imagenVideos;
 
+    let imagenesBase64 = [];
+    for (let imagen of propiedad.imagenes) {
+      try {
+        // Obtiene el nombre del archivo de la URL
+        const url = new URL(imagen.dataValues.url);
+        const imageName = path.basename(url.pathname);
+
+        // Ruta del archivo de imagen en el sistema de archivos
+        const imagePath = path.join(
+          __dirname,
+          "../../upload/imagenesVideos",
+          imageName
+        );
+
+        // Leer el archivo de imagen como un buffer
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        // Convertir el buffer a una cadena base64
+        const base64Image = imageBuffer.toString("base64");
+
+        // Agregar la cadena base64 a la matriz
+        imagenesBase64.push("data:image/jpeg;base64," + base64Image);
+      } catch (error) {
+        console.error(`Error leyendo el archivo de imagen `);
+        // Continúa con la siguiente iteración del ciclo
+        continue;
+      }
+    }
+    propiedad.imagenesBase64 = imagenesBase64;
+
     const formatData = {
       cod_cotizacion: cotizacion.cod_cotizacion,
       fecha_emision: cotizacion.fecha_emision,
@@ -311,9 +369,9 @@ const cotizacionPorCorreo = async (req, res, next) => {
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
     const imageData = fs.readFileSync(imagePath);
+
+    // Convertir el buffer de la imagen a base64
     const base64Image = Buffer.from(imageData).toString("base64");
-    const mimeType = path.extname(imagePath).replace(".", "");
-    const base64 = `data:image/${mimeType};base64,${base64Image}`;
 
     let contenidoHtml = fs.readFileSync(ubiacionPlantilla, "utf8");
 
@@ -321,59 +379,72 @@ const cotizacionPorCorreo = async (req, res, next) => {
     const template = handlebars.compile(contenidoHtml);
     const data = {
       formatData: formatData,
-      base64: base64,
+      base64: "data:image/png;base64," + base64Image,
     };
+    const pdfName = "cotizacion.pdf";
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    const options = {
-      format: "A4", // Establece el tamaño del PDF como A4
-      // Resto de opciones...
-    };
-    const pdfName = "cotizacion.pdf"; // Establece el nombre del archivo PDF
-
-    pdf.create(htmlFinal, options).toBuffer(async (error, buffer) => {
-      if (error) {
-        console.log("Error creando PDF:", error);
-        res.end("Error creando PDF: " + error);
-      } else {
-        var transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: 587,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          },
-        });
-
-        // Enviar correo con el objeto de transporte
-        let info = await transporter.sendMail({
-          from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
-          to: formatData.cliente.correo,
-          subject: "Cotizacion de la propiedad ...", // Subject line
-          attachments: [
-            {
-              filename: pdfName,
-              content: buffer,
-              contentType: "application/pdf",
-            },
-          ],
-        });
-
-        if (info.messageId) {
-          return res
-            .status(200)
-            .json({ msg: "La cotización fue enviada con éxito!" });
-        } else {
-          throw new Error("Failed to send email");
-        }
-      }
+    console.log(data.formatData.propiedad.imagenes);
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: "new",
     });
+    const page = await browser.newPage();
+    await page.setContent(htmlFinal);
+    console.log("Contenido HTML cargado en la página.");
+    const options = {
+      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      format: "A4",
+      printBackground: true,
+    };
+    try {
+      await page.pdf(options);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    }
+    await browser.close();
+    // Lee el contenido del PDF generado
+    const pdfContent = await fs.promises.readFile(options.path);
+
+    var transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    try {
+      await transporter.sendMail({
+        from: '"Inmobiliara Roca Rey" <support@example.com>', // sender address
+        to: formatData.cliente.correo,
+        subject: "Cotizacion de la propiedad ...", // Subject line
+        attachments: [
+          {
+            filename: "cotizacion.pdf",
+            content: pdfContent,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+
+      res.status(200).json({ msg: "El correo se envió correctamente." });
+    } catch (error) {
+      console.error("Error al enviar el correo:", error);
+      res.status(500).json({ error: "Error al enviar el correo." });
+    }
 
     // const pdf = await generarPDF(htmlFinal);
   } catch (error) {
+    console.log(error);
+
     if (error.message === "Failed to send email") {
+      console.log(error);
+
       res.status(500).json({ msg: "No se pudo enviar la cotización." });
     } else {
+      console.log(error);
       res.status(500).json({ msg: "No se pudo enviar la cotización." });
     }
   }
