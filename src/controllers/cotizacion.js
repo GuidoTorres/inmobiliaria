@@ -232,27 +232,28 @@ const descargarCotizacion = async (req, res) => {
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
     // Lanza una nueva instancia de Puppeteer
-    // Lanza una nueva instancia de Puppeteer
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      headless: "new"
     });
-
     const page = await browser.newPage();
 
     // Carga tu HTML en la página
     await page.setContent(htmlFinal);
 
-    // Genera el PDF y obténlo como un Buffer
-    const pdfBuffer = await page.pdf({ format: "A4" });
+    // Opciones para la generación del PDF
+    const options = {
+      path: path.join(__dirname, pdfName), // Ruta del archivo de salida
+      format: "A4",
+    };
+
+    // Genera el PDF
+    await page.pdf(options);
 
     // Cierra la instancia de Puppeteer
     await browser.close();
 
     // Envía el PDF como respuesta
-    res.set("Content-Type", "application/pdf");
-    res.set("Content-Disposition", "attachment;filename=cotizacion.pdf");
-    res.send(pdfBuffer);
+    res.download(options.path);
     return;
   } catch (error) {
     console.log(error);
