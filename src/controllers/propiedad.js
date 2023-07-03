@@ -621,7 +621,7 @@ const descargarPropiedad = async (req, res) => {
 
     let propiedades = {
       ...propiedad?.toJSON(),
-      imagenes: cotizacion?.propiedad?.imagenVideos,
+      imagenes: propiedad?.imagenVideos,
     };
     let imagenesBase64 = [];
     for (let imagen of propiedades.imagenes) {
