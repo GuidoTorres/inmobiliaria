@@ -264,7 +264,7 @@
 
         <br />
         <br />
-        <div style="display: flex; flex-wrap: wrap;">
+        <div style="display: flex; flex-wrap: wrap; margin-top: 50px;">
           {{#each formatData.propiedad.imagenesBase64}}
           <div
             style="
@@ -277,7 +277,39 @@
             <img
               src="{{this}}"
               alt="Imagen"
-              style="width: 60%; height: 60%"
+              style="width: 70%; height: 70%"
+            />
+          </div>
+          {{/each}}
+          {{#each formatData.propiedad.imagenesBase64}}
+          <div
+            style="
+              width: 33%;
+              box-sizing: border-box;
+              padding: 10px;
+              float: left;
+            "
+          >
+            <img
+              src="{{this}}"
+              alt="Imagen"
+              style="width: 70%; height: 70%"
+            />
+          </div>
+          {{/each}}
+          {{#each formatData.propiedad.imagenesBase64}}
+          <div
+            style="
+              width: 33%;
+              box-sizing: border-box;
+              padding: 10px;
+              float: left;
+            "
+          >
+            <img
+              src="{{this}}"
+              alt="Imagen"
+              style="width: 70%; height: 70%"
             />
           </div>
           {{/each}}
