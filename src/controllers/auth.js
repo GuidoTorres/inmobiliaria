@@ -21,12 +21,12 @@ const checkAuth = async (req, res, next) => {
     } else {
       res
         .status(409)
-        .send({ msg: "No tienes permisos para acceder a esta ruta token." });
+        .send({ msg: "No tienes permisos para acceder a esta ruta." });
     }
   } catch (error) {
     res
       .status(409)
-      .send({ msg: "No tienes permisos para acceder a esta ruta token." });
+      .send({ msg: "No tienes permisos para acceder a esta ruta." });
   }
 };
 
