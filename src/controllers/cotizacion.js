@@ -275,7 +275,7 @@ const descargarCotizacion = async (req, res) => {
       console.error("Error al generar el PDF:", error);
     }
     await browser.close();
-
+    console.log(formatData);
     // Envía el PDF como respuesta
     res.download(options.path);
     await TrabajadorPropiedad.update(
