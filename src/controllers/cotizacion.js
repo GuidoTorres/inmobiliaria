@@ -282,7 +282,7 @@ const descargarCotizacion = async (req, res) => {
       { exportado: true },
       {
         where: {
-          cod_trabajador: formatData.trabajador.cod_usuario,
+          cod_trabajador: formatData.trabajador.cod_trabajador,
           cod_propiedad: formatData.propiedad.cod_propiedad,
         },
       }
