@@ -13,7 +13,7 @@ const get = async (req, res) => {
     const formatData = permisos.map(permiso => {
       return{
         cod_permiso: permiso.cod_permiso,
-        categoria: permiso.modulo.nombre,
+        categoria: permiso.permiso,
         descripcion: permiso.descripcion
       }
     });
