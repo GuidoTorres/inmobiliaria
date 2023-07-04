@@ -185,7 +185,7 @@ const descargarCotizacion = async (req, res) => {
     });
 
     if (!cotizacion) {
-      res.status(404).json({ msg: "No se encontro la cotización." });
+      return res.status(404).json({ msg: "No se encontro la cotización." });
     }
 
     let propiedad = {
@@ -195,18 +195,21 @@ const descargarCotizacion = async (req, res) => {
     delete propiedad?.imagenVideos;
 
     let imagenesBase64 = [];
-    for (let imagen of propiedad.imagenes) {
+    for (let imagen of propiedad?.imagenes) {
       try {
         // Obtiene el nombre del archivo de la URL
         const url = new URL(imagen.dataValues.url);
+        console.log(url);
         const imageName = path.basename(url.pathname);
-
+        console.log(imageName);
         // Ruta del archivo de imagen en el sistema de archivos
         const imagePath = path.join(
           __dirname,
           "../../upload/imagenesVideos",
           imageName
         );
+
+        console.log(imagePath);
 
         // Leer el archivo de imagen como un buffer
         const imageBuffer = fs.readFileSync(imagePath);
@@ -246,6 +249,7 @@ const descargarCotizacion = async (req, res) => {
       },
       propiedad: propiedad,
     };
+    console.log(formatData.propiedad);
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
     const imageData = fs.readFileSync(imagePath);
@@ -428,10 +432,10 @@ const cotizacionPorCorreo = async (req, res, next) => {
         ],
       });
 
-      res.status(200).json({ msg: "El correo se envió correctamente." });
+      return res.status(200).json({ msg: "El correo se envió correctamente." });
     } catch (error) {
       console.error("Error al enviar el correo:", error);
-      res.status(500).json({ error: "Error al enviar el correo." });
+      return res.status(500).json({ error: "Error al enviar el correo." });
     }
 
     // const pdf = await generarPDF(htmlFinal);
@@ -441,10 +445,10 @@ const cotizacionPorCorreo = async (req, res, next) => {
     if (error.message === "Failed to send email") {
       console.log(error);
 
-      res.status(500).json({ msg: "No se pudo enviar la cotización." });
+      return res.status(500).json({ msg: "No se pudo enviar la cotización." });
     } else {
       console.log(error);
-      res.status(500).json({ msg: "No se pudo enviar la cotización." });
+      return res.status(500).json({ msg: "No se pudo enviar la cotización." });
     }
   }
 };

@@ -11,9 +11,9 @@ const {
 } = db.models;
 const path = require("path");
 const handlebars = require("handlebars");
-const pdf = require("html-pdf");
 const fs = require("fs");
 const puppeteer = require("puppeteer");
+const { log } = require("console");
 
 const get = async (req, res) => {
   try {
@@ -612,16 +612,16 @@ const descargarPropiedad = async (req, res) => {
   try {
     const propiedad = await Propiedad.findOne({
       where: { cod_propiedad: id },
-      include: [{ model: Propietario }, { model: ImagenVideo }],
+      include: [{ model: Propietario }, { model: ImagenVideo }, {model:TrabajadorPropiedad , include:[{model:Usuario}]}], 
     });
 
     if (!propiedad) {
       return res.status(404).json({ msg: "No se encontraro la propiedad." });
     }
-
     let propiedades = {
       ...propiedad?.toJSON(),
       imagenes: propiedad?.imagenVideos,
+      agente: propiedad?.trabajador_propiedads?.at(0)?.dataValues?.usuario?.dataValues
     };
     let imagenesBase64 = [];
     for (let imagen of propiedades.imagenes) {
@@ -674,6 +674,7 @@ const descargarPropiedad = async (req, res) => {
       createdAt: dayjs(propiedad?.createdAt)?.format("DD/MM/YYYY"),
       propietario: propiedad?.propietario,
       imagenes: propiedad?.imagenesBase64,
+      agente: propiedades?.agente
     };
 
     const ubiacionPlantilla = require.resolve("../../views/propiedad.html");

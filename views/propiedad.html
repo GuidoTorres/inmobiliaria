@@ -28,7 +28,7 @@
         height: 270mm;
         padding: 50px;
         z-index: 10;
-        margin-top: 80px;
+        margin-top: 60px;
       }
 
 
@@ -47,7 +47,7 @@
     "
   />
     <div class="page" >
-      <h1 style="font-size: 26px">COTIZACIÓN DE PROPIEDAD</h1>
+      <h1 style="font-size: 26px">INFORMACION DE PROPIEDAD</h1>
       <h5 style="margin-top: 30px; font-size: 18px; font-weight: bold;">{{formatData.nombre}}</h3>
       <hr style="margin-top: -20px; width: 75%; margin-left: 0;"/>
 
@@ -87,6 +87,20 @@
             {{formatData.observaciones}}
           </div>
       </div>
+      <hr style=" width: 100%; margin-left: 0; margin-top: 30px;"/>
+
+      <table style="width: 100%; margin-bottom: 20px;">
+        <tr>
+          <td style="width: 50%; text-align: left; height: 30px; font-size: 16px;"><i class="fa-solid fa-user"style="color: #E38102 ;"></i>
+            <label for=""><strong>Agente:</strong>  <label for="">{{formatData.agente.nombre}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-building" style="color: #E38102 ;"></i><label for=""> <strong>Oficina:</strong>  <label for="">{{formatData.agente.oficina}}</label></label></td>
+        </tr>    
+        <tr>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-envelope" style="color: #E38102 ;"></i><label for=""> <strong>Correo:</strong>  <label for="">{{formatData.agente.correo}}</label></label></td>
+          <td style="width: 50%; text-align: left; height: 30px;font-size: 16px;"><i class="fa-solid fa-phone" style="color: #E38102 ;"></i><label for=""> <strong>Celular:</strong>  <label for="">{{formatData.agente.celular}}</label></label></td>
+        </tr>      
+
+      </table>
     </div>
   </body>
 </html>
