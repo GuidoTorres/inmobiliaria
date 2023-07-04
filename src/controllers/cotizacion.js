@@ -13,7 +13,6 @@ const handlebars = require("handlebars");
 const pdf = require("html-pdf");
 const path = require("path");
 const puppeteer = require("puppeteer");
-const { log } = require("console");
 const get = async (req, res) => {
   try {
     const { fecha_emision, fecha_vencimiento } = req.query;
@@ -199,9 +198,7 @@ const descargarCotizacion = async (req, res) => {
       try {
         // Obtiene el nombre del archivo de la URL
         const url = new URL(imagen.dataValues.url);
-        console.log(url);
         const imageName = path.basename(url.pathname);
-        console.log(imageName);
         // Ruta del archivo de imagen en el sistema de archivos
         const imagePath = path.join(
           __dirname,
@@ -209,7 +206,6 @@ const descargarCotizacion = async (req, res) => {
           imageName
         );
 
-        console.log(imagePath);
 
         // Leer el archivo de imagen como un buffer
         const imageBuffer = fs.readFileSync(imagePath);
@@ -249,7 +245,6 @@ const descargarCotizacion = async (req, res) => {
       },
       propiedad: propiedad,
     };
-    console.log(formatData.propiedad);
     const imagePath = path.join(__dirname, "../../assets/images/bg-doc.png");
     const ubiacionPlantilla = require.resolve("../../views/cotizacion.html");
     const imageData = fs.readFileSync(imagePath);
@@ -386,14 +381,12 @@ const cotizacionPorCorreo = async (req, res, next) => {
     };
     // Genera el HTML final a partir de la plantilla y los datos
     const htmlFinal = template(data);
-    console.log(data.formatData.propiedad.imagenes);
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
       headless: "new",
     });
     const page = await browser.newPage();
     await page.setContent(htmlFinal);
-    console.log("Contenido HTML cargado en la página.");
     const options = {
       path: path.join(__dirname,
       "../../upload/pdf/cotizacion.pdf"),

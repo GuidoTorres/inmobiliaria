@@ -7,12 +7,12 @@ const usuario = require("../controllers/usuario");
 // router.put("/:id",checkAuth, checkRoleAuth([1,2]), usuario.update);
 // router.delete("/:id",checkAuth, checkRoleAuth([1,2]), usuario.delte);
 
-router.get("/", usuario.get);
+router.get("/",checkAuth, checkRoleAuth([1,2]), usuario.get);
 router.get("/recuperar/codigo/:id", usuario.compararCodRecuperacion);
-router.post("/", usuario.post);
+router.post("/",checkAuth, checkRoleAuth([1,2]), usuario.post);
 router.post("/recuperar", usuario.codigoRecuperacion);
-router.post("/cambiar/contrasenia", usuario.actualizarPassword);
-router.put("/:id", usuario.update);
-router.delete("/:id", usuario.delte);
+router.post("/cambiar/contrasenia",checkAuth, checkRoleAuth([1,2]), usuario.actualizarPassword);
+router.put("/:id",checkAuth, checkRoleAuth([1,2]), usuario.update);
+router.delete("/:id",checkAuth, checkRoleAuth([1,2]), usuario.delte);
 
 module.exports = router;

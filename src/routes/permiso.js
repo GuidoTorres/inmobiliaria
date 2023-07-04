@@ -1,9 +1,10 @@
 const router = require("express").Router();
+const { checkAuth } = require("../controllers/auth");
 const permiso = require("../controllers/permiso");
 
-router.get("/", permiso.get);
-router.post("/", permiso.post);
-router.put("/:id", permiso.update);
-router.delete("/:id", permiso.delte);
+router.get("/",checkAuth, permiso.get);
+router.post("/",checkAuth, permiso.post);
+router.put("/:id",checkAuth, permiso.update);
+router.delete("/:id",checkAuth, permiso.delte);
 
 module.exports = router;

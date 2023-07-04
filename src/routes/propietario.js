@@ -3,10 +3,10 @@ const propietario = require("../controllers/propietario");
 const { checkAuth, checkRoleAuth } = require("../controllers/auth");
 const multerTitulo = require("../middlewares/multerTituloPropiedad")
 
-router.get("/",  propietario.get);
-router.get("/descargar",  propietario.descargarPropietarios);
-router.post("/", multerTitulo(),  propietario.post);
-router.put("/:id",  multerTitulo(), propietario.update);
-router.delete("/:id", propietario.delte);
+router.get("/",checkAuth,  propietario.get);
+router.get("/descargar",checkAuth,  propietario.descargarPropietarios);
+router.post("/",checkAuth, multerTitulo(),  propietario.post);
+router.put("/:id",checkAuth,  multerTitulo(), propietario.update);
+router.delete("/:id",checkAuth, propietario.delte);
 
 module.exports = router;
