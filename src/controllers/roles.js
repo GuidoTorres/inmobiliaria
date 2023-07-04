@@ -1,49 +1,33 @@
 const db = require("../../database/models");
-const {Rol, RolPermiso, Permiso, Modulo} = db.models
+const { Rol, RolPermiso, Permiso, Modulo } = db.models;
 const get = async (req, res) => {
   try {
     const roles = await Rol.findAll({
       include: [
         {
           model: RolPermiso,
-          include: [{ model: Permiso, include:[{model:Modulo}] }],
+          include: [{ model: Permiso }],
         },
       ],
     });
 
     // Mapeamos los roles y sus permisos
     const formatRoles = roles.map((item) => {
-      let permisosByCategoria = {};
-
-      item.rol_permisos.forEach((permiso) => {
-        if (!permisosByCategoria[permiso.permiso.modulo.nombre]) {
-          permisosByCategoria[permiso.permiso.modulo.nombre] = {
-            cod_categoria: permiso.permiso.modulo.cod_modulo,
-            categoria: permiso.permiso.modulo.nombre,
-            permisos_categoria: [],
-          };
-        }
-
-        permisosByCategoria[permiso.permiso.modulo.nombre].permisos_categoria.push({
-          cod_permiso: permiso.cod_permiso,
-          permiso: permiso.permiso.permiso,
-          descripcion: permiso.permiso.descripcion,
-          key: permiso.permiso.key,
-        });
-      });
-
-      // Convertir el objeto a un array para el formato de respuesta
-      let permisosArray = Object.values(permisosByCategoria);
-
       return {
         cod_rol: item.cod_rol,
         rol: item.rol,
-        permisos: permisosArray,
+        permisos: item.rol_permisos.map((ele) => {
+          return {
+            categoria:ele.permiso.permiso,
+            descripcion:ele.permiso.descripcion,
+          };
+        }),
       };
     });
 
     return res.status(200).json({ data: formatRoles });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de roles" });
   }
 };
@@ -53,43 +37,26 @@ const getById = async (req, res) => {
 
   try {
     const roles = await Rol.findAll({
-      where:{cod_rol:id},
+      where: { cod_rol: id },
       include: [
         {
           model: RolPermiso,
-          include: [{ model: Permiso, include:[{model:Modulo}] }],
+          include: [{ model: Permiso }],
         },
       ],
     });
 
     // Mapeamos los roles y sus permisos
     const formatRoles = roles.map((item) => {
-      let permisosByCategoria = {};
-
-      item.rol_permisos.forEach((permiso) => {
-        if (!permisosByCategoria[permiso.permiso.modulo.nombre]) {
-          permisosByCategoria[permiso.permiso.modulo.nombre] = {
-            cod_categoria: permiso.permiso.modulo.cod_modulo,
-            categoria: permiso.permiso.modulo.nombre,
-            permisos_categoria: [],
-          };
-        }
-
-        permisosByCategoria[permiso.permiso.modulo.nombre].permisos_categoria.push({
-          cod_permiso: permiso.cod_permiso,
-          permiso: permiso.permiso.permiso,
-          descripcion: permiso.permiso.descripcion,
-          key: permiso.permiso.key,
-        });
-      });
-
-      // Convertir el objeto a un array para el formato de respuesta
-      let permisosArray = Object.values(permisosByCategoria);
-
       return {
         cod_rol: item.cod_rol,
         rol: item.rol,
-        permisos: permisosArray,
+        permisos: item.permisos.map((ele) => {
+          return {
+            categoria: ele.permisos_categoria.map((data) => data.permiso),
+            descripcion:ele.permisos_categoria.map((data) => data.descripcion),
+          };
+        }),
       };
     });
 
@@ -98,7 +65,6 @@ const getById = async (req, res) => {
     res.status(500).json({ msg: "No se pudo obtener la lista de roles" });
   }
 };
-
 
 const post = async (req, res) => {
   try {
@@ -111,7 +77,7 @@ const post = async (req, res) => {
       return res.status(400).json({ msg: "El rol ya existe." });
     }
 
-    const createdRole = await db.models.Rol.create({ rol});
+    const createdRole = await db.models.Rol.create({ rol });
 
     if (createdRole && req.body.cod_permiso) {
       const rol_permiso = req.body.cod_permiso.map((item) => {
@@ -129,7 +95,6 @@ const post = async (req, res) => {
     res.status(500).json({ msg: "No se pudo registrar el rol." });
   }
 };
-
 
 const update = async (req, res) => {
   const transaction = await db.sequelize.transaction();
@@ -180,11 +145,10 @@ const update = async (req, res) => {
   }
 };
 
-
 const delte = async (req, res) => {
   let id = req.params.id;
 
-  if(id === "1" || id === "2" || id === "3") {
+  if (id === "1" || id === "2" || id === "3") {
     return res.status(403).json({ msg: "Este rol no puede ser eliminado." });
   }
   try {
@@ -217,8 +181,6 @@ const updateRolPermisos = async (req, res) => {
     const { cod_permiso } = req.body;
     // Eliminar todos los permisos asociados con el rol
     await db.models.RolPermiso.destroy({ where: { cod_rol: id } });
-
-
 
     // Agregar los nuevos permisos
     if (cod_permiso) {

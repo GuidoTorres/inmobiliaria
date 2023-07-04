@@ -206,7 +206,6 @@ const descargarCotizacion = async (req, res) => {
           imageName
         );
 
-
         // Leer el archivo de imagen como un buffer
         const imageBuffer = fs.readFileSync(imagePath);
 
@@ -266,8 +265,7 @@ const descargarCotizacion = async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(htmlFinal);
     const options = {
-      path: path.join(__dirname,
-        "../../upload/pdf/cotizacion.pdf"),
+      path: path.join(__dirname, "../../upload/pdf/cotizacion.pdf"),
       format: "A4",
       printBackground: true,
     };
@@ -280,6 +278,15 @@ const descargarCotizacion = async (req, res) => {
 
     // Envía el PDF como respuesta
     res.download(options.path);
+    await TrabajadorPropiedad.update(
+      { exportado: true },
+      {
+        where: {
+          cod_trabajador: formatData.trabajador.cod_usuario,
+          cod_propiedad: formatData.propiedad.cod_propiedad,
+        },
+      }
+    );
     return;
   } catch (error) {
     console.log(error);
@@ -388,8 +395,7 @@ const cotizacionPorCorreo = async (req, res, next) => {
     const page = await browser.newPage();
     await page.setContent(htmlFinal);
     const options = {
-      path: path.join(__dirname,
-      "../../upload/pdf/cotizacion.pdf"),
+      path: path.join(__dirname, "../../upload/pdf/cotizacion.pdf"),
       format: "A4",
       printBackground: true,
     };

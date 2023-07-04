@@ -10,28 +10,16 @@ const get = async (req, res) => {
       ],
     });
 
-    let permisosByCategoria = {};
-
-    permisos.forEach(permiso => {
-      if(!permisosByCategoria[permiso.modulo.nombre]) {
-        permisosByCategoria[permiso.modulo.nombre] = {
-          cod_categoria: permiso.modulo.id,
-          categoria: permiso.modulo.nombre,
-          permisos_categoria: [],
-        };
-      }
-
-      permisosByCategoria[permiso.modulo.nombre].permisos_categoria.push({
+    const formatData = permisos.map(permiso => {
+      return{
         cod_permiso: permiso.cod_permiso,
-        permiso: permiso.permiso,
-        descripcion: permiso.descripcion,
-        key: permiso.key,
-      });
+        categoria: permiso.modulo.nombre,
+        descripcion: permiso.descripcion
+      }
     });
 
-    let permisosArray = Object.values(permisosByCategoria);
 
-    return res.status(200).json({ permisos: permisosArray });
+    return res.status(200).json({ data: formatData });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "No se pudo obtener la lista de permisos" });
