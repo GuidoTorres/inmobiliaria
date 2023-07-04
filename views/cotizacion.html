@@ -264,7 +264,7 @@
 
         <br />
         <br />
-        <div style="display: block; overflow: auto">
+        <div style="display: flex; flex-wrap: wrap;">
           {{#each formatData.propiedad.imagenesBase64}}
           <div
             style="
@@ -277,7 +277,7 @@
             <img
               src="{{this}}"
               alt="Imagen"
-              style="width: 100%; height: auto"
+              style="width: 60%; height: 60%"
             />
           </div>
           {{/each}}
