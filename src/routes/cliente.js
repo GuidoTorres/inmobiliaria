@@ -11,16 +11,16 @@ const cliente = require("../controllers/cliente");
 router.get("/",checkAuth, cliente.get);
 router.get("/todos",checkAuth, cliente.getAllClients);
 router.get("/trabajado", checkAuth, cliente.getClienteTrabajado);
-router.get("/posible", cliente.getPosibleCliente);
+router.get("/posible",checkAuth, cliente.getPosibleCliente);
 router.post("/",checkAuth, cliente.post);
 router.post("/trabajado",checkAuth, cliente.postClienteTrabajado);
 router.post("/posible",checkAuth,cliente.postPosibleCliente);
-router.put("/:id", cliente.update);
-router.put("/trabajado/:cod_cliente/:cod_venta", cliente.updateClienteTrabajado);
-router.put("/posible/:id", cliente.updatePosibleCliente);
-router.put("/posible/trabajado/:id", cliente.updatePosibleClienteaTrabajado);
-router.delete("/:id", cliente.delte);
-router.delete("/trabajado/:cod_cliente/:cod_venta", cliente.delteClienteTrabajado);
+router.put("/:id",checkAuth, cliente.update);
+router.put("/trabajado/:cod_cliente/:cod_venta", checkAuth, cliente.updateClienteTrabajado);
+router.put("/posible/:id", checkAuth, cliente.updatePosibleCliente);
+router.put("/posible/trabajado/:id",checkAuth, cliente.updatePosibleClienteaTrabajado);
+router.delete("/:id",checkAuth, cliente.delte);
+router.delete("/trabajado/:cod_cliente/:cod_venta",checkAuth, cliente.delteClienteTrabajado);
 
 
 module.exports = router;
