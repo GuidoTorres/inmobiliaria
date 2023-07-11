@@ -7,7 +7,7 @@ router.get("/", checkAuth, propiedad.get);
 router.get("/descargar/:id", checkAuth, propiedad.descargarPropiedad);
 router.get("/cliente", propiedad.getPropiedadCliente);
 router.get("/usuario/:id", checkAuth, propiedad.getPropiedadByUser);
-router.get("/cliente/:id", checkAuth, propiedad.getPropiedadClienteById);
+router.get("/cliente/:id", propiedad.getPropiedadClienteById);
 router.get("/habilitado/:id", checkAuth, propiedad.updateHabilitado);
 router.post("/", checkAuth, multer.uploadFile(), propiedad.post);
 router.put("/:id", checkAuth, multer.uploadFile(), propiedad.update);
